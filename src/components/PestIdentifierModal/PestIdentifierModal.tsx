@@ -57,13 +57,12 @@ export default function PestIdentifierModal({ onClose }: { onClose: () => void }
                 className={`relative aspect-square rounded-xl overflow-hidden bg-cover bg-center border transition-all duration-300 group ${
                   selected?.name === pest.name 
                     ? "border-green-500 ring-2 ring-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.3)] scale-[1.02] z-10" 
-                    : "border-white/10 hover:border-green-500/50 cursor-pointer opacity-70 hover:opacity-100"
+                    : "border-white/10 hover:border-green-500/50 cursor-pointer opacity-100"
                 }`}
                 onClick={() => setSelected(pest)}
                 style={{ backgroundImage: `url(${pest.image})` }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent transition-opacity" />
-                <span className="absolute bottom-3 left-0 w-full text-center font-display font-bold text-white text-sm tracking-wide">
+                <span className="absolute bottom-2 left-0 w-full text-center font-display font-bold text-white text-[13px] tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/30 py-1 backdrop-blur-sm">
                   {pest.name}
                 </span>
               </button>
