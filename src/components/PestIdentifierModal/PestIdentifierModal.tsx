@@ -4,18 +4,18 @@ import { useState } from "react";
 import { X, ArrowRight, ShieldAlert } from "lucide-react";
 
 const pests = [
-  { image: "/pests/pest_mosquito.png", name: "Mosquitoes", risk: "High", tip: "Rapidly breed in stagnant water. Dangerous carriers of disease requiring specialized barrier sprays to eradicate." },
-  { image: "/pests/pest_termite.png", name: "Termites", risk: "Critical", tip: "Silently destroy structural wood from the inside out. By the time they are seen, the damage is already severe." },
-  { image: "/pests/pest_cockroach.png", name: "Cockroaches", risk: "High", tip: "Highly resilient scavengers that spread harmful bacteria throughout your kitchen and food prep surfaces." },
-  { image: "/pests/pest_bedbug.png", name: "Bed Bugs", risk: "High", tip: "Horrific parasites that hide in mattress seams and feed exclusively on human blood while you sleep." },
-  { image: "/pests/pest_rat.png", name: "Rats", risk: "High", tip: "Destructive, intelligent rodents that gnaw through wires and drywall while spreading dangerous diseases." },
-  { image: "/pests/pest_wasp.png", name: "Stinging Pests", risk: "Medium", tip: "Yellowjackets, hornets, and wasps form highly aggressive colonies that pose severe swarming dangers." },
-  { image: "/pests/pest_mouse.png", name: "Mice", risk: "High", tip: "Micro-scavengers that can squeeze through holes the size of a dime, constantly contaminating surfaces." },
-  { image: "/pests/pest_ant.png", name: "Ants", risk: "Medium", tip: "Massive hidden colonies requiring advanced queen-extermination baits to prevent constant interior swarms." },
-  { image: "/pests/pest_tick.png", name: "Ticks", risk: "High", tip: "Dangerous yard parasites waiting in the grass to latch onto humans and pets, known for transmitting Lyme disease." },
-  { image: "/pests/pest_spider.png", name: "Spiders", risk: "Medium", tip: "Unnerving arachnids that infiltrate structural voids and corners, building unsightly webs around the property." },
-  { image: "/pests/pest_lanternfly.png", name: "Lanternflies", risk: "High", tip: "Highly destructive invasive bugs that multiply endlessly and decimate expensive yard foliage and trees." },
-  { image: "/pests/pest_flea.png", name: "Fleas", risk: "Medium", tip: "Rapid-reproducing parasites that attack household pets and burrow deep into carpets and upholstery." },
+  { image: "/pests/calm_mosquito.png", name: "Mosquitoes", tip: "Breed in stagnant water. Carriers of disease requiring specialized barrier sprays to eradicate." },
+  { image: "/pests/calm_termite.png", name: "Termites", tip: "Silently destroy structural wood from the inside out. Best treated with baiting stations." },
+  { image: "/pests/calm_cockroach.png", name: "Cockroaches", tip: "Resilient scavengers that spread bacteria throughout kitchens and food prep surfaces." },
+  { image: "/pests/calm_bedbug.png", name: "Bed Bugs", tip: "Parasites that hide in mattress seams and feed while you sleep." },
+  { image: "/pests/calm_rat.png", name: "Rats", tip: "Intelligent rodents that gnaw through wires and drywall while spreading diseases." },
+  { image: "/pests/calm_wasp.png", name: "Stinging Pests", tip: "Yellowjackets, hornets, and wasps form colonies that pose swarming dangers." },
+  { image: "/pests/calm_mouse.png", name: "Mice", tip: "Scavengers that can squeeze through small holes, constantly contaminating surfaces." },
+  { image: "/pests/calm_ant.png", name: "Ants", tip: "Hidden colonies requiring advanced queen-extermination baits to prevent interior swarms." },
+  { image: "/pests/calm_tick.png", name: "Ticks", tip: "Yard parasites waiting in grass to latch onto humans and pets, known for transmitting diseases." },
+  { image: "/pests/calm_spider.png", name: "Spiders", tip: "Arachnids that infiltrate structural voids and corners, building webs around the property." },
+  { image: "/pests/calm_lanternfly.png", name: "Lanternflies", tip: "Destructive invasive bugs that decimate yard foliage and trees." },
+  { image: "/pests/calm_flea.png", name: "Fleas", tip: "Rapid-reproducing parasites that attack household pets and burrow into carpets." },
 ];
 
 export default function PestIdentifierModal({ onClose }: { onClose: () => void }) {
@@ -76,18 +76,10 @@ export default function PestIdentifierModal({ onClose }: { onClose: () => void }
               <div>
                  <div className="flex items-center gap-3 mb-4">
                    <h3 className="text-3xl font-display font-bold text-white">{selected.name}</h3>
-                   <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
-                     selected.risk === 'Critical' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
-                     selected.risk === 'High' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                     'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
-                   }`}>
-                     Danger: {selected.risk}
-                   </span>
                  </div>
                  
                  <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10 text-white/70 text-sm leading-relaxed">
-                   <ShieldAlert size={16} className="text-amber-500 mb-2 inline-block mr-2" />
-                   <strong className="text-white/90 font-semibold tracking-wide uppercase text-xs">Threat Profile:</strong><br/>
+                   <strong className="text-white/90 font-semibold tracking-wide uppercase text-xs">Pest Information:</strong><br/>
                    {selected.tip}
                  </div>
               </div>
