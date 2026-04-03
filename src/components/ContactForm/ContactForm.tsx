@@ -16,9 +16,32 @@ export default function ContactForm() {
     service: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form.");
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error(err);
+      setError("An error occurred. Please try again or call us directly.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -259,7 +282,9 @@ export default function ContactForm() {
                      </span>
                      <span className="relative z-10 flex flex-col items-start leading-none text-left">
                        <span className="text-[9px] uppercase tracking-widest text-green-400/70 font-semibold mb-0.5">100% Free</span>
-                       <span className="text-lg font-display font-bold text-white tracking-wide">Request Free Inspection</span>
+                       <span className="text-lg font-display font-bold text-white tracking-wide">
+                         {loading ? "Sending..." : "Request Free Inspection"}
+                       </span>
                      </span>
                    </span>
                    <style>{`
@@ -267,6 +292,12 @@ export default function ContactForm() {
                      @keyframes spin-border { to { --angle: 360deg; } }
                    `}</style>
                  </button>
+                 
+                 {error && (
+                   <p className="text-sm font-semibold text-red-400 text-center mt-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+                     {error}
+                   </p>
+                 )}
 
                  <p className="text-xs text-center text-white/40 max-w-sm mx-auto leading-relaxed">
                    By submitting, you agree to be contacted by Squito. We never share your data.
