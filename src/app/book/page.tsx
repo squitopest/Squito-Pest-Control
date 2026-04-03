@@ -121,25 +121,6 @@ function BookingContent() {
     setShowSuggestions(false);
   };
 
-  if (sessionId) {
-    return (
-      <div className="flex-1 flex items-center justify-center pt-32 pb-24 px-4">
-        <div className="glass-card p-12 rounded-3xl text-center max-w-xl border-green-500/30">
-          <div className="w-20 h-20 bg-green-500/20 border border-green-500/40 rounded-full flex items-center justify-center mx-auto mb-6 text-green-400">
-            <ShieldCheck size={40} />
-          </div>
-          <h1 className="text-4xl font-display font-bold text-white mb-4">Payment Successful!</h1>
-          <p className="text-white/70 text-lg mb-8">
-            Your appointment has been securely locked in. A Squito technician will reach out directly to confirm your arrival window. Welcome to the Squito family!
-          </p>
-          <a href="/" className="px-8 py-3 rounded-xl bg-green-500 text-white font-bold hover:bg-green-600 transition-colors">
-            Return Home
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.date || !form.time) {
