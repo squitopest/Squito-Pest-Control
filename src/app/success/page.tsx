@@ -37,8 +37,12 @@ function SuccessContent() {
           Payment <span className="gradient-text">Successful!</span>
         </h1>
         
-        <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-12">
-          Welcome to the family. Your protective shield has officially been activated. Our dispatch center has securely received your encrypted billing details and scheduled your appointment.
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
+          Welcome to the family! We look forward to keeping you pest-free.
+        </h2>
+        
+        <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-12 text-balance leading-relaxed">
+          Your protective shield has officially been activated. Our dispatch center has securely received your encrypted billing details and scheduled your appointment.
         </p>
 
         {/* Next Steps Timeline */}
