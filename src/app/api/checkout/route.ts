@@ -5,9 +5,9 @@ import { createServiceClient } from "@/lib/supabase";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { propertyType, zipCode, date } = body;
+    const { propertyType, zipCode, date, time, street, planId } = body;
 
-    if (!propertyType || !zipCode) {
+    if (!zipCode || !date || !time || !street) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -15,15 +15,12 @@ export async function POST(req: Request) {
 
     // 1. Create Supabase Row
     const supabase = createServiceClient();
-    
-    // We insert a row and get the ID back. 
-    // If Supabase keys are mock, this will fail unless we wrap in try/catch or bypass.
     let bookingId = "mock-booking-id-" + Math.random().toString(36).slice(2);
     
     if (!isMock) {
         const { data, error } = await supabase
           .from("bookings")
-          .insert([{ property_type: propertyType, zip_code: zipCode, service_date: date }])
+          .insert([{ property_type: propertyType || "Residential", zip_code: zipCode, service_date: date }])
           .select()
           .single();
           
@@ -34,17 +31,18 @@ export async function POST(req: Request) {
         bookingId = data.id;
     }
 
-    // 2. Generate Stripe Session
-    // In Phase 2 requested logic, we charge a $0 authorization, or a flat fee. 
-    // Let's do a $49 flat inspection fee as a real-world example.
-    
     if (isMock) {
         return NextResponse.json({
             success: true,
-            checkoutUrl: "/book?simulateSuccess=true", 
+            checkoutUrl: "/book?session_id=mock_success", 
             message: "MOCK MODE: Add real Stripe & Supabase keys to .env.local"
         });
     }
+
+    // Determine Title from ID
+    const planName = planId === "home-protection" ? "Home Protection Plan" 
+                   : planId === "total-shield" ? "Total Shield Plan" 
+                   : "Basic Shield Plan";
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -53,11 +51,11 @@ export async function POST(req: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: "Squito AI Basic Inspection & Service Call",
-              description: `Property: ${propertyType} | Date: ${date} | Zip: ${zipCode}`,
+              name: `Squito AI - ${planName}`,
+              description: `Appointment: ${date} at ${time} | Address: ${street}, ${zipCode}`,
               images: ["https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c?auto=format&fit=crop&q=80&w=200"],
             },
-            unit_amount: 4900, // $49.00
+            unit_amount: 100, // $1.00 Test Charge
           },
           quantity: 1,
         },
