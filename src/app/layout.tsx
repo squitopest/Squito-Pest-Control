@@ -28,8 +28,13 @@ export const metadata: Metadata = {
     title: "Squito AI | Smart Pest Control in Long Island, NY",
     description:
       "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
+    url: "https://getsquito.com",
+    siteName: "Squito AI",
+    images: [{ url: "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c?auto=format&fit=crop&q=80&w=1200", width: 1200, height: 630 }],
+    locale: "en_US",
     type: "website",
   },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -37,8 +42,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "PestControl",
+    "name": "Squito AI",
+    "image": "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c",
+    "telephone": "(800) 555-1234",
+    "url": "https://getsquito.com",
+    "areaServed": "Long Island, NY",
+    "priceRange": "$$",
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <head>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      </head>
       <body>
         <CustomCursor />
         <Navbar />
