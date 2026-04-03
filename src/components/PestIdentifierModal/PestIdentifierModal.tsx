@@ -60,7 +60,7 @@ export default function PestIdentifierModal({ onClose }: { onClose: () => void }
                     : "border-white/10 hover:border-green-500/50 cursor-pointer opacity-70 hover:opacity-100"
                 }`}
                 onClick={() => setSelected(pest)}
-                style={{ backgroundImage: \`url(\${pest.image})\` }}
+                style={{ backgroundImage: `url(${pest.image})` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent transition-opacity" />
                 <span className="absolute bottom-3 left-0 w-full text-center font-display font-bold text-white text-sm tracking-wide">
@@ -76,11 +76,11 @@ export default function PestIdentifierModal({ onClose }: { onClose: () => void }
               <div>
                  <div className="flex items-center gap-3 mb-4">
                    <h3 className="text-3xl font-display font-bold text-white">{selected.name}</h3>
-                   <span className={\`text-xs font-bold px-3 py-1 rounded-full border \${
+                   <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
                      selected.risk === 'Critical' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
                      selected.risk === 'High' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
                      'bg-yellow-500/10 text-yellow-400 border-yellow-500/30'
-                   }\`}>
+                   }`}>
                      Danger: {selected.risk}
                    </span>
                  </div>
