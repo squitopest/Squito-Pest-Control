@@ -106,8 +106,8 @@ export default function CustomCursor() {
       {particles.map(p => (
         <div
           key={p.id}
-          className="fixed pointer-events-none z-[99997]"
-          style={{ left: p.x, top: p.y }}
+          className="fixed top-0 left-0 pointer-events-none z-[99997]"
+          style={{ transform: `translate(${p.x}px, ${p.y}px)` }}
         >
           {[...Array(8)].map((_, i) => (
             <div
