@@ -41,15 +41,9 @@ function SuccessContent() {
           Welcome to the family! We look forward to keeping you pest-free.
         </h2>
         
-        <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto mb-12 text-balance leading-relaxed">
-          Your protective shield has officially been activated. Our dispatch center has securely received your encrypted billing details and scheduled your appointment.
-        </p>
-
         {/* Next Steps Timeline */}
-        <div className="mt-12 text-left bg-background/50 border border-white/5 rounded-3xl p-8 mb-12 relative overflow-hidden">
+        <div className="mt-6 text-left bg-background/50 border border-white/5 rounded-3xl p-8 mb-12 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400/50 via-green-500/20 to-transparent ml-12" />
-          
-          <h2 className="text-2xl font-bold text-white mb-8 ml-4">What happens next?</h2>
 
           <div className="space-y-10 relative z-10">
             {/* Step 1 */}
