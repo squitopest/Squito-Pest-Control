@@ -91,7 +91,6 @@ export default function Hero() {
               className="flex items-center justify-center gap-2 px-8 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-white/10 hover:border-white/30 transition-all w-full sm:w-auto backdrop-blur-md"
               onClick={() => setIdentifierOpen(true)}
             >
-              <Camera size={18} />
               Identify a Pest
             </button>
           </div>
