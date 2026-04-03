@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 139 52% 4%;
+    --foreground: 0 0% 100%;
+    --card: 139 31% 6%;
+    --card-foreground: 0 0% 100%;
+    --popover: 139 31% 6%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 144 100% 10%;
+    --secondary: 139 26% 12%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 139 26% 12%;
+    --muted-foreground: 139 20% 64%;
+    --accent: 139 26% 12%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 139 26% 12%;
+    --input: 139 26% 12%;
+    --ring: 142 71% 45%;
+    --radius: 0.5rem;
+
+    /* Squito Brand Custom */
+    --color-green-400: #4ade80;
+    --color-green-500: #22c55e;
+    --color-green-600: #16a34a;
+    --color-green-700: #15803d;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
+    overflow-x: hidden;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Base custom utilities */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-green-400 via-green-500 to-green-700;
+}
+
+.glass-card {
+  @apply bg-card/60 border border-border backdrop-blur-xl;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-green-700 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-green-600;
+}
+
+@keyframes scurryLeft {
+  0% { transform: rotate(0deg) translateY(0); }
+  100% { transform: rotate(15deg) translateY(-2px); }
+}
+
+@keyframes scurryRight {
+  0% { transform: rotate(0deg) translateY(0); }
+  100% { transform: rotate(-15deg) translateY(2px); }
+}
+
+@keyframes spiderSquish {
+  0%   { transform: scale(1, 1); }
+  15%  { transform: scale(1.6, 0.4) translateY(12px); opacity: 0.6; }
+  60%  { transform: scale(1.6, 0.4) translateY(12px); opacity: 0.6; }
+  100% { transform: scale(1, 1) translateY(0); opacity: 1; }
+}
+
+@keyframes particleBurst {
+  0% {
+    transform: rotate(var(--angle)) translateX(0px) scale(1);
+    opacity: 1;
+    background: #4ade80;
+  }
+  100% {
+    transform: rotate(var(--angle)) translateX(30px) scale(0);
+    opacity: 0;
+    background: #22c55e;
+  }
+}
+
+.animate-spider-scurry-left {
+  animation: scurryLeft 0.15s infinite alternate linear;
+}
+
+.animate-spider-scurry-right {
+  animation: scurryRight 0.15s infinite alternate linear;
+}
+
+.animate-spider-squish {
+  animation: spiderSquish 0.6s ease-out forwards;
+}
+
+.animate-particle-burst {
+  animation: particleBurst 0.6s ease-out forwards;
+}
