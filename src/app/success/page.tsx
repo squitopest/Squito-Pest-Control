@@ -59,8 +59,8 @@ function SuccessContent() {
 
             {/* Step 2 */}
             <div className="flex gap-6 items-start">
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/50 flex items-center justify-center flex-shrink-0">
-                <Clock size={14} className="text-blue-400" />
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.5)]">
+                <Clock size={14} className="text-white font-bold" />
               </div>
               <div className="-mt-1.5">
                 <h3 className="text-lg font-bold text-white">Dispatch Alignment</h3>
@@ -70,8 +70,8 @@ function SuccessContent() {
 
             {/* Step 3 */}
             <div className="flex gap-6 items-start">
-              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/20 flex items-center justify-center flex-shrink-0">
-                <Truck size={14} className="text-white/60" />
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.5)]">
+                <Truck size={14} className="text-white font-bold" />
               </div>
               <div className="-mt-1.5">
                 <h3 className="text-lg font-bold text-white/80">Arrival</h3>
