@@ -153,9 +153,47 @@ export default function Plans() {
 
               <a
                 href={`/book?plan=${plan.id}&billing=${billing}`}
-                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all w-full text-center ${plan.btnTheme}`}
+                className="group relative w-full mt-auto block overflow-hidden rounded-xl p-[1px] focus:outline-none focus:ring-2 focus:ring-green-500/50"
               >
-                {plan.cta}
+                {/* Animated rotating gradient border */}
+                <span
+                  className="absolute inset-0 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: plan.id === "home-protection" ? "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)" : 
+                                plan.id === "total-shield" ? "conic-gradient(from var(--angle, 0deg), #f59e0b, #d97706, #b45309, #fbbf24, #f59e0b)" : 
+                                "conic-gradient(from var(--angle, 0deg), #52525b, #3f3f46, #27272a, #71717a, #52525b)",
+                    animation: "spin-border 3s linear infinite",
+                  }}
+                />
+                
+                {/* Fill container */}
+                <span className={`relative flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-background/90 backdrop-blur-xl font-display font-bold text-base transition-all duration-500 ${
+                  plan.id === "home-protection" ? "group-hover:bg-green-500/10 text-white" : 
+                  plan.id === "total-shield" ? "group-hover:bg-amber-500/10 text-amber-500 group-hover:text-amber-400" : 
+                  "group-hover:bg-white/5 text-white/90 group-hover:text-white"
+                }`}>
+                  {/* Inner shimmer sweep */}
+                  <span className={`absolute inset-0 rounded-xl -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent to-transparent ${
+                    plan.id === "home-protection" ? "via-green-400/20" : 
+                    plan.id === "total-shield" ? "via-amber-400/20" : 
+                    "via-white/10"
+                  }`} />
+                  
+                  {/* Glow blob */}
+                  <span className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                    plan.id === "home-protection" ? "shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]" : 
+                    plan.id === "total-shield" ? "shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]" : 
+                    "shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]"
+                  }`} />
+                  
+                  <span className="relative z-10">{plan.cta}</span>
+                </span>
+                
+                {/* CSS defined per-component for @property fallback */}
+                <style>{`
+                  @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+                  @keyframes spin-border { to { --angle: 360deg; } }
+                `}</style>
               </a>
             </div>
           ))}
