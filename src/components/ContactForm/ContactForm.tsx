@@ -38,7 +38,7 @@ export default function ContactForm() {
       setSubmitted(true);
     } catch (err: any) {
       console.error(err);
-      setError("An error occurred. Please try again or call us directly.");
+      setError(err.message || "An error occurred. Please try again or call us directly.");
     } finally {
       setLoading(false);
     }
