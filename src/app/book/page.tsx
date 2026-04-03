@@ -20,6 +20,9 @@ function BookingContent() {
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
     street: "",
     zipCode: "",
     date: "",
@@ -138,6 +141,9 @@ function BookingContent() {
         body: JSON.stringify({
           planId: planId || "basic-shield",
           propertyType: "Residential",
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
           street: form.street,
           zipCode: form.zipCode,
           date: form.date, 
@@ -171,6 +177,48 @@ function BookingContent() {
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Checkout Form */}
         <div className="flex-1 space-y-8">
+          
+          {/* Contact Block */}
+          <div className="glass-card p-8 rounded-3xl">
+            <h2 className="text-2xl font-bold text-white mb-6">Contact Information</h2>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-white/80">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="John Doe"
+                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  value={form.fullName}
+                  onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-white/80">Email Address (For Receipt)</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="john@example.com"
+                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-white/80">Phone Number</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="(555) 123-4567"
+                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
           
           {/* Location Block */}
           <div className="glass-card p-8 rounded-3xl overflow-visible">

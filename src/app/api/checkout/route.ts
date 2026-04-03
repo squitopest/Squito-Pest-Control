@@ -5,9 +5,9 @@ import { createServiceClient } from "@/lib/supabase";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { propertyType, zipCode, date, time, street, planId } = body;
+    const { propertyType, zipCode, date, time, street, planId, fullName, email, phone } = body;
 
-    if (!zipCode || !date || !time || !street) {
+    if (!zipCode || !date || !time || !street || !fullName || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -27,7 +27,10 @@ export async function POST(req: Request) {
               service_date: date,
               service_time: time,
               street: street,
-              plan_id: planId || "basic-shield"
+              plan_id: planId || "basic-shield",
+              full_name: fullName,
+              email: email,
+              phone: phone
             }])
             .select()
             .single();
@@ -67,6 +70,7 @@ export async function POST(req: Request) {
     } else {
         // Regular Stripe Flow
         const session = await stripe.checkout.sessions.create({
+          customer_email: email,
           payment_method_types: ["card"],
           line_items: [
             {

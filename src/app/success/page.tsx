@@ -76,8 +76,8 @@ function SuccessContent() {
                 <Truck size={14} className="text-white/60" />
               </div>
               <div className="-mt-1.5">
-                <h3 className="text-lg font-bold text-white/80">Arrival & Shielding</h3>
-                <p className="text-white/50 text-sm mt-1">We arrive at your property, perform the entire inspection, and deploy your defensive treatments.</p>
+                <h3 className="text-lg font-bold text-white/80">Arrival</h3>
+                <p className="text-white/50 text-sm mt-1">A licensed technician will arrive at the scheduled time to assess your property and thoroughly review the next steps with you.</p>
               </div>
             </div>
           </div>
