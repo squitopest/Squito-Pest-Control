@@ -21,7 +21,14 @@ export async function POST(req: Request) {
         try {
           const { data, error } = await supabase
             .from("bookings")
-            .insert([{ property_type: propertyType || "Residential", zip_code: zipCode, service_date: date }])
+            .insert([{ 
+              property_type: propertyType || "Residential", 
+              zip_code: zipCode, 
+              service_date: date,
+              service_time: time,
+              street: street,
+              plan_id: planId || "basic-shield"
+            }])
             .select()
             .single();
             
