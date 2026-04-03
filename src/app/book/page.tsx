@@ -208,42 +208,22 @@ function BookingContent() {
           <div className="glass-card p-8 rounded-3xl">
             <h2 className="text-2xl font-bold text-white mb-6">Schedule Service</h2>
             
-            {/* Custom Pill Calendar */}
-            <div className="space-y-3 mb-8">
+            <div className="space-y-4 mb-8">
               <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
                 <Calendar size={16} className="text-green-400" /> Desired Date
               </label>
-              <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
-                {availableDays.map((dateObj, i) => {
-                  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                  const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
-                  const dayNum = dateObj.getDate();
-                  const fullDateString = dateObj.toLocaleDateString('en-US', { dateStyle: 'full' });
-                  
-                  const isSelected = form.date === fullDateString;
-
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setForm(f => ({ ...f, date: fullDateString }))}
-                      className={`flex-shrink-0 snap-center flex flex-col items-center justify-center w-20 h-24 rounded-2xl border transition-all ${
-                        isSelected 
-                          ? "bg-green-500/20 border-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.3)]" 
-                          : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
-                      }`}
-                    >
-                      <span className="text-xs uppercase font-bold tracking-wider mb-1">{dayName}</span>
-                      <span className="text-2xl font-display font-bold">{dayNum}</span>
-                      <span className="text-[10px] uppercase font-semibold">{monthName}</span>
-                    </button>
-                  );
-                })}
-              </div>
+              <input
+                type="date"
+                required
+                className="w-full bg-background/50 border border-white/10 hover:border-white/20 focus:border-green-500/50 rounded-xl px-4 py-4 text-white outline-none transition-colors cursor-pointer"
+                min={new Date().toISOString().split('T')[0]} // Prevents picking past dates
+                value={form.date}
+                onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+              />
             </div>
 
             {/* Custom AM/PM Toggle */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
                 <Clock size={16} className="text-green-400" /> Arrival Window
               </label>
@@ -257,7 +237,7 @@ function BookingContent() {
                       : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Sun size={24} className={form.time === "AM" ? "text-blue-400" : ""} />
+                  <Sun size={24} className={form.time === "AM" ? "text-blue-400 animate-pulse" : ""} />
                   <span className="font-bold">Morning</span>
                   <span className="text-xs opacity-70">8:00 AM - 12:00 PM</span>
                 </button>
@@ -271,10 +251,17 @@ function BookingContent() {
                       : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Moon size={24} className={form.time === "PM" ? "text-amber-400" : ""} />
+                  <Moon size={24} className={form.time === "PM" ? "text-amber-400 animate-pulse" : ""} />
                   <span className="font-bold">Afternoon</span>
                   <span className="text-xs opacity-70">12:00 PM - 4:00 PM</span>
                 </button>
+              </div>
+
+              {/* Animated Conclusive Text underneath Time Selection */}
+              <div className="mt-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 animate-pulse">
+                <p className="text-center font-semibold text-green-400 text-sm flex items-center justify-center gap-2 tracking-wide">
+                  <ShieldCheck size={16} /> A team member will reach out to confirm a time with you!
+                </p>
               </div>
             </div>
 
