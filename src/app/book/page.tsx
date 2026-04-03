@@ -268,7 +268,8 @@ function BookingContent() {
               <input
                 type="date"
                 required
-                className="w-full bg-background/50 border border-white/10 hover:border-white/20 focus:border-green-500/50 rounded-xl px-4 py-4 text-white outline-none transition-colors cursor-pointer"
+                className="w-full bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-6 py-5 text-white text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
+                style={{ colorScheme: "dark" }}
                 min={new Date().toISOString().split('T')[0]} 
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
