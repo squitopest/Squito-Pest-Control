@@ -315,7 +315,7 @@ function BookingContent() {
               className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
               <CreditCard size={20} />
-              {loading ? "Connecting to Secure Stripe Portal..." : "Proceed to Payment ($1.00)"}
+              {loading ? "Connecting to Secure Test Portal..." : "Proceed to Free Checkout (Test)"}
             </button>
             <p className="text-center text-white/40 text-xs mt-4 flex items-center justify-center gap-2">
                Safe, secure 256-bit SSL encrypted checkout hosted by Stripe.
@@ -333,7 +333,7 @@ function BookingContent() {
                 <p className="text-white font-medium">{planTitle}</p>
                 <p className="text-white/50 text-sm">Billed {billing}</p>
               </div>
-              <p className="text-white font-bold">$1.00</p>
+              <p className="text-white font-bold">$0.00</p>
             </div>
             
             <div className="flex justify-between items-start mb-6 text-sm">
@@ -343,7 +343,7 @@ function BookingContent() {
 
             <div className="flex justify-between items-center py-4 border-t border-white/10">
               <p className="text-white font-bold text-lg">Total Due Today</p>
-              <p className="text-green-400 font-display font-bold text-2xl">$1.00</p>
+              <p className="text-green-400 font-display font-bold text-2xl">$0.00</p>
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">

@@ -6,7 +6,7 @@ import { Check, Zap, Shield, Star } from "lucide-react";
 const plans = [
   {
     name: "Basic Shield",
-    price: { monthly: 1, yearly: 1 },
+    price: { monthly: 0, yearly: 0 },
     id: "basic-shield",
     desc: "Perfect for smaller homes or first-time customers.",
     icon: Shield,
@@ -25,7 +25,7 @@ const plans = [
   },
   {
     name: "Home Protection",
-    price: { monthly: 1, yearly: 1 },
+    price: { monthly: 0, yearly: 0 },
     id: "home-protection",
     desc: "Most popular — full protection, inside and out.",
     icon: Star,
@@ -46,7 +46,7 @@ const plans = [
   },
   {
     name: "Total Shield",
-    price: { monthly: 1, yearly: 1 },
+    price: { monthly: 0, yearly: 0 },
     id: "total-shield",
     desc: "Total coverage — yard, interior, and everything in between.",
     icon: Zap,
