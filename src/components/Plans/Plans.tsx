@@ -5,9 +5,9 @@ import { Check, Zap, Shield, Star } from "lucide-react";
 
 const plans = [
   {
-    name: "Basic Shield",
+    name: "Essential Defense",
     price: { monthly: 0, yearly: 0 },
-    id: "basic-shield",
+    id: "essential-defense",
     desc: "Perfect for smaller homes or first-time customers.",
     icon: Shield,
     features: [
@@ -24,9 +24,9 @@ const plans = [
     btnTheme: "bg-transparent border border-border hover:bg-white/5 text-white",
   },
   {
-    name: "Home Protection",
+    name: "Premium Shield",
     price: { monthly: 0, yearly: 0 },
-    id: "home-protection",
+    id: "premium-shield",
     desc: "Most popular — full protection, inside and out.",
     icon: Star,
     features: [
@@ -45,9 +45,9 @@ const plans = [
     btnTheme: "btn-primary w-full justify-center",
   },
   {
-    name: "Total Shield",
+    name: "Ultimate Fortress",
     price: { monthly: 0, yearly: 0 },
-    id: "total-shield",
+    id: "ultimate-fortress",
     desc: "Total coverage — yard, interior, and everything in between.",
     icon: Zap,
     features: [
@@ -159,8 +159,8 @@ export default function Plans() {
                 <span
                   className="absolute inset-0 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                   style={{
-                    background: plan.id === "home-protection" ? "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)" : 
-                                plan.id === "total-shield" ? "conic-gradient(from var(--angle, 0deg), #f59e0b, #d97706, #b45309, #fbbf24, #f59e0b)" : 
+                    background: plan.id === "premium-shield" ? "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)" : 
+                                plan.id === "ultimate-fortress" ? "conic-gradient(from var(--angle, 0deg), #f59e0b, #d97706, #b45309, #fbbf24, #f59e0b)" : 
                                 "conic-gradient(from var(--angle, 0deg), #52525b, #3f3f46, #27272a, #71717a, #52525b)",
                     animation: "spin-border 3s linear infinite",
                   }}
@@ -168,21 +168,21 @@ export default function Plans() {
                 
                 {/* Fill container */}
                 <span className={`relative flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-background/90 backdrop-blur-xl font-display font-bold text-base transition-all duration-500 ${
-                  plan.id === "home-protection" ? "group-hover:bg-green-500/10 text-white" : 
-                  plan.id === "total-shield" ? "group-hover:bg-amber-500/10 text-amber-500 group-hover:text-amber-400" : 
+                  plan.id === "premium-shield" ? "group-hover:bg-green-500/10 text-white" : 
+                  plan.id === "ultimate-fortress" ? "group-hover:bg-amber-500/10 text-amber-500 group-hover:text-amber-400" : 
                   "group-hover:bg-white/5 text-white/90 group-hover:text-white"
                 }`}>
                   {/* Inner shimmer sweep */}
                   <span className={`absolute inset-0 rounded-xl -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent to-transparent ${
-                    plan.id === "home-protection" ? "via-green-400/20" : 
-                    plan.id === "total-shield" ? "via-amber-400/20" : 
+                    plan.id === "premium-shield" ? "via-green-400/20" : 
+                    plan.id === "ultimate-fortress" ? "via-amber-400/20" : 
                     "via-white/10"
                   }`} />
                   
                   {/* Glow blob */}
                   <span className={`absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
-                    plan.id === "home-protection" ? "shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]" : 
-                    plan.id === "total-shield" ? "shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]" : 
+                    plan.id === "premium-shield" ? "shadow-[inset_0_0_20px_rgba(34,197,94,0.1)]" : 
+                    plan.id === "ultimate-fortress" ? "shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]" : 
                     "shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]"
                   }`} />
                   

@@ -27,7 +27,7 @@ export async function POST(req: Request) {
               service_date: date,
               service_time: time,
               street: street,
-              plan_id: planId || "basic-shield",
+              plan_id: planId || "essential-defense",
               full_name: fullName,
               email: email,
               phone: phone
@@ -54,9 +54,9 @@ export async function POST(req: Request) {
     }
 
     // Determine Title from ID
-    const planName = planId === "home-protection" ? "Home Protection Plan" 
-                   : planId === "total-shield" ? "Total Shield Plan" 
-                   : "Basic Shield Plan";
+    const planName = planId === "premium-shield" ? "Premium Shield Plan" 
+                   : planId === "ultimate-fortress" ? "Ultimate Fortress Plan" 
+                   : "Essential Defense Plan";
 
     // --- FREE TEST BYPASS ---
     // If we are testing the UI for free, bypass Stripe completely!

@@ -40,9 +40,9 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const planTitle = planId === "home-protection" ? "Home Protection Plan" 
-                  : planId === "total-shield" ? "Total Shield Plan" 
-                  : "Basic Shield Plan";
+  const planTitle = planId === "premium-shield" ? "Premium Shield Plan" 
+                  : planId === "ultimate-fortress" ? "Ultimate Fortress Plan" 
+                  : "Essential Defense Plan";
 
   // Geoapify Location Detection
   const handleDetectLocation = () => {
@@ -139,7 +139,7 @@ function BookingContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planId: planId || "basic-shield",
+          planId: planId || "essential-defense",
           propertyType: "Residential",
           fullName: form.fullName,
           email: form.email,
