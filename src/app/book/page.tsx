@@ -1,23 +1,9 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon } from "lucide-react";
+import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon, Map } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
-
-// Generate next 14 available days (skipping Sundays as an example of business logic)
-const generateAvailableDays = () => {
-  const days = [];
-  let current = new Date();
-  while (days.length < 14) {
-    current.setDate(current.getDate() + 1);
-    // Optional: Skip Sundays (0)
-    if (current.getDay() !== 0) {
-      days.push(new Date(current));
-    }
-  }
-  return days;
-};
 
 function BookingContent() {
   const searchParams = useSearchParams();
@@ -28,23 +14,34 @@ function BookingContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // New State variables for enhanced UI
-  const availableDays = useState(generateAvailableDays)[0];
   const [locating, setLocating] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
     street: "",
     zipCode: "",
-    date: "", // Will store ISO string or formatted date
-    time: "", // "AM" or "PM"
+    date: "",
+    time: "", 
   });
 
-  // Derived Title for Display
+  // Handle clicking outside suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const planTitle = planId === "home-protection" ? "Home Protection Plan" 
                   : planId === "total-shield" ? "Total Shield Plan" 
                   : "Basic Shield Plan";
 
-  // Location Services Logic
+  // Geoapify Location Detection
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser");
@@ -57,22 +54,22 @@ function BookingContent() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          // Use free secure OpenStreetMap reverse geocoding
+          const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+            `https://api.geoapify.com/v1/geocode/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&apiKey=${GEOAPIFY_KEY}`
           );
           const data = await response.json();
           
-          if (data && data.address) {
-            const streetNum = data.address.house_number || "";
-            const streetName = data.address.road || data.address.street || "";
-            const zip = data.address.postcode || "";
+          if (data && data.features && data.features.length > 0) {
+            const result = data.features[0].properties;
+            const streetStr = result.housenumber ? `${result.housenumber} ${result.street}` : result.street;
             
             setForm(prev => ({
               ...prev,
-              street: `${streetNum} ${streetName}`.trim() || data.display_name.split(',')[0],
-              zipCode: zip
+              street: streetStr || result.formatted.split(',')[0],
+              zipCode: result.postcode || ""
             }));
+            setShowSuggestions(false);
           } else {
             setError("Could not pinpoint exact address. Please enter manually.");
           }
@@ -88,6 +85,40 @@ function BookingContent() {
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  // Geoapify Predictive Autocomplete
+  const handleAddressChange = async (val: string) => {
+    setForm(prev => ({ ...prev, street: val }));
+    
+    if (val.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    try {
+      const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
+      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&apiKey=${GEOAPIFY_KEY}`);
+      const data = await res.json();
+      
+      if (data && data.results) {
+        setSuggestions(data.results.filter((res: any) => res.street || Object.keys(res).length > 0));
+        setShowSuggestions(true);
+      }
+    } catch (e) {
+      console.error("Autocomplete Error", e);
+    }
+  };
+
+  const selectSuggestion = (suggestion: any) => {
+    const streetStr = suggestion.housenumber ? `${suggestion.housenumber} ${suggestion.street}` : suggestion.street;
+    setForm(prev => ({
+      ...prev,
+      street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
+      zipCode: suggestion.postcode || ""
+    }));
+    setShowSuggestions(false);
   };
 
   if (sessionId) {
@@ -128,8 +159,8 @@ function BookingContent() {
           propertyType: "Residential",
           street: form.street,
           zipCode: form.zipCode,
-          date: form.date, // Formatted date string
-          time: form.time === "AM" ? "8am - 12pm" : "12pm - 4pm", // Enhanced Stripe Description payload
+          date: form.date, 
+          time: form.time === "AM" ? "8am - 12pm" : "12pm - 4pm", 
         }),
       });
 
@@ -161,7 +192,7 @@ function BookingContent() {
         <div className="flex-1 space-y-8">
           
           {/* Location Block */}
-          <div className="glass-card p-8 rounded-3xl">
+          <div className="glass-card p-8 rounded-3xl overflow-visible">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h2 className="text-2xl font-bold text-white">Service Location</h2>
               <button 
@@ -176,7 +207,7 @@ function BookingContent() {
             </div>
             
             <div className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-2 relative" ref={suggestionsRef}>
                 <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
                   <MapPin size={16} className="text-green-400" /> Street Address
                 </label>
@@ -186,8 +217,30 @@ function BookingContent() {
                   placeholder="123 Main St"
                   className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
                   value={form.street}
-                  onChange={e => setForm(f => ({ ...f, street: e.target.value }))}
+                  onChange={e => handleAddressChange(e.target.value)}
+                  onFocus={() => {
+                    if (suggestions.length > 0) setShowSuggestions(true);
+                  }}
                 />
+                
+                {/* Geoapify Interactive Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+                    {suggestions.map((suggestion, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => selectSuggestion(suggestion)}
+                        className="px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
+                      >
+                        <Map size={16} className="text-white/40 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-white/90">{suggestion.address_line1}</p>
+                          <p className="text-xs text-white/50">{suggestion.address_line2}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -216,7 +269,7 @@ function BookingContent() {
                 type="date"
                 required
                 className="w-full bg-background/50 border border-white/10 hover:border-white/20 focus:border-green-500/50 rounded-xl px-4 py-4 text-white outline-none transition-colors cursor-pointer"
-                min={new Date().toISOString().split('T')[0]} // Prevents picking past dates
+                min={new Date().toISOString().split('T')[0]} 
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
               />
@@ -318,7 +371,7 @@ function BookingContent() {
               </div>
               <div className="flex items-center gap-2 opacity-60">
                  <Navigation size={16} className="text-white" />
-                 <span className="text-xs text-white">GPS Auto-Routing Enabled</span>
+                 <span className="text-xs text-white">Geoapify Precision Mapping</span>
               </div>
             </div>
           </div>
