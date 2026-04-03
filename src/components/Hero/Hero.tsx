@@ -79,7 +79,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
             <a 
-              href="#contact" 
+              href="#plans" 
               className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group w-full sm:w-auto"
             >
               <span className="relative z-10 flex items-center gap-2 shadow-sm">
