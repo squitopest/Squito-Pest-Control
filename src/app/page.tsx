@@ -17,12 +17,12 @@ export default function Home() {
     <main>
       <Hero />
       <PestTicker />
-      <Services />
-      <HowItWorks />
       <Stats />
+      <Reviews />
       <PestLibrary />
       <Plans />
-      <Reviews />
+      <HowItWorks />
+      <Services />
       <ServiceArea />
       <ContactForm />
       <Footer />
