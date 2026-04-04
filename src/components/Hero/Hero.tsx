@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Camera, CheckCircle, Star, Phone } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Phone } from "lucide-react";
 import PestIdentifierModal from "@/components/PestIdentifierModal/PestIdentifierModal";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
@@ -11,30 +11,41 @@ export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [identifierOpen, setIdentifierOpen] = useState(false);
+  // Defer iframe load: don't insert until 2.5s after mount (improves LCP)
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const wordInterval = setInterval(() => {
       setAnimating(true);
       setTimeout(() => {
         setWordIndex(i => (i + 1) % rotatingWords.length);
         setAnimating(false);
       }, 400);
     }, 2800);
-    return () => clearInterval(interval);
+
+    // Defer YouTube iframe until after the page has painted and is interactive
+    const videoTimer = setTimeout(() => setVideoReady(true), 2500);
+
+    return () => {
+      clearInterval(wordInterval);
+      clearTimeout(videoTimer);
+    };
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden" id="hero">
+    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center pt-32 lg:pt-24 pb-12 overflow-hidden" id="hero">
       
-      {/* Background Video */}
+      {/* Background Video — deferred for better LCP */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[50%] left-[50%] w-[100vw] h-[100vw] lg:w-[100vw] lg:h-[56.25vw] -translate-x-1/2 -translate-y-1/2 min-h-screen min-w-[177.77vh]">
-          <iframe
-            className="absolute top-0 left-0 w-full h-full pointer-events-none"
-            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
-            allow="autoplay; encrypted-media"
-            title="Background video"
-          />
+          {videoReady && (
+            <iframe
+              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
+              allow="autoplay; encrypted-media"
+              title="Background video"
+            />
+          )}
         </div>
         {/* Dark Overlays */}
         <div className="absolute inset-0 bg-background/80 z-10" />
@@ -55,14 +66,14 @@ export default function Hero() {
             <span className="text-sm font-medium text-white/90">5-Star Rated on Long Island</span>
           </div>
 
-          <h1 className="font-display font-bold text-5xl lg:text-7xl leading-[1.1] tracking-tight">
+          <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-7xl leading-[1.1] tracking-tight">
             <span className="block text-white">Smart. Safe.</span>
             <span className="block gradient-text">Pest Control.</span>
           </h1>
 
-          <div className="text-2xl md:text-3xl font-display font-semibold text-white/90 flex items-center flex-wrap">
+          <div className="text-xl md:text-3xl font-display font-semibold text-white/90 flex items-center flex-wrap">
             <span>We eliminate&nbsp;</span>
-            <span className="relative inline-block w-[180px] md:w-[220px] h-[40px] overflow-hidden">
+            <span className="relative inline-block w-[160px] md:w-[220px] h-[36px] md:h-[40px] overflow-hidden">
               <span 
                 className={`absolute left-0 top-0 text-green-400 transform transition-all duration-400 ${
                   animating ? 'translate-y-full opacity-0' : 'translate-y-0 opacity-100'
@@ -79,7 +90,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
             <a 
-              href="#plans" 
+              href="/plans" 
               className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group w-full sm:w-auto"
             >
               <span className="relative z-10 flex items-center gap-2 shadow-sm">
@@ -107,13 +118,13 @@ export default function Hero() {
 
         {/* Right Stats Card */}
         <div className="flex-1 w-full flex justify-center lg:justify-end">
-          <div className="glass-card p-6 md:p-8 rounded-2xl w-full max-w-md animate-fade-in-up shadow-2xl border-green-500/20" style={{ animationDelay: '0.2s' }}>
+          <div className="glass-card p-5 md:p-8 rounded-2xl w-full max-w-md animate-fade-in-up shadow-2xl border-green-500/20" style={{ animationDelay: '0.2s' }}>
             <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/10">
               <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)] animate-pulse" />
               <span className="font-semibold text-white/90">Live Protection Active</span>
             </div>
             
-            <div className="grid grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
               {[
                 { num: "1,000+", label: "Homes Protected" },
                 { num: "Same Day", label: "Service Available" },
@@ -121,8 +132,8 @@ export default function Hero() {
                 { num: "5.0 ★", label: "Average Rating" },
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col">
-                  <span className="text-2xl font-display font-bold text-white mb-1">{stat.num}</span>
-                  <span className="text-sm text-green-400 font-medium">{stat.label}</span>
+                  <span className="text-xl md:text-2xl font-display font-bold text-white mb-1">{stat.num}</span>
+                  <span className="text-xs md:text-sm text-green-400 font-medium">{stat.label}</span>
                 </div>
               ))}
             </div>

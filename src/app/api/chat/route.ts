@@ -1,11 +1,13 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
+import { NextResponse } from 'next/server';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY || "mock-key",
 });
 
-export const maxDuration = 30; // 30 seconds limit for server edge functions
+export const maxDuration = 30;
 
 const SYSTEM_PROMPT = `
 You are Squito AI, the highly intelligent, friendly, and expert pest control assistant for "Squito AI Pest Control" based on Long Island, New York.
@@ -58,15 +60,24 @@ Spiders are present on Long Island all year, usually hiding in dark, undisturbed
 `;
 
 export async function POST(req: Request) {
+  // Rate limit: 10 AI messages per IP per minute to protect OpenAI credits
+  const ip = getClientIp(req);
+  if (!rateLimit(`chat:${ip}`, 10, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many messages. Please slow down and try again in a moment." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { messages } = await req.json();
 
-    // If there is no mock key (or validation fails under the hood), Vercel AI SDK throws.
-    // We catch it inside an edge-friendly block.
+    // Sanitize: cap context window to the last 20 messages to prevent cost inflation
+    const safeMessages = Array.isArray(messages) ? messages.slice(-20) : [];
 
     const result = await streamText({
       model: openai('gpt-4o-mini'),
-      messages,
+      messages: safeMessages,
       system: SYSTEM_PROMPT,
       temperature: 0.7,
     });
@@ -75,18 +86,17 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("AI CHAT ERROR:", error.message);
 
-    // Graceful fallback for local development if the user hasn't added a key yet
-    if (error.message.includes("API key not configured") || error.message.includes("Incorrect API key")) {
+    if (error.message?.includes("API key not configured") || error.message?.includes("Incorrect API key")) {
       return new Response(
-        JSON.stringify([
-          {
-            text: "Oops! My OpenAI API key is missing or invalid. Please check `.env.local` and your OpenAI dashboard!"
-          }
-        ]),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify([{ text: "Oops! My AI assistant is temporarily unavailable. Please call us at (631) 203-1000!" }]),
+        { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
     return new Response("An error occurred.", { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
 }

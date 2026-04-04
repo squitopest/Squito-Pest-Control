@@ -53,7 +53,7 @@ function SuccessContent() {
               </div>
               <div className="-mt-1.5">
                 <h3 className="text-lg font-bold text-white">Order Confirmed</h3>
-                <p className="text-white/60 text-sm mt-1">Your $1.00 USD transaction has been securely processed by Stripe.</p>
+                <p className="text-white/60 text-sm mt-1">Your payment has been securely processed by Stripe.</p>
               </div>
             </div>
 
@@ -63,8 +63,8 @@ function SuccessContent() {
                 <Clock size={14} className="text-white font-bold" />
               </div>
               <div className="-mt-1.5">
-                <h3 className="text-lg font-bold text-white">Dispatch Alignment</h3>
-                <p className="text-white/60 text-sm mt-1">A Squito dispatch manager is currently assigning a specialized technician to your requested date/time slot.</p>
+                <h3 className="text-lg font-bold text-white">Dispatch</h3>
+                <p className="text-white/60 text-sm mt-1">Our dispatcher is currently assigning a specialized technician to your requested date/time slot and will call you within the hour to confirm!</p>
               </div>
             </div>
 
@@ -96,7 +96,7 @@ function SuccessContent() {
 
         {/* Action Button */}
         <Link 
-          href="/"
+          href="/#reviews"
           className="inline-flex items-center justify-center px-12 py-5 rounded-2xl font-bold text-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.2)]"
         >
           Return to Dashboard

@@ -118,8 +118,8 @@ export default function Navbar() {
 
       {/* Mobile menu overlay */}
       {menuOpen && (
-        <div className="fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl flex flex-col pt-24 px-6 animate-fade-in-up">
-          <div className="flex flex-col gap-6 text-xl font-display font-semibold">
+        <div className="fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl flex flex-col pt-28 px-8 animate-fade-in-up pb-8 overflow-y-auto">
+          <div className="flex flex-col gap-6 text-2xl font-display font-semibold flex-1">
             {navLinks.map((link) => (
               <a
                 key={link.label}
@@ -131,18 +131,18 @@ export default function Navbar() {
               </a>
             ))}
           </div>
-          <div className="mt-8 flex flex-col gap-4">
+          <div className="mt-auto flex flex-col gap-4">
             <a href="tel:6312031000" className="group relative flex items-center justify-center gap-4 py-4 px-6 rounded-2xl bg-green-500/10 border border-green-500/30 overflow-hidden transition-all duration-500 hover:border-green-500 hover:shadow-[0_0_25px_rgba(34,197,94,0.2)]">
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/20 to-transparent group-hover:translate-x-full transition-transform duration-700" />
-              <div className="relative z-10 w-10 h-10 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center group-hover:bg-green-500 transition-colors shrink-0">
-                <Phone size={20} className="text-green-400 group-hover:text-white transition-colors" />
+              <div className="relative z-10 w-12 h-12 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center group-hover:bg-green-500 transition-colors shrink-0">
+                <Phone size={24} className="text-green-400 group-hover:text-white transition-colors" />
               </div>
               <div className="relative z-10 flex flex-col items-start">
                 <span className="text-[10px] uppercase tracking-widest text-green-500/70 font-semibold leading-none mb-1">Call Now</span>
                 <span className="text-xl font-display font-bold text-white">(631) 203-1000</span>
               </div>
             </a>
-            <a href="#contact" className="btn-primary justify-center py-4" onClick={() => setMenuOpen(false)}>
+            <a href="#contact" className="btn-primary justify-center py-4 text-lg" onClick={() => setMenuOpen(false)}>
               Get Protected
             </a>
           </div>

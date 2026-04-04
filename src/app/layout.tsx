@@ -5,6 +5,7 @@ import CustomCursor from "@/components/CustomCursor/CustomCursor";
 import Navbar from "@/components/Navbar/Navbar";
 import ChatWidget from "@/components/ChatWidget/ChatWidget";
 import StickyCallBar from "@/components/StickyCallBar/StickyCallBar";
+import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -62,7 +63,9 @@ export default function RootLayout({
       <body>
         <CustomCursor />
         <Navbar />
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
         <StickyCallBar />
         <ChatWidget />
       </body>

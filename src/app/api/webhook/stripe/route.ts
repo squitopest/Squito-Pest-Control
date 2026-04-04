@@ -7,8 +7,15 @@ export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature") as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+  // 🔒 PRODUCTION GUARD: Never allow unsigned webhook calls in production.
+  // If this env var is missing on Vercel, fix it immediately in the dashboard.
+  if (!webhookSecret && process.env.NODE_ENV === "production") {
+    console.error("FATAL: STRIPE_WEBHOOK_SECRET is not set in production. Rejecting webhook.");
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
   if (!webhookSecret) {
-    console.warn("No Stripe Webhook Secret detected. Bypassing validation (NOT FOR PRODUCTION).");
+    console.warn("No Stripe Webhook Secret detected. Bypassing validation (local dev only).");
   }
 
   let event;

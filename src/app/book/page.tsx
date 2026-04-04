@@ -40,9 +40,40 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const planTitle = planId === "premium-shield" ? "Premium Shield Plan" 
-                  : planId === "ultimate-fortress" ? "Ultimate Fortress Plan" 
-                  : "Essential Defense Plan";
+  const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray"];
+  const isOneTimeService = ONE_TIME_IDS.includes(planId ?? "");
+
+  const planTitle = isOneTimeService
+    ? planId === "termite-inspection" ? "Termite Inspection"
+      : planId === "wasp-removal" ? "Wasp Nest Removal"
+      : "Mosquito Event Spray"
+    : planId === "premium-shield" ? "Premium Shield Plan"
+    : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
+    : "Essential Defense Plan";
+
+  const initialFee = isOneTimeService
+    ? planId === "termite-inspection" ? 149
+      : planId === "wasp-removal" ? 249
+      : 199 // Mosquito Event Spray
+    : planId === "premium-shield" ? 299.99
+    : planId === "ultimate-fortress" ? 399.99
+    : 199.99;
+
+  const isYearly = billing === "yearly";
+
+  const yearlyAmount = isYearly && !isOneTimeService
+    ? planId === "premium-shield" ? 863.88
+      : planId === "ultimate-fortress" ? 1247.88
+      : 479.88
+    : 0;
+
+  const activeInitialFee = isYearly ? 0 : initialFee;
+  const subtotal = activeInitialFee + yearlyAmount;
+
+  // NY State + Nassau County sales tax (8.625%)
+  const NY_TAX_RATE = 0.08625;
+  const taxAmount = Math.round(subtotal * NY_TAX_RATE * 100) / 100;
+  const totalDue = Math.round((subtotal + taxAmount) * 100) / 100;
 
   // Geoapify Location Detection
   const handleDetectLocation = () => {
@@ -84,7 +115,13 @@ function BookingContent() {
       },
       (geoError) => {
         setLocating(false);
-        setError("Location access denied or unavailable. Please enter manually.");
+        if (geoError.code === 1) {
+          setError("Location access was denied. Please allow location access in your browser settings, or enter your address manually.");
+        } else if (geoError.code === 2) {
+          setError("Location unavailable. Please enter your address manually.");
+        } else {
+          setError("Location request timed out. Please enter your address manually.");
+        }
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -147,7 +184,8 @@ function BookingContent() {
           street: form.street,
           zipCode: form.zipCode,
           date: form.date, 
-          time: form.time === "AM" ? "8am - 12pm" : "12pm - 4pm", 
+          time: form.time === "AM" ? "8am - 12pm" : form.time === "PM" ? "12pm - 4pm" : "4pm - 8pm",
+          billing: billing,
         }),
       });
 
@@ -310,7 +348,7 @@ function BookingContent() {
               <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
                 <Clock size={16} className="text-green-400" /> Arrival Window
               </label>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <button
                   type="button"
                   onClick={() => setForm(f => ({ ...f, time: "AM" }))}
@@ -338,6 +376,35 @@ function BookingContent() {
                   <span className="font-bold">Afternoon</span>
                   <span className="text-xs opacity-70">12:00 PM - 4:00 PM</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, time: "EVE" }))}
+                  className={`flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all ${
+                    form.time === "EVE"
+                      ? "bg-violet-500/20 border-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                      : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={form.time === "EVE" ? "text-violet-400 animate-pulse" : ""}
+                  >
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    <path d="M19 3v4" />
+                    <path d="M21 5h-4" />
+                  </svg>
+                  <span className="font-bold">Evening</span>
+                  <span className="text-xs opacity-70">4:00 PM - 8:00 PM</span>
+                </button>
               </div>
 
               {/* Animated Conclusive Text underneath Time Selection */}
@@ -363,7 +430,7 @@ function BookingContent() {
               className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
               <CreditCard size={20} />
-              {loading ? "Connecting to Secure Test Portal..." : "Proceed to Free Checkout (Test)"}
+              {loading ? "Connecting to Secure Checkout..." : "Proceed to Checkout"}
             </button>
             <p className="text-center text-white/40 text-xs mt-4 flex items-center justify-center gap-2">
                Safe, secure 256-bit SSL encrypted checkout hosted by Stripe.
@@ -376,22 +443,82 @@ function BookingContent() {
           <div className="glass-card p-8 rounded-3xl sticky top-32">
             <h2 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">Order Summary</h2>
             
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-white font-medium">{planTitle}</p>
-                <p className="text-white/50 text-sm">Billed {billing}</p>
-              </div>
-              <p className="text-white font-bold">$0.00</p>
-            </div>
-            
+            {isOneTimeService ? (
+              /* ── One-Time Service Summary ── */
+              <>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-white font-medium">{planTitle}</p>
+                    <p className="text-white/50 text-sm">One-time service</p>
+                  </div>
+                  <p className="text-white font-bold">${initialFee.toFixed(2)}</p>
+                </div>
+
+                <div className="mb-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                  <p className="text-blue-300/80 text-xs leading-relaxed">
+                    No subscription required. This is a single visit — you will only be charged once.
+                  </p>
+                </div>
+              </>
+            ) : (
+              /* ── Subscription Summary ── */
+              <>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-white font-medium">{planTitle}</p>
+                    <p className="text-white/50 text-sm">Billed {billing}</p>
+                  </div>
+                  <p className="text-white/40 text-sm">Monthly</p>
+                </div>
+
+                {isYearly ? (
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-emerald-400 font-semibold text-sm">Initial Service Fee Waived</p>
+                      <p className="text-emerald-400/70 text-xs">You saved ${initialFee.toFixed(2)} by paying upfront</p>
+                    </div>
+                    <p className="text-emerald-400 font-bold line-through opacity-50">${initialFee.toFixed(2)}</p>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-amber-400 font-semibold text-sm">Initial Service Fee</p>
+                      <p className="text-white/40 text-xs">One-time, charged today</p>
+                    </div>
+                    <p className="text-amber-400 font-bold">${initialFee.toFixed(2)}</p>
+                  </div>
+                )}
+
+                {isYearly && !isOneTimeService && (
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-emerald-400 font-semibold text-sm">Annual Plan Prepayment</p>
+                      <p className="text-white/40 text-xs">12 months upfront</p>
+                    </div>
+                    <p className="text-emerald-400 font-bold">${yearlyAmount.toFixed(2)}</p>
+                  </div>
+                )}
+
+                <div className="mb-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                  <p className="text-amber-300/80 text-xs leading-relaxed">
+                    {isYearly && !isOneTimeService 
+                      ? "All plan benefits unlock immediately. You are fully paid for the next 12 months!" 
+                      : "All plan benefits unlock immediately once your initial service fee is processed. Your monthly subscription will begin the following month."}
+                  </p>
+                </div>
+              </>
+            )}
+
             <div className="flex justify-between items-start mb-6 text-sm">
-              <p className="text-white/60">Taxes & Fees</p>
-              <p className="text-white/60">$0.00</p>
+              <div>
+                <p className="text-white/60">NY Sales Tax <span className="text-white/30">(8.625%)</span></p>
+              </div>
+              <p className="text-white/60">${taxAmount.toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between items-center py-4 border-t border-white/10">
               <p className="text-white font-bold text-lg">Total Due Today</p>
-              <p className="text-green-400 font-display font-bold text-2xl">$0.00</p>
+              <p className="text-green-400 font-display font-bold text-2xl">${totalDue.toFixed(2)}</p>
             </div>
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">

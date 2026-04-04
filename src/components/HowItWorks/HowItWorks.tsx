@@ -28,7 +28,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 bg-surface" id="how-it-works">
+    <section className="hidden lg:block py-24 bg-surface" id="how-it-works">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex flex-col items-center text-center mb-16 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">

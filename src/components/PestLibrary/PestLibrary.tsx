@@ -27,7 +27,7 @@ export default function PestLibrary() {
   );
 
   return (
-    <section className="py-24 bg-surface" id="pest-library">
+    <section className="py-16 md:py-24 bg-surface" id="pest-library">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex flex-col items-center text-center mb-16 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
@@ -85,7 +85,7 @@ export default function PestLibrary() {
         {/* Info panel */}
         {selected && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in-up">
-            <div className="bg-card w-full max-w-3xl rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]">
+            <div className="bg-card w-full max-w-3xl rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[95vh]">
               <div 
                 className="w-full md:w-2/5 h-48 md:h-auto bg-cover bg-center shrink-0 border-b md:border-b-0 md:border-r border-border relative"
                 style={{ backgroundImage: `url(${selected.image})` }}
@@ -95,7 +95,7 @@ export default function PestLibrary() {
               <div className="p-6 md:p-8 flex-1 overflow-y-auto">
                 <div className="flex justify-between items-start mb-6">
                   <h3 className="text-3xl font-display font-bold text-white">{selected.name}</h3>
-                  <button onClick={() => setSelected(null)} className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-all">
+                  <button onClick={() => setSelected(null)} className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-3 md:p-2 rounded-full transition-all mt-[-10px] mr-[-10px] md:m-0">
                     <X size={20} />
                   </button>
                 </div>

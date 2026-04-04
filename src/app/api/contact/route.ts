@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
-// Ensure the code doesn't break if the API key isn't present yet during local build
-const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy_key_123");
+// Fallback sentinel prevents a build-time crash during static analysis.
+// In production, RESEND_API_KEY must be set on Vercel or emails will fail.
+const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
+
 
 export async function POST(req: Request) {
+  // Rate limit: 5 contact form submissions per IP per minute
+  const ip = getClientIp(req);
+  if (!rateLimit(`contact:${ip}`, 5, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a moment before trying again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { firstName, lastName, email, phone, zip, service, message } = body;
@@ -16,11 +28,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // You can swap the 'to' email address here once in production!
     const recipientEmail = "service@getsquito.com";
 
     const { data, error } = await resend.emails.send({
-      from: "Squito Website <onboarding@resend.dev>", // Resend's default free testing domain
+      from: "Squito Website <onboarding@resend.dev>",
       to: [recipientEmail],
       subject: `New Lead: ${service || "Pest Control Inquiry"} - ${zip}`,
       html: `
@@ -41,9 +52,11 @@ export async function POST(req: Request) {
     });
 
     if (error) {
-      console.warn("RESEND API ERROR [Bypassed for UI Testing]:", error.message);
-      // We return success anyway so the user can test the Success State UI without crashing due to Sandbox locks!
-      return NextResponse.json({ success: true, bypassed: true });
+      console.error("Resend API Error:", error.message);
+      return NextResponse.json(
+        { error: "Failed to send message. Please try again or call us directly." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({ success: true, data });
@@ -54,4 +67,8 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
 }

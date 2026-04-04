@@ -5,11 +5,18 @@ import { useEffect, useRef, useState } from "react";
 export default function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<HTMLDivElement>(null);
-  
+
   const [isClicking, setIsClicking] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  // Start as null: unknown until we can check the media query on the client
+  const [isTouchDevice, setIsTouchDevice] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // Detect touch/coarse pointer (mobile, tablet). If true, skip entirely.
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    setIsTouchDevice(isTouch);
+    if (isTouch) return; // No cursor on touch devices — do not attach any listeners
+
     let mouseX = -100;
     let mouseY = -100;
     let ringX = -100;
@@ -37,7 +44,7 @@ export default function CustomCursor() {
       // Smoothly interpolate ring
       ringX += (mouseX - ringX) * 0.15;
       ringY += (mouseY - ringY) * 0.15;
-      
+
       if (ringRef.current) {
         ringRef.current.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
       }
@@ -58,6 +65,10 @@ export default function CustomCursor() {
     };
   }, []);
 
+  // Don't render anything until we know the device type (avoids SSR mismatch)
+  // Also skip entirely on touch/mobile devices
+  if (isTouchDevice !== false) return null;
+
   return (
     <div className="hidden md:block pointer-events-none z-[99999] fixed inset-0">
       {/* Center Dot */}
@@ -67,17 +78,17 @@ export default function CustomCursor() {
           isHovering ? "scale-0" : "scale-100"
         }`}
       />
-      
+
       {/* Outer Interpolated Ring */}
       <div
         ref={ringRef}
         className={`fixed top-0 left-0 rounded-full border border-green-500 transition-all duration-300 ease-out flex items-center justify-center ${
-          isHovering 
-            ? "w-12 h-12 bg-green-500/10 backdrop-blur-[2px]" 
+          isHovering
+            ? "w-12 h-12 bg-green-500/10 backdrop-blur-[2px]"
             : "w-8 h-8 bg-transparent"
         } ${
-          isClicking 
-            ? "scale-50 border-green-400 bg-green-500/30" 
+          isClicking
+            ? "scale-50 border-green-400 bg-green-500/30"
             : "scale-100"
         }`}
       >

@@ -66,7 +66,7 @@ export default function Services() {
   const ref = useScrollReveal();
 
   return (
-    <section className="py-24 relative overflow-hidden" id="services" ref={ref as React.RefObject<HTMLElement>}>
+    <section className="py-16 md:py-24 relative overflow-hidden" id="services" ref={ref as React.RefObject<HTMLElement>}>
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex flex-col items-center text-center mb-16 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
@@ -86,7 +86,7 @@ export default function Services() {
           {services.map((service, i) => (
             <div
               key={i}
-              className={`min-h-[420px] rounded-2xl relative group overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-white/10 ${service.bgHover}`}
+              className={`min-h-[350px] md:min-h-[420px] rounded-2xl relative group overflow-hidden transition-all duration-500 hover:-translate-y-2 border border-white/10 ${service.bgHover}`}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
             >
@@ -99,7 +99,7 @@ export default function Services() {
                 className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent group-hover:via-[#0a0a0a]/60 transition-colors duration-500"
               />
 
-              <div className="relative z-10 flex flex-col h-full p-8 pt-10">
+              <div className="relative z-10 flex flex-col h-full p-6 md:p-8 pt-8 md:pt-10">
                 <h3 className="text-2xl font-display font-semibold mb-3 text-white shadow-sm tracking-wide">{service.title}</h3>
                 <p className="text-white/80 font-medium mb-6 flex-grow leading-relaxed max-w-[95%]">{service.desc}</p>
                 <ul className="flex flex-col gap-3 mb-8">
