@@ -20,13 +20,13 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Squito AI | Smart Pest Control in Long Island, NY",
+  title: "Squito Pest Control- Long Island's Premiere Pest Solutions",
   description:
     "Long Island's premier pest control company. Smart, safe, and effective pest elimination for homes and businesses. No contracts. Same-day service. 100% satisfaction guaranteed.",
   keywords:
     "pest control Long Island, exterminator Nassau County, exterminator Suffolk County, mosquito control, termite control, rodent removal, bed bug treatment",
   openGraph: {
-    title: "Squito AI | Smart Pest Control in Long Island, NY",
+    title: "Squito Pest Control- Long Island's Premiere Pest Solutions",
     description:
       "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
     url: "https://getsquito.com",
