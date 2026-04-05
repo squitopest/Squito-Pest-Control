@@ -102,7 +102,7 @@ function BookingContent() {
             setForm(prev => ({
               ...prev,
               street: streetStr || result.formatted.split(',')[0],
-              city: result.city || "",
+              city: result.village || result.hamlet || result.suburb || result.municipality || result.city || "",
               zipCode: result.postcode || ""
             }));
             setShowSuggestions(false);
@@ -159,7 +159,7 @@ function BookingContent() {
     setForm(prev => ({
       ...prev,
       street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
-      city: suggestion.city || "",
+      city: suggestion.village || suggestion.hamlet || suggestion.suburb || suggestion.municipality || suggestion.city || "",
       zipCode: suggestion.postcode || ""
     }));
     setShowSuggestions(false);

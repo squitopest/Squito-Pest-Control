@@ -65,7 +65,7 @@ export default function ContactForm() {
     setForm(prev => ({
       ...prev,
       street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
-      city: suggestion.city || "",
+      city: suggestion.village || suggestion.hamlet || suggestion.suburb || suggestion.municipality || suggestion.city || "",
       zip: suggestion.postcode || ""
     }));
     setShowSuggestions(false);
