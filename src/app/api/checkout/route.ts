@@ -5,9 +5,9 @@ import { createServiceClient } from "@/lib/supabase";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { propertyType, zipCode, date, time, street, planId, fullName, email, phone, billing } = body;
+    const { propertyType, zipCode, date, time, street, city, planId, fullName, email, phone, billing } = body;
 
-    if (!zipCode || !date || !time || !street || !fullName || !email || !phone) {
+    if (!zipCode || !date || !time || !street || !city || !fullName || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
             zip_code: zipCode,
             service_date: date,
             service_time: time,
-            street: street,
+            street: `${street}, ${city}`,
             plan_id: planId || "essential-defense",
             full_name: fullName,
             email: email,
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
               currency: "usd",
               product_data: {
                 name: `Squito AI - ${planName}`,
-                description: `Appointment: ${date} at ${time} | Address: ${street}, ${zipCode}`,
+                description: `Appointment: ${date} at ${time} | Address: ${street}, ${city} ${zipCode}`,
               },
               unit_amount: totalCharge, // Initial fee + NY sales tax (8.625%)
             },

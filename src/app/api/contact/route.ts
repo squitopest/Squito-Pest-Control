@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, street, zip, service, message } = body;
+    const { firstName, lastName, email, phone, street, city, zip, service, message } = body;
 
     if (!firstName || !lastName || !email || !phone) {
       return NextResponse.json(
@@ -40,8 +40,7 @@ export async function POST(req: Request) {
           <p><strong>Name:</strong> ${firstName} ${lastName}</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Phone:</strong> ${phone}</p>
-          <p><strong>Street Address:</strong> ${street}</p>
-          <p><strong>Zip Code:</strong> ${zip}</p>
+          <p><strong>Service Address:</strong> ${street}, ${city || ''} ${zip}</p>
           <p><strong>Requested Service:</strong> ${service || "Not Specified"}</p>
           <br />
           <p><strong>Message / Pest Details:</strong></p>
@@ -72,6 +71,7 @@ export async function POST(req: Request) {
             email,
             phone,
             street,
+            city,
             zip,
             service: service || "Not Specified",
             message: message || "No additional message provided.",
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
                   <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Your Request</td></tr>
                   <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${service || 'General Pest Control Inquiry'}</td></tr>
                   <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Address</td></tr>
-                  <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${street || 'Not provided'}${zip ? ', ' + zip : ''}</td></tr>
+                  <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${street || 'Not provided'}${city ? ', ' + city : ''}${zip ? ' ' + zip : ''}</td></tr>
                   <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Contact Info</td></tr>
                   <tr><td style="padding: 0 0 8px; color: white; font-size: 16px;">${phone} &bull; ${email}</td></tr>
                 </table>

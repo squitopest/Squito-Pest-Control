@@ -12,6 +12,7 @@ export default function ContactForm() {
     email: "",
     phone: "",
     street: "",
+    city: "",
     zip: "",
     message: "",
     service: "",
@@ -214,33 +215,46 @@ export default function ContactForm() {
                     </div>
                   </div>
 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                   <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
                       <label htmlFor="street" className="text-sm font-semibold text-white/80 ml-1">Street Address *</label>
                       <input
                         id="street"
-                       type="text"
-                       required
-                       placeholder="123 Main St"
+                        type="text"
+                        required
+                        placeholder="123 Main St"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.street}
-                       onChange={e => setForm(f => ({ ...f, street: e.target.value }))}
+                        onChange={e => setForm(f => ({ ...f, street: e.target.value }))}
                       />
                     </div>
-                   <div className="space-y-2">
-                      <label htmlFor="zip" className="text-sm font-semibold text-white/80 ml-1">ZIP Code *</label>
+                    <div className="space-y-2">
+                      <label htmlFor="city" className="text-sm font-semibold text-white/80 ml-1">City *</label>
                       <input
-                        id="zip"
-                       type="text"
-                       required
-                       placeholder="11501"
-                        maxLength={5}
+                        id="city"
+                        type="text"
+                        required
+                        placeholder="Islandia"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
-                        value={form.zip}
-                       onChange={e => setForm(f => ({ ...f, zip: e.target.value }))}
+                        value={form.city}
+                        onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                       />
                     </div>
-                 </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="zip" className="text-sm font-semibold text-white/80 ml-1">ZIP Code *</label>
+                    <input
+                      id="zip"
+                      type="text"
+                      required
+                      placeholder="11749"
+                      maxLength={5}
+                      className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
+                      value={form.zip}
+                      onChange={e => setForm(f => ({ ...f, zip: e.target.value }))}
+                    />
+                  </div>
 
                  <div className="space-y-2">
                      <label htmlFor="service" className="text-sm font-semibold text-white/80 ml-1">Pest Problem</label>

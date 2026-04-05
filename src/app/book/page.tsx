@@ -24,6 +24,7 @@ function BookingContent() {
     email: "",
     phone: "",
     street: "",
+    city: "",
     zipCode: "",
     date: "",
     time: "", 
@@ -101,6 +102,7 @@ function BookingContent() {
             setForm(prev => ({
               ...prev,
               street: streetStr || result.formatted.split(',')[0],
+              city: result.city || "",
               zipCode: result.postcode || ""
             }));
             setShowSuggestions(false);
@@ -156,6 +158,7 @@ function BookingContent() {
     setForm(prev => ({
       ...prev,
       street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
+      city: suggestion.city || "",
       zipCode: suggestion.postcode || ""
     }));
     setShowSuggestions(false);
@@ -182,6 +185,7 @@ function BookingContent() {
           email: form.email,
           phone: form.phone,
           street: form.street,
+          city: form.city,
           zipCode: form.zipCode,
           date: form.date, 
           time: form.time === "AM" ? "8am - 12pm" : form.time === "PM" ? "12pm - 4pm" : "4pm - 8pm",
@@ -310,16 +314,30 @@ function BookingContent() {
                 )}
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-white/80">ZIP Code</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="11501"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
-                  value={form.zipCode}
-                  onChange={e => setForm(f => ({ ...f, zipCode: e.target.value }))}
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-white/80">City *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Islandia"
+                    className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                    value={form.city}
+                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-white/80">ZIP Code *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="11501"
+                    className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                    value={form.zipCode}
+                    onChange={e => setForm(f => ({ ...f, zipCode: e.target.value }))}
+                  />
+                </div>
               </div>
             </div>
           </div>
