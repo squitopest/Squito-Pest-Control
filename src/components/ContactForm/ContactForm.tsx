@@ -20,6 +20,19 @@ export default function ContactForm() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Scroll to form top on submission success
+  useEffect(() => {
+    if (submitted) {
+      const contactSection = document.getElementById("contact");
+      if (contactSection) {
+        window.scrollTo({
+          top: contactSection.offsetTop - 80,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [submitted]);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
