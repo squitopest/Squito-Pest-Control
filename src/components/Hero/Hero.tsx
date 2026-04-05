@@ -46,7 +46,7 @@ export default function Hero() {
       }, 400);
     }, 2800);
 
-    const videoTimer = setTimeout(() => setVideoReady(true), 2500);
+    const videoTimer = setTimeout(() => setVideoReady(true), 100);
 
     return () => {
       clearInterval(wordInterval);
@@ -135,9 +135,9 @@ export default function Hero() {
             />
           )}
         </div>
-        {/* Dark Overlays */}
-        <div className="absolute inset-0 bg-background/80 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/100 z-10" />
+        {/* Dark Overlays (Lightened at user request) */}
+        <div className="absolute inset-0 bg-background/60 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background/100 z-10" />
       </div>
 
       <div className="container relative z-20 mx-auto px-4 lg:px-8 max-w-7xl flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
