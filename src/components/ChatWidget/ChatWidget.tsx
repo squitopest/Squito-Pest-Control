@@ -55,11 +55,11 @@ export default function ChatWidget() {
   return (
     <>
       <button
-        className={`fixed bottom-6 right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center text-white transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-surface hover:bg-surface border border-white/10 scale-90' : 'bg-gradient-to-tr from-green-600 to-green-400 hover:scale-110'}`}
+        className={`fixed bottom-6 right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-surface hover:bg-surface border border-white/10 scale-90' : 'bg-white hover:scale-110 p-0 overflow-hidden'}`}
         onClick={() => setOpen(!open)}
         aria-label="Chat with Squito AI"
       >
-        {open ? <X size={24} className="text-white/60" /> : <MessageCircle size={28} />}
+        {open ? <X size={24} className="text-white/60" /> : <img src="/squito_ai_logo.png" alt="Squito AI Chat" className="w-full h-full object-cover" />}
         {!open && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse" />}
       </button>
 
@@ -68,8 +68,8 @@ export default function ChatWidget() {
           <div className="bg-surface border-b border-border p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-                  <Shield size={20} className="text-green-500" />
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-border">
+                  <img src="/squito_ai_logo.png" alt="Squito AI" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-surface" />
               </div>
