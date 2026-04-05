@@ -59,7 +59,7 @@ export default function ChatWidget() {
         onClick={() => setOpen(!open)}
         aria-label="Chat with Squito AI"
       >
-        {open ? <X size={24} className="text-white/60" /> : <img src="/squito_ai_logo.png" alt="Squito AI Chat" className="w-full h-full object-cover" />}
+        {open ? <X size={24} className="text-white/60" /> : <img src="/logo.png" alt="Squito AI Chat" className="w-full h-full object-contain p-1.5" />}
         {!open && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse" />}
       </button>
 
@@ -69,7 +69,7 @@ export default function ChatWidget() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-border">
-                  <img src="/squito_ai_logo.png" alt="Squito AI" className="w-full h-full object-cover" />
+                  <img src="/logo.png" alt="Squito AI" className="w-full h-full object-contain p-1" />
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-surface" />
               </div>
