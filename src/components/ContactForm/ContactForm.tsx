@@ -24,13 +24,16 @@ export default function ContactForm() {
   // Scroll to form top on submission success
   useEffect(() => {
     if (submitted) {
-      const contactSection = document.getElementById("contact");
-      if (contactSection) {
-        window.scrollTo({
-          top: contactSection.offsetTop - 80,
-          behavior: "smooth",
-        });
-      }
+      // Small timeout to allow React to render the success state
+      setTimeout(() => {
+        const successEl = document.getElementById("success-message");
+        if (successEl) {
+          window.scrollTo({
+            top: successEl.getBoundingClientRect().top + window.scrollY - 100,
+            behavior: "smooth",
+          });
+        }
+      }, 50);
     }
   }, [submitted]);
   const [form, setForm] = useState({
@@ -172,7 +175,7 @@ export default function ContactForm() {
          <div className="flex-1 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
            <div className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20">
              {submitted ? (
-                <div className="text-center py-8 flex flex-col items-center">
+                <div id="success-message" className="text-center py-8 flex flex-col items-center">
                   <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                     <CheckCircle size={32} className="text-green-500" />
                  </div>
@@ -198,6 +201,7 @@ export default function ContactForm() {
                       muted 
                       loop 
                       playsInline
+                      preload="auto"
                       className="w-full h-full object-cover absolute top-0 left-0 pointer-events-none"
                     >
                       <source src="/success_video.mp4" type="video/mp4" />

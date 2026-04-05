@@ -40,6 +40,21 @@ function SuccessContent() {
         <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
           Welcome to the family! We look forward to keeping you pest-free.
         </h2>
+
+        {/* Success Video Section */}
+        <div className="w-full max-w-2xl mx-auto aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 relative shadow-2xl mt-8 mb-12">
+            <video 
+              autoPlay 
+              muted 
+              loop 
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover absolute top-0 left-0 pointer-events-none"
+            >
+              <source src="/success_video.mp4" type="video/mp4" />
+              Your browser does not support HTML5 video.
+            </video>
+        </div>
         
         {/* Next Steps Timeline */}
         <div className="mt-6 text-left bg-background/50 border border-white/5 rounded-3xl p-8 mb-12 relative overflow-hidden">
