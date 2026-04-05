@@ -11,6 +11,7 @@ export default function ContactForm() {
     lastName: "",
     email: "",
     phone: "",
+    street: "",
     zip: "",
     message: "",
     service: "",
@@ -215,6 +216,18 @@ export default function ContactForm() {
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                    <div className="space-y-2">
+                      <label htmlFor="street" className="text-sm font-semibold text-white/80 ml-1">Street Address *</label>
+                      <input
+                        id="street"
+                       type="text"
+                       required
+                       placeholder="123 Main St"
+                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
+                        value={form.street}
+                       onChange={e => setForm(f => ({ ...f, street: e.target.value }))}
+                      />
+                    </div>
+                   <div className="space-y-2">
                       <label htmlFor="zip" className="text-sm font-semibold text-white/80 ml-1">ZIP Code *</label>
                       <input
                         id="zip"
@@ -227,7 +240,9 @@ export default function ContactForm() {
                        onChange={e => setForm(f => ({ ...f, zip: e.target.value }))}
                       />
                     </div>
-                   <div className="space-y-2">
+                 </div>
+
+                 <div className="space-y-2">
                      <label htmlFor="service" className="text-sm font-semibold text-white/80 ml-1">Pest Problem</label>
                      <select
                         id="service"
@@ -245,7 +260,6 @@ export default function ContactForm() {
                        <option className="text-black">Other</option>
                       </select>
                    </div>
-                 </div>
 
                  <div className="space-y-2">
                     <label htmlFor="message" className="text-sm font-semibold text-white/80 ml-1">Tell Us More</label>

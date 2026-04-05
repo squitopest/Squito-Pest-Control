@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 
 export async function POST(req: Request) {
   const payload = await req.text();
@@ -40,15 +43,67 @@ export async function POST(req: Request) {
       // Mark as paid in Database
       const supabase = createServiceClient();
       
-      const { error } = await supabase
+      const { data: booking, error } = await supabase
         .from("bookings")
         .update({ stripe_payment_status: "paid" })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .select()
+        .single();
 
       if (error) {
         console.error("Failed to update booking status in Supabase", error);
-      } else {
+      } else if (booking) {
         console.log(`Booking ${bookingId} successfully marked as PAID!`);
+
+        // 1. Send Zapier Webhook
+        if (process.env.ZAPIER_WEBHOOK_URL) {
+          try {
+            await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                type: "purchase",
+                bookingId: booking.id,
+                firstName: booking.full_name?.split(" ")[0] || "",
+                lastName: booking.full_name?.split(" ").slice(1).join(" ") || "",
+                email: booking.email,
+                phone: booking.phone,
+                zip: booking.zip_code,
+                street: booking.street,
+                service: booking.plan_id,
+                date: booking.service_date,
+                time: booking.service_time,
+                timestamp: new Date().toISOString()
+              })
+            });
+          } catch (zapierError) {
+            console.error("Zapier Webhook Error (Purchase):", zapierError);
+          }
+        }
+
+        // 2. Send Email via Resend
+        try {
+          await resend.emails.send({
+            from: "Squito Checkout <onboarding@resend.dev>",
+            to: ["service@getsquito.com"],
+            subject: `New Booking/Purchase: ${booking.plan_id}`,
+            html: `
+              <div style="font-family: sans-serif; padding: 20px; color: #333;">
+                <h2 style="color: #22c55e;">New Squito AI Purchase!</h2>
+                <p><strong>Customer:</strong> ${booking.full_name}</p>
+                <p><strong>Email:</strong> ${booking.email}</p>
+                <p><strong>Phone:</strong> ${booking.phone}</p>
+                <p><strong>Address:</strong> ${booking.street}, ${booking.zip_code}</p>
+                <p><strong>Plan/Service:</strong> ${booking.plan_id}</p>
+                <p><strong>Requested Date:</strong> ${booking.service_date} at ${booking.service_time}</p>
+                <br />
+                <p><small>View in Stripe or Supabase for payment confirmation.</small></p>
+              </div>
+            `,
+          });
+        } catch (emailError) {
+          console.error("Resend Email Error (Purchase):", emailError);
+        }
       }
     }
   } else if (event.type === "checkout.session.expired") {

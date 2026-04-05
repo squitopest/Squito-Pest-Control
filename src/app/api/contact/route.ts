@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { firstName, lastName, email, phone, zip, service, message } = body;
+    const { firstName, lastName, email, phone, street, zip, service, message } = body;
 
     if (!firstName || !lastName || !email || !phone) {
       return NextResponse.json(
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
           <p><strong>Name:</strong> ${firstName} ${lastName}</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Street Address:</strong> ${street}</p>
           <p><strong>Zip Code:</strong> ${zip}</p>
           <p><strong>Requested Service:</strong> ${service || "Not Specified"}</p>
           <br />
@@ -57,6 +58,29 @@ export async function POST(req: Request) {
         { error: "Failed to send message. Please try again or call us directly." },
         { status: 502 }
       );
+    }
+
+    if (process.env.ZAPIER_WEBHOOK_URL) {
+      try {
+        await fetch(process.env.ZAPIER_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "lead",
+            firstName,
+            lastName,
+            email,
+            phone,
+            street,
+            zip,
+            service: service || "Not Specified",
+            message: message || "No additional message provided.",
+            timestamp: new Date().toISOString()
+          })
+        });
+      } catch (zapierError) {
+        console.error("Zapier Webhook Error:", zapierError);
+      }
     }
 
     return NextResponse.json({ success: true, data });
