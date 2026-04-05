@@ -2,8 +2,6 @@
 
 import Hero from "@/components/Hero/Hero";
 import PestTicker from "@/components/PestTicker/PestTicker";
-import Services from "@/components/Services/Services";
-import HowItWorks from "@/components/HowItWorks/HowItWorks";
 import Stats from "@/components/Stats/Stats";
 import PestLibrary from "@/components/PestLibrary/PestLibrary";
 import Plans from "@/components/Plans/Plans";
@@ -21,8 +19,6 @@ export default function Home() {
       <Reviews />
       <PestLibrary />
       <Plans />
-      <HowItWorks />
-      <Services />
       <ServiceArea />
       <ContactForm />
       <Footer />
