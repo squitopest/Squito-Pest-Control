@@ -88,7 +88,7 @@ export async function POST(req: Request) {
         // 2. Send Internal Email via Resend
         try {
           await resend.emails.send({
-            from: "Squito Checkout <onboarding@resend.dev>",
+            from: "Squito Pest Control <service@squitopestcontrol.com>",
             to: ["service@getsquito.com"],
             subject: `New Booking/Purchase: ${booking.plan_id}`,
             html: `
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
           try {
             const planName = booking.plan_id?.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Pest Control Service';
             await resend.emails.send({
-              from: "Squito Pest Control <onboarding@resend.dev>",
+              from: "Squito Pest Control <noreply@squitopestcontrol.com>",
               to: [booking.email],
               subject: `Booking Confirmed — ${planName}`,
               html: `

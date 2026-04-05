@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const recipientEmail = "service@getsquito.com";
 
     const { data, error } = await resend.emails.send({
-      from: "Squito Website <onboarding@resend.dev>",
+      from: "Squito Pest Control <service@squitopestcontrol.com>",
       to: [recipientEmail],
       subject: `New Lead: ${service || "Pest Control Inquiry"} - ${zip}`,
       html: `
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     // Send Customer Confirmation Email
     try {
       await resend.emails.send({
-        from: "Squito Pest Control <onboarding@resend.dev>",
+        from: "Squito Pest Control <noreply@squitopestcontrol.com>",
         to: [email],
         subject: `We Received Your Request, ${firstName}!`,
         html: `
