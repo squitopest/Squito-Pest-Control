@@ -130,10 +130,10 @@ export default function Reviews() {
               target="_blank"
               rel="noopener noreferrer"
               key={i}
-              className="w-[300px] md:w-[380px] shrink-0 glass-card p-6 md:p-8 rounded-2xl flex flex-col hover:border-green-500/30 hover:shadow-lg transition-all group"
+              className="w-[260px] md:w-[320px] shrink-0 bg-black/20 backdrop-blur-sm border border-white/10 p-5 md:p-6 rounded-2xl flex flex-col hover:border-green-500/30 hover:bg-black/30 hover:shadow-lg transition-all group"
             >
-              <Quote size={28} className="text-green-500/20 mb-4 group-hover:text-green-500/40 transition-colors" />
-              <p className="text-white/80 text-sm md:text-base mb-6 flex-grow leading-relaxed italic">
+              <Quote size={24} className="text-green-500/20 mb-3 group-hover:text-green-500/40 transition-colors" />
+              <p className="text-white/80 text-sm mb-5 flex-grow leading-relaxed italic">
                 "{r.text}"
               </p>
               <div className="mt-auto border-t border-white/10 pt-4 flex flex-col">
