@@ -83,6 +83,50 @@ export async function POST(req: Request) {
       }
     }
 
+    // Send Customer Confirmation Email
+    try {
+      await resend.emails.send({
+        from: "Squito Pest Control <onboarding@resend.dev>",
+        to: [email],
+        subject: `We Received Your Request, ${firstName}!`,
+        html: `
+          <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 32px 24px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">📋 Request Received!</h1>
+              <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 16px;">We'll be in touch shortly</p>
+            </div>
+            <div style="padding: 32px 24px; color: #e0e0e0;">
+              <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${firstName}</strong>,</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Thank you for reaching out to Squito Pest Control! We've received your free inspection request and a member of our team will contact you shortly to schedule your visit.</p>
+              
+              <div style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Your Request</td></tr>
+                  <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${service || 'General Pest Control Inquiry'}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Address</td></tr>
+                  <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${street || 'Not provided'}${zip ? ', ' + zip : ''}</td></tr>
+                  <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Contact Info</td></tr>
+                  <tr><td style="padding: 0 0 8px; color: white; font-size: 16px;">${phone} &bull; ${email}</td></tr>
+                </table>
+              </div>
+
+              <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Need immediate assistance? We offer same-day service for calls placed before 2 PM.</p>
+              
+              <div style="text-align: center; margin: 28px 0;">
+                <a href="tel:6312031000" style="display: inline-block; background: #22c55e; color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 700; font-size: 15px;">Call Us: (631) 203-1000</a>
+              </div>
+            </div>
+            <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
+              <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
+              <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau & Suffolk County, Long Island NY</p>
+            </div>
+          </div>
+        `,
+      });
+    } catch (custEmailError) {
+      console.error("Customer Confirmation Email Error:", custEmailError);
+    }
+
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Contact API Error:", error);

@@ -85,7 +85,7 @@ export async function POST(req: Request) {
           }
         }
 
-        // 2. Send Email via Resend
+        // 2. Send Internal Email via Resend
         try {
           await resend.emails.send({
             from: "Squito Checkout <onboarding@resend.dev>",
@@ -106,7 +106,54 @@ export async function POST(req: Request) {
             `,
           });
         } catch (emailError) {
-          console.error("Resend Email Error (Purchase):", emailError);
+          console.error("Resend Email Error (Internal):", emailError);
+        }
+
+        // 3. Send Customer Confirmation Email
+        if (booking.email) {
+          try {
+            const planName = booking.plan_id?.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Pest Control Service';
+            await resend.emails.send({
+              from: "Squito Pest Control <onboarding@resend.dev>",
+              to: [booking.email],
+              subject: `Booking Confirmed — ${planName}`,
+              html: `
+                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; border-radius: 16px; overflow: hidden;">
+                  <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 32px 24px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 28px;">✅ Booking Confirmed!</h1>
+                    <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 16px;">Thank you for choosing Squito Pest Control</p>
+                  </div>
+                  <div style="padding: 32px 24px; color: #e0e0e0;">
+                    <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${booking.full_name?.split(' ')[0] || 'there'}</strong>,</p>
+                    <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Your payment has been received and your service is booked! Here are your details:</p>
+                    
+                    <div style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                      <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Plan</td></tr>
+                        <tr><td style="padding: 0 0 16px; color: white; font-size: 18px; font-weight: 700;">${planName}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Scheduled Date</td></tr>
+                        <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${booking.service_date} &bull; ${booking.service_time}</td></tr>
+                        <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Address</td></tr>
+                        <tr><td style="padding: 0 0 8px; color: white; font-size: 16px;">${booking.street}, ${booking.zip_code}</td></tr>
+                      </table>
+                    </div>
+
+                    <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Our team will reach out before your appointment to confirm. If you have any questions, don't hesitate to contact us.</p>
+                    
+                    <div style="text-align: center; margin: 28px 0;">
+                      <a href="tel:6312031000" style="display: inline-block; background: #22c55e; color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 700; font-size: 15px;">Call Us: (631) 203-1000</a>
+                    </div>
+                  </div>
+                  <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
+                    <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
+                    <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau & Suffolk County, Long Island NY</p>
+                  </div>
+                </div>
+              `,
+            });
+          } catch (custEmailError) {
+            console.error("Customer Confirmation Email Error:", custEmailError);
+          }
         }
       }
     }
