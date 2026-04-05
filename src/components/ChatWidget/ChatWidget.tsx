@@ -15,7 +15,7 @@ const quickQuestions = [
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // Vercel AI SDK hook manages state, streaming, and API calling automatically
   const { messages, input, handleInputChange, handleSubmit, isLoading, setInput, append } = useChat({
     api: "/api/chat",
@@ -27,11 +27,11 @@ export default function ChatWidget() {
       }
     ],
     onError: (error: any) => {
-       console.error("Chat Error:", error);
-       append({
-          role: "assistant",
-          content: "Oops! My OpenAI service connection failed. Please ensure the OPENAI_API_KEY is correctly set in `.env.local` and that your OpenAI API dashboard has an active billing plan (Quota Exceeded is common)!"
-       });
+      console.error("Chat Error:", error);
+      append({
+        role: "assistant",
+        content: "Oops! My OpenAI service connection failed. Please ensure the OPENAI_API_KEY is correctly set in `.env.local` and that your OpenAI API dashboard has an active billing plan (Quota Exceeded is common)!"
+      });
     }
   });
 
@@ -47,8 +47,8 @@ export default function ChatWidget() {
 
   const sendQuickQuestion = (q: string) => {
     append({
-       role: "user",
-       content: q
+      role: "user",
+      content: q
     });
   };
 
@@ -128,11 +128,11 @@ export default function ChatWidget() {
           )}
 
           <div className="p-3 bg-surface border-t border-border shrink-0">
-            <form 
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSubmit(e);
-              }} 
+              }}
               className="relative flex items-center"
             >
               <input
@@ -145,7 +145,7 @@ export default function ChatWidget() {
               />
               <button
                 onClick={(e) => {
-                   if (!input.trim()) e.preventDefault();
+                  if (!input.trim()) e.preventDefault();
                 }}
                 type="submit"
                 disabled={!input.trim() || isLoading}

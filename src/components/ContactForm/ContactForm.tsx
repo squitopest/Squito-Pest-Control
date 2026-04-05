@@ -1,11 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { Phone, Mail, MapPin, Send, CheckCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Phone, Mail, MapPin, Send, CheckCircle, Map } from "lucide-react";
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [type, setType] = useState<"residential" | "commercial">("residential");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Handle clicking outside suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -20,6 +34,42 @@ export default function ContactForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Geoapify Predictive Autocomplete
+  const handleAddressChange = async (val: string) => {
+    setForm(prev => ({ ...prev, street: val }));
+    
+    if (val.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    
+    try {
+      const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
+      // Proximity biased towards Islip, NY
+      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&filter=countrycode:us&bias=proximity:-73.134960,40.789142&apiKey=${GEOAPIFY_KEY}`);
+      const data = await res.json();
+      
+      if (data && data.results) {
+        setSuggestions(data.results.filter((res: any) => res.street || Object.keys(res).length > 0));
+        setShowSuggestions(true);
+      }
+    } catch (e) {
+      console.error("Autocomplete Error", e);
+    }
+  };
+
+  const selectSuggestion = (suggestion: any) => {
+    const streetStr = suggestion.housenumber ? `${suggestion.housenumber} ${suggestion.street}` : suggestion.street;
+    setForm(prev => ({
+      ...prev,
+      street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
+      city: suggestion.city || "",
+      zip: suggestion.postcode || ""
+    }));
+    setShowSuggestions(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,7 +266,7 @@ export default function ContactForm() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative" ref={suggestionsRef}>
                       <label htmlFor="street" className="text-sm font-semibold text-white/80 ml-1">Street Address *</label>
                       <input
                         id="street"
@@ -225,8 +275,30 @@ export default function ContactForm() {
                         placeholder="123 Main St"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.street}
-                        onChange={e => setForm(f => ({ ...f, street: e.target.value }))}
+                        onChange={e => handleAddressChange(e.target.value)}
+                        onFocus={() => {
+                          if (suggestions.length > 0) setShowSuggestions(true);
+                        }}
                       />
+                      
+                      {/* Geoapify Interactive Dropdown */}
+                      {showSuggestions && suggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+                          {suggestions.map((suggestion, i) => (
+                            <div 
+                              key={i} 
+                              onClick={() => selectSuggestion(suggestion)}
+                              className="px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
+                            >
+                              <Map size={16} className="text-white/40 flex-shrink-0" />
+                              <div>
+                                <p className="text-sm font-semibold text-white/90">{suggestion.address_line1}</p>
+                                <p className="text-xs text-white/50">{suggestion.address_line2}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="city" className="text-sm font-semibold text-white/80 ml-1">City *</label>
