@@ -54,6 +54,17 @@ export default function Hero() {
     };
   }, []);
 
+  // Lock body scroll when modal is open
+  const modalOpen = scanning || !!aiResult;
+  useEffect(() => {
+    if (modalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [modalOpen]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -247,10 +258,10 @@ export default function Hero() {
       {/* AI Result Modal Overlay */}
       {(scanning || aiResult) && (
         <div 
-          className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up"
+          className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up overflow-y-auto"
           onClick={e => !scanning && e.target === e.currentTarget && clearAiResult()}
         >
-          <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden my-auto">
             {/* Image Preview + Scanning Overlay */}
             {previewUrl && (
               <div className="relative w-full h-48 sm:h-64 bg-black/40 overflow-hidden">
