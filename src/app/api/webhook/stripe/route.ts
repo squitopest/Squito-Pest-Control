@@ -119,10 +119,20 @@ export async function POST(req: Request) {
               subject: `Booking Confirmed — ${planName}`,
               html: `
                 <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; border-radius: 16px; overflow: hidden;">
-                  <div style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 32px 24px; text-align: center;">
-                    <h1 style="color: white; margin: 0; font-size: 28px;">✅ Booking Confirmed!</h1>
-                    <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 16px;">Thank you for choosing Squito Pest Control</p>
+                  <!-- Logo Header -->
+                  <div style="background: #0a0a0a; padding: 24px 24px 0; text-align: center;">
+                    <img src="https://squitopestcontrol.com/logo.png" alt="Squito Pest Control" width="160" style="display: inline-block;" />
                   </div>
+                  <!-- Hero Banner -->
+                  <div style="position: relative; text-align: center;">
+                    <img src="https://squitopestcontrol.com/termite-inspection.png" alt="Professional Inspection" width="600" style="width: 100%; max-height: 200px; object-fit: cover; display: block; opacity: 0.5;" />
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.9) 100%);"></div>
+                    <div style="position: absolute; bottom: 20px; left: 0; right: 0; text-align: center;">
+                      <h1 style="color: white; margin: 0; font-size: 26px;">✅ Booking Confirmed!</h1>
+                      <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0; font-size: 14px;">Thank you for choosing Squito Pest Control</p>
+                    </div>
+                  </div>
+                  <!-- Body -->
                   <div style="padding: 32px 24px; color: #e0e0e0;">
                     <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${booking.full_name?.split(' ')[0] || 'there'}</strong>,</p>
                     <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Your payment has been received and your service is booked! Here are your details:</p>
@@ -143,7 +153,12 @@ export async function POST(req: Request) {
                     <div style="text-align: center; margin: 28px 0;">
                       <a href="tel:6312031000" style="display: inline-block; background: #22c55e; color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 700; font-size: 15px;">Call Us: (631) 203-1000</a>
                     </div>
+
+                    <div style="text-align: center; margin: 16px 0 0;">
+                      <a href="https://squitopestcontrol.com" style="color: #22c55e; text-decoration: none; font-size: 13px; font-weight: 600;">Visit Our Website →</a>
+                    </div>
                   </div>
+                  <!-- Footer -->
                   <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
                     <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
                     <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau & Suffolk County, Long Island NY</p>
