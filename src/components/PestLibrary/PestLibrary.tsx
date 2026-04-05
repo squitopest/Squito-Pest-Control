@@ -109,22 +109,21 @@ export default function PestLibrary() {
       <button
         key={idx}
         onClick={() => setSelected(pest)}
-        className={`group relative shrink-0 w-[200px] sm:w-[240px] h-[280px] sm:h-[320px] rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
+        className={`group relative shrink-0 w-[160px] sm:w-[240px] h-[220px] sm:h-[320px] rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
       >
         <img src={pest.image} alt={pest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-        {/* Risk Badge */}
-        <span className={`absolute top-3 right-3 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
+        <span className={`absolute top-2 sm:top-3 right-2 sm:right-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-2 sm:px-2.5 py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
           {pest.risk}
         </span>
         {/* Name + Season */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <h3 className="font-display font-bold text-white text-lg mb-1 drop-shadow-lg">{pest.name}</h3>
-          <p className="text-white/50 text-xs font-medium">📅 {pest.season}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+          <h3 className="font-display font-bold text-white text-base sm:text-lg mb-1 drop-shadow-lg">{pest.name}</h3>
+          <p className="text-white/50 text-[10px] sm:text-xs font-medium">📅 {pest.season}</p>
         </div>
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-green-500/0 group-hover:bg-green-500/10 transition-colors duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 text-sm font-semibold text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+          <span className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
             Learn More →
           </span>
         </div>
@@ -197,8 +196,8 @@ export default function PestLibrary() {
           0% { transform: translateX(-33.333%); }
           100% { transform: translateX(0); }
         }
-        .animate-marquee-left { animation: marquee-left 60s linear infinite; }
-        .animate-marquee-right { animation: marquee-right 60s linear infinite; }
+        .animate-marquee-left { animation: marquee-left 35s linear infinite; }
+        .animate-marquee-right { animation: marquee-right 35s linear infinite; }
       `}</style>
 
       {/* Bottom CTA */}
