@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       
       const { data: booking, error } = await supabase
         .from("bookings")
-        .update({ stripe_payment_status: "paid" })
+        .update({ status: "paid" })
         .eq("id", bookingId)
         .select()
         .single();
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
       const supabase = createServiceClient();
       await supabase
         .from("bookings")
-        .update({ stripe_payment_status: "expired" })
+        .update({ status: "expired" })
         .eq("id", bookingId);
     }
   }
