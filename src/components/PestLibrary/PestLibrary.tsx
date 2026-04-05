@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle, Phone, Shield } from "lucide-react";
+import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle, Phone, Shield, Upload } from "lucide-react";
 
 // ─── EXPANDED LONG ISLAND PEST DATABASE ───
 const pests = [
@@ -55,6 +55,7 @@ export default function PestLibrary() {
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const modalOpen = !!selected || scanning || !!aiResult;
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function PestLibrary() {
     } finally {
       setScanning(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (uploadInputRef.current) uploadInputRef.current.value = "";
     }
   };
 
@@ -147,28 +149,48 @@ export default function PestLibrary() {
             {pests.length} pests identified across Long Island. Tap any threat to see our expert treatment profile.
           </p>
           {/* Snap & Identify */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="group relative overflow-hidden rounded-xl p-[1px] focus:outline-none mb-2"
-          >
-            <span
-              className="absolute inset-0 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                background: "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)",
-                animation: "spin-border 3s linear infinite",
-              }}
-            />
-            <span className="relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-surface/90 backdrop-blur-xl font-semibold text-sm text-white transition-all duration-300 group-hover:bg-green-500/10 whitespace-nowrap">
-              <Camera size={18} className="text-green-400" />
-              📸 Snap &amp; Identify a Pest
-            </span>
+          <div className="flex flex-col sm:flex-row gap-3 mb-2">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="group relative overflow-hidden rounded-xl p-[1px] focus:outline-none"
+            >
+              <span
+                className="absolute inset-0 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)",
+                  animation: "spin-border 3s linear infinite",
+                }}
+              />
+              <span className="relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-surface/90 backdrop-blur-xl font-semibold text-sm text-white transition-all duration-300 group-hover:bg-green-500/10 whitespace-nowrap">
+                <Camera size={18} className="text-green-400" />
+                Snap Photo
+              </span>
+            </button>
+
+            <button
+              onClick={() => uploadInputRef.current?.click()}
+              className="group relative overflow-hidden rounded-xl p-[1px] focus:outline-none"
+            >
+              <span
+                className="absolute inset-0 rounded-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)",
+                  animation: "spin-border 3s linear infinite",
+                }}
+              />
+              <span className="relative flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-surface/90 backdrop-blur-xl font-semibold text-sm text-white transition-all duration-300 group-hover:bg-green-500/10 whitespace-nowrap">
+                <Upload size={18} className="text-green-400" />
+                Upload Photo
+              </span>
+            </button>
             <style>{`
               @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
               @keyframes spin-border { to { --angle: 360deg; } }
             `}</style>
-          </button>
+          </div>
           <p className="text-white/25 text-xs">Photos are processed securely and never stored.</p>
           <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" id="library-pest-camera" />
+          <input ref={uploadInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="library-pest-upload" />
         </div>
       </div>
 
@@ -321,6 +343,7 @@ export default function PestLibrary() {
                     <p className="text-white/60 text-sm mb-5 max-w-sm mx-auto">{aiResult.message}</p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl transition-all text-sm"><Camera size={16} /> Try Again</button>
+                      <button onClick={() => uploadInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl transition-all text-sm"><Upload size={16} /> Upload</button>
                       <a href="tel:6312031000" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-sm">Call (631) 203-1000</a>
                     </div>
                   </div>

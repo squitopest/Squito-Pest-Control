@@ -38,6 +38,9 @@ Species on LI: Pavement Ant (Tetramorium caespitum), Odorous House Ant (Tapinoma
 ## WASPS, HORNETS & YELLOWJACKETS (Peak: July–October)
 Species on LI: Eastern Yellowjacket (Vespula maculifrons), Bald-faced Hornet (Dolichovespula maculata), Paper Wasp (Polistes spp.), European Hornet (Vespa crabro). Colonies reach maximum size in late summer and become hyper-aggressive. Squito safely removes nests using professional PPE and applies preventative treatments to rooflines, soffits, and eaves.
 
+## BEES, BUMBLE BEES & CARPENTER BEES (Peak: Spring–Summer)
+Species on LI: Carpenter Bee (Xylocopa virginica — drills perfectly round holes in wood, lacks hair on abdomen), Bumble Bee (Bombus spp. — very hairy abdomen, ground nesting), Honey Bee (Apis mellifera). Carpenter bees cause structural damage to wooden decks and eaves. Bumble bees and honey bees are crucial pollinators but can nest in wall voids or ground burrows. Squito uses targeted treatments for wood-destroying carpenter bees and coordinates safe relocation for protected honey bees.
+
 ## SPIDERS (Peak: August–November)
 Species on LI: Common House Spider (Parasteatoda tepidariorum), Wolf Spider (Hogna spp.), Yellow Sac Spider (Cheiracanthium inclusum — can bite), Cellar Spider, Jumping Spider. Brown Recluse is NOT native to LI. Squito applies perimeter barrier treatments and removes existing web structures.
 
@@ -142,7 +145,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Call OpenAI Vision API directly (using gpt-4o-mini for cost efficiency)
+    // Call OpenAI Vision API directly (using gpt-4o for maximum accuracy)
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -150,7 +153,7 @@ export async function POST(req: Request) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           {
@@ -160,7 +163,7 @@ export async function POST(req: Request) {
                 type: "image_url",
                 image_url: {
                   url: image.startsWith("data:") ? image : `data:image/jpeg;base64,${image}`,
-                  detail: "low", // "low" = fixed 85 tokens, much cheaper than "high"
+                  detail: "auto", // "auto" allows high detail for accurate pest pattern recognition
                 },
               },
               {

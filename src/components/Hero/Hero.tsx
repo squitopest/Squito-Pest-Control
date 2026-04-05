@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, CheckCircle, Star, Phone, Camera, X, ShieldAlert, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle, Star, Phone, Camera, X, ShieldAlert, AlertTriangle, Loader2, Upload } from "lucide-react";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
 const YOUTUBE_VIDEO_ID = "ouaGJXqUaXc";
@@ -36,6 +36,7 @@ export default function Hero() {
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -92,6 +93,7 @@ export default function Hero() {
     } finally {
       setScanning(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (uploadInputRef.current) uploadInputRef.current.value = "";
     }
   };
 
@@ -186,14 +188,26 @@ export default function Hero() {
               </span>
               <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
             </a>
-            <button
-              className="group relative overflow-hidden flex items-center justify-center gap-2 px-8 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-green-500/10 hover:border-green-500/50 transition-all w-full sm:w-auto backdrop-blur-md"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
-              <Camera size={18} className="relative z-10 text-green-400" />
-              <span className="relative z-10">Snap &amp; Identify</span>
-            </button>
+            <div className="flex w-full sm:w-auto gap-2">
+              <button
+                className="group relative overflow-hidden flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-green-500/10 hover:border-green-500/50 transition-all backdrop-blur-md"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+                <Camera size={18} className="relative z-10 text-green-400" />
+                <span className="relative z-10">Snap Photo</span>
+              </button>
+              
+              <button
+                className="group relative overflow-hidden flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-green-500/10 hover:border-green-500/50 transition-all backdrop-blur-md"
+                onClick={() => uploadInputRef.current?.click()}
+              >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+                <Upload size={18} className="relative z-10 text-green-400" />
+                <span className="relative z-10">Upload</span>
+              </button>
+            </div>
+            
             <input
               ref={fileInputRef}
               type="file"
@@ -202,6 +216,14 @@ export default function Hero() {
               onChange={handleFileChange}
               className="hidden"
               id="hero-pest-camera"
+            />
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="hero-pest-upload"
             />
           </div>
 
@@ -334,6 +356,9 @@ export default function Hero() {
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 hover:border-green-500/50 text-white font-semibold rounded-xl transition-all text-sm">
                         <Camera size={16} /> Try Another Photo
+                      </button>
+                      <button onClick={() => uploadInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 hover:border-green-500/50 text-white font-semibold rounded-xl transition-all text-sm">
+                        <Upload size={16} /> Upload Another
                       </button>
                       <a href="tel:6312031000" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-sm">
                         Call (631) 203-1000
