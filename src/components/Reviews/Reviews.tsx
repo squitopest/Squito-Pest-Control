@@ -94,7 +94,8 @@ export default function Reviews() {
 
   return (
     <section className="py-24 bg-background overflow-hidden relative" id="reviews">
-      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
+      <div className="absolute inset-0 bg-[url('/reviews_bg.jpg')] bg-cover bg-center opacity-30 mix-blend-overlay pointer-events-none" />
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl relative z-10">
         <div className="flex flex-col items-center justify-center text-center mb-16 px-4 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
             <Star size={14} fill="currentColor" />
