@@ -1,18 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ArrowRight, CheckCircle, Star, Phone } from "lucide-react";
-import PestIdentifierModal from "@/components/PestIdentifierModal/PestIdentifierModal";
+import { useState, useEffect, useRef } from "react";
+import { ArrowRight, CheckCircle, Star, Phone, Camera, X, ShieldAlert, AlertTriangle, Loader2 } from "lucide-react";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
 const YOUTUBE_VIDEO_ID = "ouaGJXqUaXc";
 
+// Risk level color mapping
+const riskColors: Record<string, string> = {
+  Low: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+  Medium: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30",
+  High: "text-orange-400 bg-orange-500/10 border-orange-500/30",
+  Critical: "text-red-400 bg-red-500/10 border-red-500/30",
+};
+
+type AIResult = {
+  identified: true;
+  pestName: string;
+  riskLevel: string;
+  season: string;
+  description: string;
+  confidence: string;
+} | {
+  identified: false;
+  message: string;
+};
+
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [identifierOpen, setIdentifierOpen] = useState(false);
-  // Defer iframe load: don't insert until 2.5s after mount (improves LCP)
   const [videoReady, setVideoReady] = useState(false);
+  
+  // AI Pest Identifier State
+  const [scanning, setScanning] = useState(false);
+  const [aiResult, setAiResult] = useState<AIResult | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -23,7 +46,6 @@ export default function Hero() {
       }, 400);
     }, 2800);
 
-    // Defer YouTube iframe until after the page has painted and is interactive
     const videoTimer = setTimeout(() => setVideoReady(true), 2500);
 
     return () => {
@@ -31,6 +53,61 @@ export default function Hero() {
       clearTimeout(videoTimer);
     };
   }, []);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setAiResult(null);
+    setScanning(true);
+
+    try {
+      const base64 = await compressAndEncode(file);
+      const response = await fetch("/api/identify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        setAiResult({ identified: false, message: data.error });
+      } else {
+        setAiResult(data);
+      }
+    } catch {
+      setAiResult({ identified: false, message: "Something went wrong. Please try again or call us at (631) 203-1000!" });
+    } finally {
+      setScanning(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const compressAndEncode = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxDim = 512;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim) { h = (h / w) * maxDim; w = maxDim; }
+        else if (h > maxDim) { w = (w / h) * maxDim; h = maxDim; }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const clearAiResult = () => {
+    setAiResult(null);
+    setPreviewUrl(null);
+  };
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center pt-32 lg:pt-24 pb-12 overflow-hidden" id="hero">
@@ -99,11 +176,22 @@ export default function Hero() {
               <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
             </a>
             <button
-              className="flex items-center justify-center gap-2 px-8 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-white/10 hover:border-white/30 transition-all w-full sm:w-auto backdrop-blur-md"
-              onClick={() => setIdentifierOpen(true)}
+              className="group relative overflow-hidden flex items-center justify-center gap-2 px-8 py-[14px] rounded-full border border-white/20 bg-white/5 text-white font-display font-semibold hover:bg-green-500/10 hover:border-green-500/50 transition-all w-full sm:w-auto backdrop-blur-md"
+              onClick={() => fileInputRef.current?.click()}
             >
-              Identify a Pest
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+              <Camera size={18} className="relative z-10 text-green-400" />
+              <span className="relative z-10">Snap &amp; Identify</span>
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="hidden"
+              id="hero-pest-camera"
+            />
           </div>
 
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
@@ -156,8 +244,96 @@ export default function Hero() {
         </div>
       </div>
 
-      {identifierOpen && (
-        <PestIdentifierModal onClose={() => setIdentifierOpen(false)} />
+      {/* AI Result Modal Overlay */}
+      {(scanning || aiResult) && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up"
+          onClick={e => !scanning && e.target === e.currentTarget && clearAiResult()}
+        >
+          <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+            {/* Image Preview + Scanning Overlay */}
+            {previewUrl && (
+              <div className="relative w-full h-48 sm:h-64 bg-black/40 overflow-hidden">
+                <img src={previewUrl} alt="Pest photo" className="w-full h-full object-contain" />
+                {scanning && (
+                  <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full border-2 border-green-500/30 border-t-green-500 animate-spin" />
+                      <Camera size={24} className="absolute inset-0 m-auto text-green-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-display font-bold text-lg">Analyzing...</p>
+                      <p className="text-white/50 text-sm">Squito AI is identifying your pest</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Result Card */}
+            {aiResult && !scanning && (
+              <div className="p-6">
+                {aiResult.identified ? (
+                  <>
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-1 flex-wrap">
+                          <h3 className="text-2xl font-display font-bold text-white">{aiResult.pestName}</h3>
+                          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${riskColors[aiResult.riskLevel] || riskColors.Medium}`}>
+                            {aiResult.riskLevel} Risk
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-white/50">
+                          <ShieldAlert size={14} className="text-green-400" />
+                          Confidence: {aiResult.confidence}
+                        </div>
+                      </div>
+                      <button onClick={clearAiResult} className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-all shrink-0">
+                        <X size={16} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-4 mb-6">
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1">Active Season</h4>
+                        <p className="text-white/70 text-sm">{aiResult.season}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1">Expert Assessment</h4>
+                        <p className="text-white/70 text-sm leading-relaxed">{aiResult.description}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <a href="/plans" className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] text-sm">
+                        View Protection Plans <ArrowRight size={16} />
+                      </a>
+                      <a href="#contact" onClick={clearAiResult} className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 text-white font-semibold rounded-xl transition-all text-sm">
+                        Get Free Inspection
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center">
+                      <AlertTriangle size={24} className="text-yellow-400" />
+                    </div>
+                    <h3 className="text-xl font-display font-bold text-white mb-2">Couldn&apos;t Identify</h3>
+                    <p className="text-white/60 text-sm mb-5 max-w-sm mx-auto">{aiResult.message}</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <button onClick={() => fileInputRef.current?.click()} className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 hover:border-green-500/50 text-white font-semibold rounded-xl transition-all text-sm">
+                        <Camera size={16} /> Try Another Photo
+                      </button>
+                      <a href="tel:6312031000" className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-sm">
+                        Call (631) 203-1000
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );
