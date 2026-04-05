@@ -109,17 +109,17 @@ export default function PestLibrary() {
       <button
         key={idx}
         onClick={() => setSelected(pest)}
-        className={`group relative shrink-0 w-[160px] sm:w-[240px] h-[220px] sm:h-[320px] rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
+        className={`group relative shrink-0 snap-start w-[130px] sm:w-[240px] h-[170px] sm:h-[320px] rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
       >
         <img src={pest.image} alt={pest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-        <span className={`absolute top-2 sm:top-3 right-2 sm:right-3 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-2 sm:px-2.5 py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
+        <span className={`absolute top-2 sm:top-3 right-2 sm:right-3 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 sm:px-2.5 py-[3px] sm:py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
           {pest.risk}
         </span>
         {/* Name + Season */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
-          <h3 className="font-display font-bold text-white text-base sm:text-lg mb-1 drop-shadow-lg">{pest.name}</h3>
-          <p className="text-white/50 text-[10px] sm:text-xs font-medium">📅 {pest.season}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4">
+          <h3 className="font-display font-bold text-white text-sm sm:text-lg leading-tight mb-0.5 sm:mb-1 drop-shadow-lg">{pest.name}</h3>
+          <p className="text-white/50 text-[9px] sm:text-xs font-medium">📅 {pest.season}</p>
         </div>
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-green-500/0 group-hover:bg-green-500/10 transition-colors duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -173,15 +173,15 @@ export default function PestLibrary() {
       </div>
 
       {/* ─── SCROLLING ROW 1 (Left) ─── */}
-      <div className="relative mb-4">
-        <div className="flex gap-4 animate-marquee-left hover:[animation-play-state:paused]">
+      <div className="relative mb-4 w-full overflow-x-auto overflow-y-hidden hide-scrollbar snap-x cursor-grab active:cursor-grabbing">
+        <div className="flex gap-3 sm:gap-4 w-max animate-marquee-left hover:[animation-play-state:paused] active:[animation-play-state:paused]">
           {[...row1, ...row1, ...row1].map((pest, i) => <PestCard pest={pest} idx={i} key={`r1-${i}`} />)}
         </div>
       </div>
 
       {/* ─── SCROLLING ROW 2 (Right) ─── */}
-      <div className="relative">
-        <div className="flex gap-4 animate-marquee-right hover:[animation-play-state:paused]">
+      <div className="relative w-full overflow-x-auto overflow-y-hidden hide-scrollbar snap-x cursor-grab active:cursor-grabbing">
+        <div className="flex gap-3 sm:gap-4 w-max animate-marquee-right hover:[animation-play-state:paused] active:[animation-play-state:paused]">
           {[...row2, ...row2, ...row2].map((pest, i) => <PestCard pest={pest} idx={i} key={`r2-${i}`} />)}
         </div>
       </div>
@@ -196,8 +196,12 @@ export default function PestLibrary() {
           0% { transform: translateX(-33.333%); }
           100% { transform: translateX(0); }
         }
-        .animate-marquee-left { animation: marquee-left 35s linear infinite; }
-        .animate-marquee-right { animation: marquee-right 35s linear infinite; }
+        .animate-marquee-left { animation: marquee-left 15s linear infinite; }
+        .animate-marquee-right { animation: marquee-right 15s linear infinite; }
+        @media (min-width: 640px) {
+          .animate-marquee-left { animation: marquee-left 35s linear infinite; }
+          .animate-marquee-right { animation: marquee-right 35s linear infinite; }
+        }
       `}</style>
 
       {/* Bottom CTA */}
