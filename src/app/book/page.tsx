@@ -141,7 +141,8 @@ function BookingContent() {
     
     try {
       const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
-      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&apiKey=${GEOAPIFY_KEY}`);
+      // Proximity biased towards Islip, NY (approx center of Long Island) to give users hyper-accurate local recommendations
+      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&filter=countrycode:us&bias=proximity:-73.134960,40.789142&apiKey=${GEOAPIFY_KEY}`);
       const data = await res.json();
       
       if (data && data.results) {
