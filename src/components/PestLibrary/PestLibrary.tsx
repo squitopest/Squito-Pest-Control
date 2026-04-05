@@ -140,8 +140,8 @@ export default function PestLibrary() {
             <Shield size={14} /> Pest Intelligence Database
           </div>
           <h2 className="text-4xl md:text-5xl font-display font-bold mb-4 text-white tracking-tight">
-            Know Your Enemy.{" "}
-            <span className="gradient-text">We&apos;ll Handle the Rest.</span>
+            If you see pests,{" "}
+            <span className="gradient-text">let Squito do the rest!</span>
           </h2>
           <p className="text-white/60 max-w-2xl text-lg mb-8">
             {pests.length} pests identified across Long Island. Tap any threat to see our expert treatment profile.
