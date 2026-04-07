@@ -21,6 +21,8 @@ import {
   FlaskConical,
   Droplets,
   MapPin,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
@@ -222,6 +224,48 @@ function PlansContent() {
   const town = searchParams.get("town");
   const [billing, setBilling] = useState<"monthly" | "yearly" | "onetime">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus("loading");
+
+    try {
+      const parts = formData.name.trim().split(" ");
+      const firstName = parts[0] || "Unknown";
+      const lastName = parts.slice(1).join(" ") || " ";
+
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: formData.email,
+          phone: "Message sent from Plans Page",
+          street: "N/A",
+          city: "N/A",
+          zip: "N/A",
+          service: "Plans Page General Inquiry",
+          message: formData.message,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to send");
+      setFormStatus("success");
+      setTimeout(() => {
+        setFormStatus("idle");
+        setShowContactForm(false);
+        setFormData({ name: "", email: "", message: "" });
+      }, 3000);
+    } catch (err) {
+      setFormStatus("error");
+      setTimeout(() => setFormStatus("idle"), 3000);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -611,20 +655,83 @@ function PlansContent() {
           <p className="text-white/55 text-lg mb-10">
             Our team will assess your home and recommend the right plan — always free of charge, never high pressure.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="tel:6312031000"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-green-500 hover:bg-green-400 text-white font-bold text-lg transition-all hover:shadow-[0_0_40px_rgba(34,197,94,0.5)] group"
-            >
-              <Phone size={20} />
-              (631) 203-1000
-            </a>
-            <Link
-              href="/book"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all group"
-            >
-              Book Online <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col items-center justify-center gap-4 w-full max-w-lg mx-auto">
+            {!showContactForm ? (
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+                <a
+                  href="tel:6312031000"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-green-500 hover:bg-green-400 text-white font-bold text-lg transition-all hover:shadow-[0_0_40px_rgba(34,197,94,0.5)] group"
+                >
+                  <Phone size={20} />
+                  (631) 203-1000
+                </a>
+                <button
+                  onClick={() => setShowContactForm(true)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all group"
+                >
+                  Not sure which plan? Send us a message <ChevronDown size={18} className="group-hover:translate-y-1 transition-transform" />
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="w-full bg-background border border-border rounded-3xl p-6 shadow-2xl animate-fade-in-up text-left flex flex-col gap-4">
+                {formStatus === "success" ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center animate-fade-in-up gap-4">
+                    <div className="w-16 h-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center">
+                      <CheckCircle2 size={32} />
+                    </div>
+                    <span className="font-bold text-white text-lg">Message Sent!</span>
+                    <span className="text-white/60 text-sm">We'll get back to you shortly.</span>
+                  </div>
+                ) : (
+                  <>
+                    <h4 className="text-xl font-bold text-white mb-2">How can we help?</h4>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Your Full Name"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                    <input
+                      type="email"
+                      required
+                      placeholder="Your Email Address"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                    <textarea
+                      required
+                      rows={3}
+                      placeholder="Write your message here..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50 resize-none"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    />
+                    {formStatus === "error" && (
+                      <p className="text-red-400 text-sm text-center">There was an issue sending your message. Please call us instead.</p>
+                    )}
+                    <div className="flex gap-3 mt-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setShowContactForm(false)} 
+                        className="flex-1 py-3 rounded-xl border border-white/10 text-white/70 hover:bg-white/5 transition-colors font-semibold"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        type="submit" 
+                        disabled={formStatus === "loading"}
+                        className="flex-[2] py-3 rounded-xl bg-green-500 text-white font-bold hover:bg-green-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {formStatus === "loading" ? <Loader2 size={18} className="animate-spin" /> : "Send Now"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </form>
+            )}
           </div>
         </div>
       </section>
