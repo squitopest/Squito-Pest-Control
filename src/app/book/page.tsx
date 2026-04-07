@@ -41,12 +41,13 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray"];
+  const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray", "test-service"];
   const isOneTimeService = ONE_TIME_IDS.includes(planId ?? "");
 
   const planTitle = isOneTimeService
     ? planId === "termite-inspection" ? "Termite Inspection"
       : planId === "wasp-removal" ? "Wasp Nest Removal"
+      : planId === "test-service" ? "System Test Service"
       : "Mosquito Event Spray"
     : planId === "premium-shield" ? "Premium Shield Plan"
     : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
@@ -55,6 +56,7 @@ function BookingContent() {
   const initialFee = isOneTimeService
     ? planId === "termite-inspection" ? 149
       : planId === "wasp-removal" ? 249
+      : planId === "test-service" ? 1
       : 199 // Mosquito Event Spray
     : planId === "premium-shield" ? 299.99
     : planId === "ultimate-fortress" ? 399.99
