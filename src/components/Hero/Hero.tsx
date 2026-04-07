@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle, Star, Phone, Camera } from "lucide-react";
+import Link from "next/link";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
 const YOUTUBE_VIDEO_ID = "ouaGJXqUaXc";
@@ -105,22 +106,19 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
-            <button 
-              onClick={() => {
-                const el = document.getElementById('service-area');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
+            <Link 
+              href="/plans"
               className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group w-full sm:w-auto"
             >
               <span className="relative z-10 flex items-center gap-2 shadow-sm">
                 Get Protected <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
-            </button>
+            </Link>
             <button
               onClick={() => {
-                const el = document.getElementById('pest-library');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const el = document.getElementById('library-pest-camera');
+                if (el) el.click();
               }}
               className="group relative overflow-hidden inline-flex items-center justify-center px-8 py-4 rounded-full border border-white/20 bg-white/5 text-white font-bold text-base uppercase tracking-wider hover:bg-green-500/10 hover:border-green-500/50 transition-all backdrop-blur-md w-full sm:w-auto"
             >
