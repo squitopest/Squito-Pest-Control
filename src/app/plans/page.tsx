@@ -669,7 +669,7 @@ function PlansContent() {
                   onClick={() => setShowContactForm(true)}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all group"
                 >
-                  Not sure which plan? Send us a message <ChevronDown size={18} className="group-hover:translate-y-1 transition-transform" />
+                  Or send us a message <ChevronDown size={18} className="group-hover:translate-y-1 transition-transform" />
                 </button>
               </div>
             ) : (
