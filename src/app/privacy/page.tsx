@@ -12,7 +12,16 @@ export default function PrivacyPage() {
         <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4 tracking-tight">
           Privacy Policy
         </h1>
-        <p className="text-white/40 text-sm mb-12">Last updated: April 2026</p>
+        <p className="text-white/40 text-sm mb-8">Last updated: April 2026</p>
+
+        <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-12 border border-white/10 shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10" />
+          <img 
+            src="/team-action.jpg" 
+            alt="Squito Pest Control Team" 
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
 
         <div className="space-y-10 text-white/70 leading-relaxed">
           <section>
