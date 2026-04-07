@@ -144,7 +144,7 @@ export default function PestLibrary() {
             <span className="gradient-text">let Squito do the rest!</span>
           </h2>
           <p className="text-white/60 max-w-2xl text-lg mb-8">
-            {pests.length} pests identified across Long Island. Tap any threat to see our expert treatment profile.
+            There are multiple pests identified across Long Island. Tap any threat to see our expert treatment profile.
           </p>
           {/* Snap & Identify */}
           <div className="flex flex-col sm:flex-row gap-3 mb-2">
