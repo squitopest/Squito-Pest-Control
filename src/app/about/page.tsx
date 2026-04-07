@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { Info, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
@@ -34,9 +34,22 @@ export default function AboutPage() {
               </div>
               
               <div className="mt-10">
-                 <Link href="/book" className="btn-primary">
-                    Join the Squito Family
+                 <Link href="/plans" className="group relative overflow-hidden rounded-2xl p-[1px] focus:outline-none inline-block">
+                   <span
+                     className="absolute inset-0 rounded-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                     style={{
+                       background: "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)",
+                       animation: "spin-border 3s linear infinite",
+                     }}
+                   />
+                   <span className="relative flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-surface/90 backdrop-blur-xl font-bold text-lg text-white transition-all duration-300 group-hover:bg-green-500/10">
+                     Join the Squito Family <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                   </span>
                  </Link>
+                 <style>{`
+                   @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+                   @keyframes spin-border { to { --angle: 360deg; } }
+                 `}</style>
               </div>
            </div>
 
