@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 
 const footerLinks = {
   Services: [
@@ -37,16 +37,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-6 text-white font-display font-bold text-xl md:text-2xl tracking-tight animate-pulse shrink-0">
-              <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-lg p-1.5 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
-                <Shield size={22} className="text-white" />
-              </div>
               <div className="flex flex-col sm:flex-row sm:gap-1.5">
                 <span className="opacity-90">Smart. Safe.</span>
                 <span className="text-green-500">Pest Control.</span>
               </div>
             </div>
             <p className="text-sm leading-relaxed max-w-sm mb-8 text-white/60">
-              Smart. Safe. Pest Control. Proudly serving Long Island, New York since 2009. We eliminate pests, not peace of mind.
+              Smart. Safe. Pest Control. Proudly serving Long Island, New York. We eliminate pests, not peace of mind.
             </p>
             <div className="space-y-4 mb-8">
               <a href="tel:6312031000" className="group relative inline-flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/10 overflow-hidden transition-all duration-300 hover:border-green-500/50 hover:bg-green-500/10 w-fit">
