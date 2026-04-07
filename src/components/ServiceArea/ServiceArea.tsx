@@ -2,15 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Phone, CheckCircle, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { MapPin, Phone, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import { filterTowns, isTownServiced, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
-
-const areas = [
-  "Nassau County", "Suffolk County", "Hempstead", "Babylon",
-  "Smithtown", "Huntington", "Islip", "Brookhaven",
-  "Oyster Bay", "North Hempstead", "Garden City", "Hicksville",
-  "Massapequa", "Levittown", "Commack", "Brentwood",
-];
 
 export default function ServiceArea() {
   const router = useRouter();
@@ -239,15 +232,6 @@ export default function ServiceArea() {
                   <span>We couldn't find that town in our Long Island coverage area. Try a nearby town or call us — we might still be able to help!</span>
                 </div>
               )}
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full mb-10">
-              {areas.map((area, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-white/80 bg-white/5 border border-white/5 rounded-lg px-3 py-2">
-                  <CheckCircle size={14} className="text-green-500 shrink-0" />
-                  <span className="truncate">{area}</span>
-                </div>
-              ))}
             </div>
 
             <div>
