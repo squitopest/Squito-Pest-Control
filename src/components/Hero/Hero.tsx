@@ -152,7 +152,7 @@ export default function Hero() {
               {[
                 { num: "1,000+", label: "Homes Protected" },
                 { num: "Same Day", label: "Service Available" },
-                { num: "6+ Years", label: "Local Experience" },
+                { num: "10+ Years", label: "Local Experience" },
                 { num: "5.0 ★", label: "Average Rating" },
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col">

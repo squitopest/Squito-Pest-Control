@@ -100,9 +100,9 @@ export default function Navbar() {
                 <span className="text-sm font-bold text-white">(631) 203-1000</span>
               </div>
             </a>
-            <a href="#contact" className="btn-primary">
+            <Link href="/plans" className="btn-primary">
               Get Protected
-            </a>
+            </Link>
           </div>
 
           {/* Hamburger */}
@@ -142,9 +142,9 @@ export default function Navbar() {
                 <span className="text-xl font-display font-bold text-white">(631) 203-1000</span>
               </div>
             </a>
-            <a href="#contact" className="btn-primary justify-center py-4 text-lg" onClick={() => setMenuOpen(false)}>
+            <Link href="/plans" className="btn-primary justify-center py-4 text-lg" onClick={() => setMenuOpen(false)}>
               Get Protected
-            </a>
+            </Link>
           </div>
         </div>
       )}
