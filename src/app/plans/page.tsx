@@ -215,6 +215,23 @@ const oneTimeServices = [
     accentColor: "text-blue-400",
     gradient: "conic-gradient(from var(--angle, 0deg), #3b82f6, #2563eb, #1d4ed8, #60a5fa, #3b82f6)",
   },
+  {
+    name: "System Test Service",
+    price: 1,
+    label: "flat rate",
+    image: "/backyard-bbq.png",
+    id: "test-service",
+    icon: FlaskConical,
+    desc: "A $1.00 temporary service used to verify live Stripe and Supabase webhook routing.",
+    includes: [
+      "Verifies real credit card processing",
+      "Tests Supabase webhook booking insert",
+      "Verifies email notifications",
+    ],
+    theme: "border-purple-500/40 bg-purple-500/5 hover:border-purple-400/60",
+    accentColor: "text-purple-400",
+    gradient: "conic-gradient(from var(--angle, 0deg), #a855f7, #9333ea, #7e22ce, #c084fc, #a855f7)",
+  },
 ];
 
 function PlansContent() {
