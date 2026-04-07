@@ -138,11 +138,7 @@ export default function ServiceArea() {
               Proudly Protecting{" "}
               <span className="gradient-text">All of Long Island</span>
             </h2>
-            <p className="text-white/70 text-lg mb-8 max-w-xl">
-              From the Nassau County border to the Hamptons — if you live or
-              work on Long Island, we've got you covered. Same-day service
-              available in most areas.
-            </p>
+
 
             {/* ── Town Search Box ── */}
             <div className="w-full max-w-lg mb-10">
