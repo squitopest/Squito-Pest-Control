@@ -269,9 +269,11 @@ export default function ServiceArea() {
                 <img 
                   src="/long_island_map.png" 
                   alt="Long Island Service Area Map" 
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 scale-[1.05] translate-x-2"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+                {/* Overlay to blur/hide Brooklyn and Queens on the left side */}
+                <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-background via-background/90 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
 
                 {/* SVG scan line clipped to Long Island shape */}
                 <svg
