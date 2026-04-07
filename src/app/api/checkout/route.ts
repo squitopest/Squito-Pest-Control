@@ -54,13 +54,14 @@ export async function POST(req: Request) {
     }
 
     // One-time service IDs
-    const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray"];
+    const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray", "test-service"];
     const isOneTime = ONE_TIME_IDS.includes(planId);
 
     // Determine plan name
     const planName = isOneTime
       ? planId === "termite-inspection" ? "Termite Inspection"
         : planId === "wasp-removal" ? "Wasp Nest Removal"
+        : planId === "test-service" ? "System Test Service"
         : "Mosquito Event Spray"
       : planId === "premium-shield" ? "Premium Shield Plan"
       : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
     const initialFee = isOneTime
       ? planId === "termite-inspection" ? 14900  // $149
         : planId === "wasp-removal" ? 24900      // $249
+        : planId === "test-service" ? 100        // $1.00 — System Test Service
         : 19900                                  // $199 — Mosquito Event Spray
       : planId === "premium-shield" ? 29999      // $299.99
       : planId === "ultimate-fortress" ? 39999   // $399.99
