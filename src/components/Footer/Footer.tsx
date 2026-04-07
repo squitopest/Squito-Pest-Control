@@ -4,28 +4,28 @@ import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 
 const footerLinks = {
   Services: [
-    { label: "Residential Pest Control", href: "#services" },
-    { label: "Commercial Services", href: "#services" },
-    { label: "Mosquito & Tick Control", href: "#services" },
-    { label: "Termite Defense", href: "#services" },
-    { label: "Rodent Removal", href: "#services" },
-    { label: "Bed Bug Treatment", href: "#services" },
+    { label: "Residential Pest Control", href: "/residential" },
+    { label: "Commercial Services", href: "/commercial" },
+    { label: "Mosquito & Tick Control", href: "/services" },
+    { label: "Termite Defense", href: "/services" },
+    { label: "Rodent Removal", href: "/services" },
+    { label: "Bed Bug Treatment", href: "/services" },
   ],
   "Pest Library": [
-    { label: "Mosquitoes", href: "#pest-library" },
-    { label: "Cockroaches", href: "#pest-library" },
-    { label: "Termites", href: "#pest-library" },
-    { label: "Rodents", href: "#pest-library" },
-    { label: "Bed Bugs", href: "#pest-library" },
-    { label: "View All Pests →", href: "#pest-library" },
+    { label: "Mosquitoes", href: "/#pest-library" },
+    { label: "Cockroaches", href: "/#pest-library" },
+    { label: "Termites", href: "/#pest-library" },
+    { label: "Rodents", href: "/#pest-library" },
+    { label: "Bed Bugs", href: "/#pest-library" },
+    { label: "View All Pests →", href: "/#pest-library" },
   ],
   Company: [
-    { label: "About Us", href: "#" },
-    { label: "Our Team", href: "#" },
-    { label: "Service Area", href: "#service-area" },
-    { label: "Plans & Pricing", href: "#plans" },
-    { label: "Reviews", href: "#reviews" },
-    { label: "Contact", href: "#contact" },
+    { label: "About Us", href: "/about" },
+    { label: "Service Area", href: "/#service-area" },
+    { label: "Plans & Pricing", href: "/plans" },
+    { label: "Reviews", href: "/#reviews" },
+    { label: "FAQ", href: "/faq" },
+    { label: "Contact", href: "/contact" },
   ],
 };
 
@@ -100,7 +100,7 @@ export default function Footer() {
           </div>
           <div className="text-sm text-white/50 text-center md:text-right shrink-0">
             © {new Date().getFullYear()} <img src="/logo.png" alt="Squito" className="inline-block h-[1.8em] align-middle -translate-y-[0.1em] mx-1 mx-[-1px] brightness-0 invert opacity-80" /> Pest Control. All rights reserved.<br/>
-            <a href="#" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60">Privacy Policy</a> · <a href="#" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60">Terms of Service</a>
+            <a href="/privacy" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60">Privacy Policy</a> · <a href="/terms" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/20 hover:decoration-white/60">Terms of Service</a>
           </div>
         </div>
       </div>
