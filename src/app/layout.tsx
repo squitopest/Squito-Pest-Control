@@ -19,20 +19,27 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Squito Pest Control- Long Island's Premiere Pest Solutions",
+  metadataBase: new URL("https://getsquito.com"),
+  title: "Squito Pest Control - Long Island's Premier Pest Solutions",
   description:
     "Long Island's premier pest control company. Smart, safe, and effective pest elimination for homes and businesses. No contracts. Same-day service. 100% satisfaction guaranteed.",
   keywords:
     "pest control Long Island, exterminator Nassau County, exterminator Suffolk County, mosquito control, termite control, rodent removal, bed bug treatment",
   openGraph: {
-    title: "Squito Pest Control- Long Island's Premiere Pest Solutions",
+    title: "Squito Pest Control - Long Island's Premier Pest Solutions",
     description:
       "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
     url: "https://getsquito.com",
     siteName: "Squito Pest Control",
-    images: [{ url: "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c?auto=format&fit=crop&q=80&w=1200", width: 1200, height: 630 }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Squito Pest Control" }],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Squito Pest Control - Long Island's Premier Pest Solutions",
+    description: "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -47,7 +54,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "PestControl",
     "name": "Squito Pest Control",
-    "image": "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c",
+    "image": "https://getsquito.com/og-image.png",
     "telephone": "(800) 555-1234",
     "url": "https://getsquito.com",
     "areaServed": "Long Island, NY",
