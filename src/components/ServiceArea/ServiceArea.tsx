@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
-import { filterTowns, isTownServiced, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
+import { filterTowns, isTownServiced, zipToTown, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
 
 export default function ServiceArea() {
   const router = useRouter();
@@ -56,8 +56,10 @@ export default function ServiceArea() {
   };
 
   const selectTown = (town: string) => {
-    setQuery(town);
-    setSelectedTown(town);
+    // Strip ZIP suffix if present, e.g. "Brentwood (11717)" → "Brentwood"
+    const cleanTown = town.replace(/\s*\(\d{5}\)$/, "");
+    setQuery(cleanTown);
+    setSelectedTown(cleanTown);
     setSuggestions([]);
     setShowDropdown(false);
     setNotFound(false);
@@ -95,6 +97,12 @@ export default function ServiceArea() {
     // If nothing explicitly selected, try exact match
     if (!selectedTown) {
       if (isTownServiced(query)) {
+        // Check if it's a ZIP code first
+        const resolved = zipToTown(query.trim());
+        if (resolved) {
+          navigateToPlans(resolved);
+          return;
+        }
         // Find the properly-cased version
         const match = ALL_LONG_ISLAND_TOWNS.find(
           (t) => t.toLowerCase() === query.trim().toLowerCase()
@@ -164,7 +172,7 @@ export default function ServiceArea() {
                     onFocus={() => {
                       if (suggestions.length > 0) setShowDropdown(true);
                     }}
-                    placeholder="Enter your town (e.g. Brentwood, Massapequa...)"
+                    placeholder="Town or ZIP code (e.g. Brentwood, 11717...)"
                     className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base font-medium"
                     id="town-search-input"
                     autoComplete="off"

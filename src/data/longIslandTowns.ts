@@ -305,16 +305,128 @@ export const TOWN_SET = new Set(
   ALL_LONG_ISLAND_TOWNS.map((t) => t.toLowerCase())
 );
 
-/** Check if a given town name is within our service area */
-export function isTownServiced(town: string): boolean {
-  return TOWN_SET.has(town.trim().toLowerCase());
+/** ZIP code → Town mapping for Nassau & Suffolk County */
+export const ZIP_TO_TOWN: Record<string, string> = {
+  // Nassau County
+  "11001": "Floral Park", "11002": "Floral Park", "11003": "Elmont",
+  "11010": "Franklin Square", "11020": "Great Neck", "11021": "Great Neck",
+  "11023": "Great Neck", "11024": "Great Neck", "11030": "Manhasset",
+  "11040": "New Hyde Park", "11042": "New Hyde Park", "11050": "Port Washington",
+  "11051": "Port Washington", "11052": "Port Washington", "11053": "Port Washington",
+  "11054": "Port Washington", "11055": "Port Washington",
+  "11096": "Inwood", "11099": "New Hyde Park",
+  "11501": "Mineola", "11507": "Albertson", "11509": "Atlantic Beach",
+  "11510": "Baldwin", "11514": "Carle Place", "11516": "Cedarhurst",
+  "11518": "East Rockaway", "11520": "Freeport", "11530": "Garden City",
+  "11531": "Garden City", "11535": "Garden City", "11536": "Garden City",
+  "11542": "Glen Cove", "11545": "Glen Head", "11547": "Glenwood Landing",
+  "11548": "Greenvale", "11549": "Hempstead", "11550": "Hempstead",
+  "11551": "Hempstead", "11552": "West Hempstead", "11553": "Uniondale",
+  "11554": "East Meadow", "11555": "Uniondale", "11556": "Uniondale",
+  "11557": "Hewlett", "11558": "Island Park", "11559": "Lawrence",
+  "11560": "Locust Valley", "11561": "Long Beach", "11563": "Lynbrook",
+  "11565": "Malverne", "11566": "Merrick", "11568": "Old Westbury",
+  "11569": "Point Lookout", "11570": "Rockville Centre",
+  "11571": "Rockville Centre", "11572": "Oceanside",
+  "11575": "Roosevelt", "11576": "Roslyn", "11577": "Roslyn Heights",
+  "11579": "Sea Cliff", "11580": "Valley Stream", "11581": "Valley Stream",
+  "11582": "Valley Stream", "11590": "Westbury", "11596": "Williston Park",
+  "11598": "Woodmere", "11599": "Garden City",
+  "11709": "Bayville", "11710": "Bellmore", "11714": "Bethpage",
+  "11732": "Old Bethpage", "11735": "Farmingdale",
+  "11753": "Jericho", "11756": "Levittown", "11758": "Massapequa",
+  "11762": "Massapequa Park", "11765": "Mill Neck",
+  "11771": "Oyster Bay", "11773": "Oyster Bay",
+  "11783": "Seaford", "11791": "Syosset", "11797": "Woodbury",
+  "11801": "Hicksville", "11802": "Hicksville", "11803": "Plainview",
+  "11804": "Old Bethpage", "11815": "Hicksville",
+  // Suffolk County
+  "11701": "Amityville", "11702": "Babylon", "11703": "North Babylon",
+  "11704": "West Babylon", "11705": "Bayport", "11706": "Bay Shore",
+  "11707": "West Bay Shore", "11708": "Amityville",
+  "11713": "Bellport", "11715": "Blue Point",
+  "11716": "Bohemia", "11717": "Brentwood", "11718": "Brightwaters",
+  "11719": "Brookhaven Hamlet", "11720": "Centereach",
+  "11721": "Centerport", "11722": "Central Islip",
+  "11724": "Cold Spring Harbor", "11725": "Commack",
+  "11726": "Copiague", "11727": "Coram", "11730": "East Islip",
+  "11731": "East Northport", "11733": "East Setauket",
+  "11738": "Farmingville", "11739": "Great River",
+  "11740": "Greenlawn", "11741": "Holbrook", "11742": "Holtsville",
+  "11743": "Huntington", "11746": "Huntington Station",
+  "11747": "Melville", "11749": "Islandia",
+  "11750": "Islandia", "11751": "Islip",
+  "11752": "Islip Terrace", "11754": "Kings Park",
+  "11755": "Lake Grove", "11757": "Lindenhurst",
+  "11760": "North Lindenhurst", "11763": "Medford",
+  "11764": "Miller Place", "11766": "Mount Sinai",
+  "11767": "Nesconset", "11768": "Northport",
+  "11769": "Oakdale", "11770": "Ocean Beach",
+  "11772": "Patchogue", "11775": "Patchogue",
+  "11776": "Port Jefferson Station", "11777": "Port Jefferson",
+  "11778": "Rocky Point", "11779": "Ronkonkoma",
+  "11780": "Saint James", "11782": "Sayville",
+  "11784": "Selden", "11786": "Shoreham",
+  "11787": "Smithtown", "11788": "Hauppauge",
+  "11789": "Sound Beach", "11790": "Stony Brook",
+  "11792": "Wading River", "11793": "Wantagh",
+  "11794": "Stony Brook", "11795": "West Islip",
+  "11796": "West Sayville", "11798": "Wheatley Heights",
+  "11901": "Riverhead", "11930": "Amagansett",
+  "11931": "Aquebogue", "11932": "Bridgehampton",
+  "11933": "Calverton", "11934": "Center Moriches",
+  "11935": "Cutchogue", "11937": "East Hampton",
+  "11939": "East Marion", "11940": "East Moriches",
+  "11941": "Eastport", "11942": "East Quogue",
+  "11944": "Greenport", "11946": "Hampton Bays",
+  "11947": "Jamesport", "11948": "Laurel",
+  "11949": "Manorville", "11950": "Mastic",
+  "11951": "Mastic Beach", "11952": "Mattituck",
+  "11953": "Middle Island", "11954": "Montauk",
+  "11955": "Moriches", "11956": "New Suffolk",
+  "11957": "Orient", "11958": "Peconic",
+  "11959": "Quogue", "11960": "Remsenburg",
+  "11961": "Ridge", "11962": "Sagaponack",
+  "11963": "Sag Harbor", "11964": "Shelter Island",
+  "11965": "Shelter Island", "11967": "Shirley",
+  "11968": "Southampton", "11969": "Southampton Village",
+  "11970": "South Jamesport", "11971": "Southold",
+  "11972": "Speonk", "11973": "Upton",
+  "11975": "Wainscott", "11976": "Water Mill",
+  "11977": "Westhampton", "11978": "Westhampton Beach",
+  "11980": "Yaphank",
+};
+
+/** Check if a given town name or ZIP code is within our service area */
+export function isTownServiced(input: string): boolean {
+  const val = input.trim();
+  // Check if it's a ZIP code
+  if (/^\d{5}$/.test(val)) {
+    return val in ZIP_TO_TOWN;
+  }
+  return TOWN_SET.has(val.toLowerCase());
 }
 
-/** Get the best match from our list given a partial input */
+/** Resolve a ZIP code to a town name, or return null */
+export function zipToTown(zip: string): string | null {
+  return ZIP_TO_TOWN[zip.trim()] || null;
+}
+
+/** Get the best match from our list given a partial input (town name or ZIP) */
 export function filterTowns(query: string, limit = 8): string[] {
   if (!query || query.length < 1) return [];
   const q = query.toLowerCase().trim();
   
+  // If the user is typing a ZIP code, match ZIP codes and show "Town (ZIP)"
+  if (/^\d+$/.test(q)) {
+    const zipMatches = Object.entries(ZIP_TO_TOWN)
+      .filter(([zip]) => zip.startsWith(q))
+      .map(([zip, town]) => `${town} (${zip})`)
+      // Deduplicate
+      .filter((v, i, a) => a.indexOf(v) === i);
+    return zipMatches.slice(0, limit);
+  }
+
   // Exact start matches first, then contains matches
   const startsWith = ALL_LONG_ISLAND_TOWNS.filter((t) =>
     t.toLowerCase().startsWith(q)
