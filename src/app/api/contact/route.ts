@@ -107,7 +107,7 @@ export async function POST(req: Request) {
             <!-- Body -->
             <div style="padding: 32px 24px; color: #e0e0e0;">
               <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${firstName}</strong>,</p>
-              <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Thank you for reaching out to Squito Pest Control! We've received your free inspection request and a member of our team will contact you shortly to schedule your visit.</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Thank you for reaching out to Squito Pest Control! We've received your message and a member of our team will get back to you as soon as possible.</p>
               
               <div style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin: 24px 0;">
                 <table style="width: 100%; border-collapse: collapse;">
