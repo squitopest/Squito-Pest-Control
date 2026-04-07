@@ -23,7 +23,7 @@ export default function AboutPage() {
               </h1>
               <div className="space-y-6 text-lg text-white/70 leading-relaxed">
                  <p>
-                    Founded in 2009, Squito Pest Control was built on a simple premise: pest control doesn't have to be opaque, dangerous, or outdated. We set out to modernize the industry for Long Island homeowners and businesses.
+                    Squito Pest Control was built on a simple premise: pest control doesn't have to be opaque, dangerous, or outdated. We set out to modernize the industry for Long Island homeowners and businesses.
                  </p>
                  <p>
                     By leveraging cutting-edge, eco-friendly treatment protocols, transparent pricing, and industry-leading customer service, we eliminate the stress of pest management. We treat your property with the exact same care we treat our own.
@@ -41,28 +41,13 @@ export default function AboutPage() {
            </div>
 
            <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-4">
-                    <div className="aspect-square bg-surface border border-border rounded-3xl overflow-hidden glass-card shadow-2xl relative">
-                       {/* Image placeholder */}
-                       <div className="absolute inset-0 bg-green-500/10" />
-                       <div className="absolute inset-0 flex items-center justify-center text-5xl">🌿</div>
-                    </div>
-                    <div className="aspect-[4/5] bg-surface border border-border rounded-3xl overflow-hidden glass-card shadow-2xl relative">
-                       <div className="absolute inset-0 bg-green-500/10" />
-                       <div className="absolute inset-0 flex items-center justify-center text-5xl">🛡️</div>
-                    </div>
-                 </div>
-                 <div className="space-y-4 pt-12">
-                    <div className="aspect-[4/5] bg-surface border border-border rounded-3xl overflow-hidden glass-card shadow-2xl relative">
-                       <div className="absolute inset-0 bg-green-500/10" />
-                       <div className="absolute inset-0 flex items-center justify-center text-5xl">🔬</div>
-                    </div>
-                    <div className="aspect-square bg-surface border border-border rounded-3xl overflow-hidden glass-card shadow-2xl relative border-green-500/50 shadow-green-500/20">
-                       <div className="absolute inset-0 bg-green-500/20" />
-                       <div className="absolute inset-0 flex items-center justify-center text-5xl">🤝</div>
-                    </div>
-                 </div>
+              <div className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] rounded-3xl overflow-hidden glass-card shadow-2xl border border-white/10">
+                 <img 
+                    src="/about-us-action.jpg" 
+                    alt="Squito Pest Control Technician" 
+                    className="w-full h-full object-cover object-center"
+                 />
+                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
               </div>
            </div>
         </div>
