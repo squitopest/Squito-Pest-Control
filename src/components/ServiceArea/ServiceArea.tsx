@@ -64,6 +64,8 @@ export default function ServiceArea() {
     setShowDropdown(false);
     setNotFound(false);
     setHighlightIdx(-1);
+    // Auto-navigate to plans page
+    navigateToPlans(cleanTown);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
