@@ -66,6 +66,29 @@ export default function PestLibrary() {
     return () => { document.body.style.overflow = ''; };
   }, [modalOpen]);
 
+  // Deep Link Support for Pests
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && hash !== "pest-library") {
+        const matchingPest = pests.find(p => 
+          p.name.toLowerCase().replace(/\s+/g, '-').replace(/&/g, 'and') === hash || 
+          p.name.toLowerCase() === hash
+        );
+        // Special case for Rodents/Rats
+        if (!matchingPest && hash === 'rats') {
+           const rat = pests.find(p => p.name === 'Rats');
+           if (rat) setSelected(rat);
+        } else if (matchingPest) {
+          setSelected(matchingPest);
+        }
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
