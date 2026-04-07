@@ -1,6 +1,9 @@
 "use client";
 
-import { MapPin, Phone, CheckCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { MapPin, Phone, CheckCircle, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import { filterTowns, isTownServiced, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
 
 const areas = [
   "Nassau County", "Suffolk County", "Hempstead", "Babylon",
@@ -10,6 +13,125 @@ const areas = [
 ];
 
 export default function ServiceArea() {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedTown, setSelectedTown] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleInputChange = (val: string) => {
+    setQuery(val);
+    setSelectedTown(null);
+    setNotFound(false);
+    setHighlightIdx(-1);
+
+    if (val.trim().length < 1) {
+      setSuggestions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const matches = filterTowns(val, 8);
+    setSuggestions(matches);
+    setShowDropdown(matches.length > 0);
+
+    // If nothing matched and they typed 3+ chars, show not-found
+    if (matches.length === 0 && val.trim().length >= 3) {
+      setNotFound(true);
+    }
+  };
+
+  const selectTown = (town: string) => {
+    setQuery(town);
+    setSelectedTown(town);
+    setSuggestions([]);
+    setShowDropdown(false);
+    setNotFound(false);
+    setHighlightIdx(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || suggestions.length === 0) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleGoClick();
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIdx((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIdx((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightIdx >= 0 && highlightIdx < suggestions.length) {
+        selectTown(suggestions[highlightIdx]);
+      } else {
+        handleGoClick();
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleGoClick = () => {
+    // If nothing explicitly selected, try exact match
+    if (!selectedTown) {
+      if (isTownServiced(query)) {
+        // Find the properly-cased version
+        const match = ALL_LONG_ISLAND_TOWNS.find(
+          (t) => t.toLowerCase() === query.trim().toLowerCase()
+        );
+        if (match) {
+          navigateToPlans(match);
+          return;
+        }
+      }
+      // Check if we have suggestions and auto-select the first one
+      const matches = filterTowns(query, 1);
+      if (matches.length > 0) {
+        selectTown(matches[0]);
+        navigateToPlans(matches[0]);
+        return;
+      }
+      setNotFound(true);
+      return;
+    }
+    navigateToPlans(selectedTown);
+  };
+
+  const navigateToPlans = (town: string) => {
+    setLoading(true);
+    // Small delay for the loading animation
+    setTimeout(() => {
+      router.push(`/plans?town=${encodeURIComponent(town)}`);
+    }, 600);
+  };
+
   return (
     <section className="py-24 bg-surface border-y border-border overflow-hidden" id="service-area">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
@@ -28,6 +150,96 @@ export default function ServiceArea() {
               work on Long Island, we've got you covered. Same-day service
               available in most areas.
             </p>
+
+            {/* ── Town Search Box ── */}
+            <div className="w-full max-w-lg mb-10">
+              <label className="text-sm font-semibold text-white/60 mb-2 block flex items-center gap-2">
+                <Search size={14} className="text-green-400" />
+                Check if we service your town
+              </label>
+              <div className="relative">
+                <div className={`flex items-center gap-2 bg-background/70 border rounded-2xl px-4 py-3 transition-all duration-300 ${
+                  selectedTown
+                    ? "border-green-500/60 shadow-[0_0_20px_rgba(34,197,94,0.15)]"
+                    : notFound
+                    ? "border-red-500/50"
+                    : "border-white/10 focus-within:border-green-500/50"
+                }`}>
+                  <Search size={18} className={`flex-shrink-0 transition-colors ${selectedTown ? "text-green-400" : "text-white/30"}`} />
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={query}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => {
+                      if (suggestions.length > 0) setShowDropdown(true);
+                    }}
+                    placeholder="Enter your town (e.g. Brentwood, Massapequa...)"
+                    className="flex-1 bg-transparent text-white placeholder:text-white/30 outline-none text-base font-medium"
+                    id="town-search-input"
+                    autoComplete="off"
+                  />
+                  <button
+                    onClick={handleGoClick}
+                    disabled={loading || (!query.trim())}
+                    className={`flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-sm transition-all duration-300 flex-shrink-0 ${
+                      selectedTown
+                        ? "bg-green-500 hover:bg-green-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+                        : "bg-white/10 text-white/60 hover:bg-white/15"
+                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                  >
+                    {loading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        View Plans <ArrowRight size={14} />
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Autocomplete Dropdown */}
+                {showDropdown && suggestions.length > 0 && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute z-50 w-full mt-2 bg-neutral-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-72 overflow-y-auto"
+                  >
+                    {suggestions.map((town, i) => (
+                      <button
+                        key={town}
+                        type="button"
+                        onClick={() => selectTown(town)}
+                        className={`w-full px-4 py-3.5 flex items-center gap-3 text-left transition-colors border-b border-white/5 last:border-0 ${
+                          highlightIdx === i
+                            ? "bg-green-500/15 text-white"
+                            : "hover:bg-white/5 text-white/80"
+                        }`}
+                      >
+                        <MapPin size={14} className={`flex-shrink-0 ${highlightIdx === i ? "text-green-400" : "text-white/30"}`} />
+                        <span className="font-semibold text-sm">{town}</span>
+                        <span className="text-xs text-white/30 ml-auto">Long Island, NY</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Confirmation Badge */}
+              {selectedTown && !loading && (
+                <div className="mt-3 flex items-center gap-2 text-green-400 text-sm font-semibold animate-fade-in-up">
+                  <ShieldCheck size={16} />
+                  <span>Yes! We service <strong>{selectedTown}</strong>. Click "View Plans" to see your options.</span>
+                </div>
+              )}
+
+              {/* Not Found Message */}
+              {notFound && !selectedTown && (
+                <div className="mt-3 flex items-center gap-2 text-amber-400 text-sm font-medium">
+                  <span>We couldn't find that town in our Long Island coverage area. Try a nearby town or call us — we might still be able to help!</span>
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full mb-10">
               {areas.map((area, i) => (
@@ -76,14 +288,6 @@ export default function ServiceArea() {
                   preserveAspectRatio="none"
                 >
                   <defs>
-                    {/*
-                      Long Island runs diagonally NE in the image.
-                      object-cover on a square image in a 4:3 box crops top+bottom equally,
-                      showing ~y 12.5%-87.5% of the 1024px image.
-                      Island north shore: ~y 37-45% of orig → y_vb 18-25
-                      Island south shore: ~y 62-67% of orig → y_vb 37-43
-                      Island x: ~4% to 95% of image width
-                    */}
                     <clipPath id="li-clip">
                       <polygon points="
                         4,45   6,43   9,40   12,38

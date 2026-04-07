@@ -217,9 +217,9 @@ function BookingContent() {
         <p className="text-white/70 text-lg">Schedule your inspection and finalize your protection plan.</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-12">
+      <div className="flex flex-col-reverse lg:flex-row gap-12">
         {/* Checkout Form */}
-        <div className="flex-1 space-y-8">
+        <div className={`flex-1 space-y-8 ${loading ? "opacity-60 pointer-events-none" : "transition-opacity duration-300"}`}>
           
           {/* Contact Block */}
           <div className="glass-card p-8 rounded-3xl">
@@ -230,8 +230,9 @@ function BookingContent() {
                 <input
                   type="text"
                   required
+                  disabled={loading}
                   placeholder="John Doe"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors disabled:opacity-50"
                   value={form.fullName}
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
                 />

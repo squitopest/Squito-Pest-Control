@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Check,
@@ -19,6 +20,7 @@ import {
   AlertTriangle,
   FlaskConical,
   Droplets,
+  MapPin,
 } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
@@ -215,7 +217,9 @@ const oneTimeServices = [
   },
 ];
 
-export default function PlansPage() {
+function PlansContent() {
+  const searchParams = useSearchParams();
+  const town = searchParams.get("town");
   const [billing, setBilling] = useState<"monthly" | "yearly" | "onetime">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -230,28 +234,70 @@ export default function PlansPage() {
           <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-8">
             <Shield size={14} /> Protection Plans
           </div>
+
+          {/* Personalized town banner */}
+          {town && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-5 py-2 rounded-full text-sm font-bold tracking-wide mb-6"
+            >
+              <MapPin size={14} />
+              Showing plans for {town}, NY
+            </motion.div>
+          )}
+
           <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight leading-[1.05]">
-            Pick your plan.<br />
-            <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-              {["We", "handle", "the", "rest."].map((word, i) => (
-                <motion.span
-                  key={word}
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.55,
-                    delay: 0.3 + i * 0.12,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="inline-block"
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </span>
+            {town ? (
+              <>
+                Protection Plans for<br />
+                <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                  {`${town} Residents`.split(" ").map((word, i) => (
+                    <motion.span
+                      key={word + i}
+                      initial={{ opacity: 0, y: 32 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.3 + i * 0.12,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="inline-block"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
+              </>
+            ) : (
+              <>
+                Pick your plan.<br />
+                <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                  {["We", "handle", "the", "rest."].map((word, i) => (
+                    <motion.span
+                      key={word}
+                      initial={{ opacity: 0, y: 32 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.55,
+                        delay: 0.3 + i * 0.12,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      className="inline-block"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
+              </>
+            )}
           </h1>
           <p className="text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Every plan includes free re-service, no contracts, and the Squito AI guarantee. Choose the level of coverage that fits your home and lifestyle.
+            {town
+              ? `Squito AI proudly services ${town} and surrounding areas. Every plan includes free re-service, no contracts, and our satisfaction guarantee.`
+              : "Every plan includes free re-service, no contracts, and the Squito AI guarantee. Choose the level of coverage that fits your home and lifestyle."
+            }
           </p>
 
           {/* Billing toggle */}
@@ -585,5 +631,17 @@ export default function PlansPage() {
 
       <Footer />
     </main>
+  );
+}
+
+export default function PlansPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-white/50">Loading Plans...</p>
+      </main>
+    }>
+      <PlansContent />
+    </Suspense>
   );
 }

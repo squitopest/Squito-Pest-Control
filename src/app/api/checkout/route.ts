@@ -103,9 +103,43 @@ export async function POST(req: Request) {
       // Teleport straight to the success page as if they paid!
       redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id=free_test_bypass_${bookingId}`;
     } else {
-      // Regular Stripe Flow
+      // Create or retrieve customer to pre-fill billing details
+      let customer;
+      const existingCustomers = await stripe.customers.list({ email: email, limit: 1 });
+      
+      if (existingCustomers.data.length > 0) {
+        customer = existingCustomers.data[0];
+        // Ensure the existing customer has the most up-to-date address
+        await stripe.customers.update(customer.id, {
+          name: fullName,
+          phone: phone,
+          address: {
+            line1: street,
+            city: city,
+            state: "NY", // NY Based on localized service area
+            postal_code: zipCode,
+            country: "US",
+          }
+        });
+      } else {
+        customer = await stripe.customers.create({
+          email: email,
+          name: fullName,
+          phone: phone,
+          address: {
+            line1: street,
+            city: city,
+            state: "NY", 
+            postal_code: zipCode,
+            country: "US",
+          }
+        });
+      }
+
+      // Regular Stripe Flow with auto billing (1-click checkout)
       const session = await stripe.checkout.sessions.create({
-        customer_email: email,
+        customer: customer.id,
+        billing_address_collection: "auto",
         line_items: [
           {
             price_data: {
