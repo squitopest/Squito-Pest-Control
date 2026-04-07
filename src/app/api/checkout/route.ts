@@ -64,7 +64,6 @@ export async function POST(req: Request) {
         : "Mosquito Event Spray"
       : planId === "premium-shield" ? "Premium Shield Plan"
       : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
-      : planId === "test-sub" ? "Test Subscription Plan"
       : "Essential Defense Plan";
 
     // Determine charge amount in cents
@@ -74,7 +73,6 @@ export async function POST(req: Request) {
         : 19900                                  // $199 — Mosquito Event Spray
       : planId === "premium-shield" ? 29999      // $299.99
       : planId === "ultimate-fortress" ? 39999   // $399.99
-      : planId === "test-sub" ? 100              // $1.00 — Test Initial
       : 19999;                                   // $199.99 — Essential
 
     // Advanced Line Item Construction for Subscriptions
@@ -120,7 +118,6 @@ export async function POST(req: Request) {
       checkoutMode = "subscription";
       const monthlyFee = planId === "premium-shield" ? 8999
         : planId === "ultimate-fortress" ? 12999
-        : planId === "test-sub" ? 100
         : 4999;
       
       // Calculate split: The Initial Fee acts as a one-time charge, the monthly charge repeats.

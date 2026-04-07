@@ -50,7 +50,6 @@ function BookingContent() {
       : "Mosquito Event Spray"
     : planId === "premium-shield" ? "Premium Shield Plan"
     : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
-    : planId === "test-sub" ? "Test Subscription Plan"
     : "Essential Defense Plan";
 
   const initialFee = isOneTimeService
@@ -59,7 +58,6 @@ function BookingContent() {
       : 199 // Mosquito Event Spray
     : planId === "premium-shield" ? 299.99
     : planId === "ultimate-fortress" ? 399.99
-    : planId === "test-sub" ? 1.00
     : 199.99;
 
   const isYearly = billing === "yearly";
