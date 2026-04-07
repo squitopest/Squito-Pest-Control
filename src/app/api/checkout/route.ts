@@ -64,6 +64,7 @@ export async function POST(req: Request) {
         : "Mosquito Event Spray"
       : planId === "premium-shield" ? "Premium Shield Plan"
       : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
+      : planId === "test-sub" ? "Test Subscription Plan"
       : "Essential Defense Plan";
 
     // Determine charge amount in cents
@@ -73,6 +74,7 @@ export async function POST(req: Request) {
         : 19900                                  // $199 — Mosquito Event Spray
       : planId === "premium-shield" ? 29999      // $299.99
       : planId === "ultimate-fortress" ? 39999   // $399.99
+      : planId === "test-sub" ? 100              // $1.00 — Test Initial
       : 19999;                                   // $199.99 — Essential
 
     // Advanced Line Item Construction for Subscriptions
@@ -118,6 +120,7 @@ export async function POST(req: Request) {
       checkoutMode = "subscription";
       const monthlyFee = planId === "premium-shield" ? 8999
         : planId === "ultimate-fortress" ? 12999
+        : planId === "test-sub" ? 100
         : 4999;
       
       // Calculate split: The Initial Fee acts as a one-time charge, the monthly charge repeats.
@@ -127,17 +130,19 @@ export async function POST(req: Request) {
       const setupTax = Math.round(initialFeeDifferential * taxRate);
       const monthlyTax = Math.round(monthlyFee * taxRate);
 
-      lineItems.push({
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: `Initial Fee - ${planName}`,
-            description: `One-time initial service flush-out. Appointment: ${date} at ${time}`,
+      if (initialFeeDifferential > 0) {
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Initial Fee - ${planName}`,
+              description: `One-time initial service flush-out. Appointment: ${date} at ${time}`,
+            },
+            unit_amount: initialFeeDifferential + setupTax,
           },
-          unit_amount: initialFeeDifferential + setupTax,
-        },
-        quantity: 1,
-      });
+          quantity: 1,
+        });
+      }
 
       lineItems.push({
         price_data: {

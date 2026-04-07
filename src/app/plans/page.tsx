@@ -215,6 +215,22 @@ const oneTimeServices = [
     accentColor: "text-blue-400",
     gradient: "conic-gradient(from var(--angle, 0deg), #3b82f6, #2563eb, #1d4ed8, #60a5fa, #3b82f6)",
   },
+  {
+    name: "Subscription Test Plan",
+    price: 1,
+    label: "initial fee",
+    image: "/backyard-bbq.png",
+    id: "test-sub",
+    icon: Shield,
+    desc: "A $1.00 temporary service to test monthly recurring billing.",
+    includes: [
+      "Verifies real credit card processing",
+      "Tests $1 upfront + $1 recurrent charge safely",
+    ],
+    theme: "border-purple-500/40 bg-purple-500/5 hover:border-purple-400/60",
+    accentColor: "text-purple-400",
+    gradient: "conic-gradient(from var(--angle, 0deg), #a855f7, #9333ea, #7e22ce, #c084fc, #a855f7)",
+  },
 ];
 
 function PlansContent() {
@@ -457,7 +473,7 @@ function PlansContent() {
                       <span className="text-5xl font-display font-bold text-white">${svc.price}</span>
                       <span className="text-white/40 mb-2 text-sm">{svc.label}</span>
                     </div>
-                    <p className="text-xs text-white/40 mt-1">No subscription required</p>
+                    <p className="text-xs text-white/40 mt-1">{svc.id === 'test-sub' ? "Includes $1/mo subscription" : "No subscription required"}</p>
                   </div>
                   <div className="flex flex-col gap-4 mb-8">
                     {svc.includes.map((item, j) => (
@@ -468,7 +484,7 @@ function PlansContent() {
                     ))}
                   </div>
                   <Link
-                    href={`/book?plan=${svc.id}&billing=onetime`}
+                    href={`/book?plan=${svc.id}&billing=${svc.id === 'test-sub' ? 'monthly' : 'onetime'}`}
                     className={`group flex items-center justify-center gap-2 w-full py-4 rounded-2xl border font-display font-bold text-base transition-all duration-300 hover:bg-white/5 ${svc.accentColor}`}
                   >
                     Book Now
