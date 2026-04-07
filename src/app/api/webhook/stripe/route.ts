@@ -93,7 +93,7 @@ export async function POST(req: Request) {
             subject: `New Booking/Purchase: ${booking.plan_id}`,
             html: `
               <div style="font-family: sans-serif; padding: 20px; color: #333;">
-                <h2 style="color: #22c55e;">New Squito AI Purchase!</h2>
+                <h2 style="color: #22c55e;">New Squito Pest Control Purchase!</h2>
                 <p><strong>Customer:</strong> ${booking.full_name}</p>
                 <p><strong>Email:</strong> ${booking.email}</p>
                 <p><strong>Phone:</strong> ${booking.phone}</p>

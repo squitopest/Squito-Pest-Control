@@ -173,24 +173,26 @@ export default function ServiceArea() {
                     id="town-search-input"
                     autoComplete="off"
                   />
-                  <button
-                    onClick={handleGoClick}
-                    disabled={loading || (!query.trim())}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-xl font-bold text-sm transition-all duration-300 flex-shrink-0 ${
-                      selectedTown
-                        ? "bg-green-500 hover:bg-green-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.5)]"
-                        : "bg-white/10 text-white/60 hover:bg-white/15"
-                    } disabled:opacity-40 disabled:cursor-not-allowed`}
-                  >
-                    {loading ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <>
-                        View Plans <ArrowRight size={14} />
-                      </>
-                    )}
-                  </button>
                 </div>
+
+                {/* View Plans Button — below the search bar for mobile visibility */}
+                <button
+                  onClick={handleGoClick}
+                  disabled={loading || (!query.trim())}
+                  className={`mt-3 w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${
+                    selectedTown
+                      ? "bg-green-500 hover:bg-green-400 text-white shadow-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-[1.02]"
+                      : "bg-white/10 text-white/60 hover:bg-white/15"
+                  } disabled:opacity-40 disabled:cursor-not-allowed`}
+                >
+                  {loading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>
+                      View Plans <ArrowRight size={14} />
+                    </>
+                  )}
+                </button>
 
                 {/* Autocomplete Dropdown */}
                 {showDropdown && suggestions.length > 0 && (

@@ -189,7 +189,7 @@ export default function PestLibrary() {
             `}</style>
           </div>
           <p className="text-white/25 text-xs">Photos are processed securely and never stored.</p>
-          <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="hidden" id="library-pest-camera" />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="library-pest-camera" />
           <input ref={uploadInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="library-pest-upload" />
         </div>
       </div>
@@ -297,7 +297,7 @@ export default function PestLibrary() {
                       <Camera size={24} className="absolute inset-0 m-auto text-green-400" />
                     </div>
                     <p className="text-white font-display font-bold text-lg">Analyzing...</p>
-                    <p className="text-white/50 text-sm">Squito AI is identifying your pest</p>
+                    <p className="text-white/50 text-sm">Squito Pest Control is identifying your pest</p>
                   </div>
                 )}
               </div>

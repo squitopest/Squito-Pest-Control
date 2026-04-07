@@ -2,7 +2,7 @@ import { ShieldCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Services | Squito AI Pest Control",
+  title: "Services | Squito Pest Control",
   description: "Comprehensive pest control services for residential and commercial properties across Long Island.",
 };
 

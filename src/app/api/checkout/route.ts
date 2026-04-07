@@ -145,7 +145,7 @@ export async function POST(req: Request) {
             price_data: {
               currency: "usd",
               product_data: {
-                name: `Squito AI - ${planName}`,
+                name: `Squito Pest Control - ${planName}`,
                 description: `Appointment: ${date} at ${time} | Address: ${street}, ${city} ${zipCode}`,
               },
               unit_amount: totalCharge, // Initial fee + NY sales tax (8.625%)

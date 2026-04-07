@@ -2,8 +2,8 @@ import { Mail } from "lucide-react";
 import ContactForm from "@/components/ContactForm/ContactForm";
 
 export const metadata = {
-  title: "Contact Us | Squito AI Pest Control",
-  description: "Get in touch with Squito AI for same-day pest control service on Long Island.",
+  title: "Contact Us | Squito Pest Control",
+  description: "Get in touch with Squito Pest Control for same-day pest control service on Long Island.",
 };
 
 export default function ContactPage() {

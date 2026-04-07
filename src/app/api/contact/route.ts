@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       subject: `New Lead: ${service || "Pest Control Inquiry"} - ${zip}`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #333;">
-          <h2 style="color: #22c55e;">New Squito AI Website Lead!</h2>
+          <h2 style="color: #22c55e;">New Squito Pest Control Website Lead!</h2>
           <p><strong>Name:</strong> ${firstName} ${lastName}</p>
           <p><strong>Email:</strong> ${email}</p>
           <p><strong>Phone:</strong> ${phone}</p>

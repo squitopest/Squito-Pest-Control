@@ -133,7 +133,7 @@ const plans = [
 const faqs = [
   {
     q: "Are there any contracts or cancellation fees?",
-    a: "Absolutely not. All Squito AI plans are month-to-month with zero contracts and zero cancellation fees. You can pause or cancel anytime directly from your account portal.",
+    a: "Absolutely not. All Squito Pest Control plans are month-to-month with zero contracts and zero cancellation fees. You can pause or cancel anytime directly from your account portal.",
   },
   {
     q: "What happens if pests come back between visits?",
@@ -295,8 +295,8 @@ function PlansContent() {
           </h1>
           <p className="text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
             {town
-              ? `Squito AI proudly services ${town} and surrounding areas. Every plan includes free re-service, no contracts, and our satisfaction guarantee.`
-              : "Every plan includes free re-service, no contracts, and the Squito AI guarantee. Choose the level of coverage that fits your home and lifestyle."
+              ? `Squito Pest Control proudly services ${town} and surrounding areas. Every plan includes free re-service, no contracts, and our satisfaction guarantee.`
+              : "Every plan includes free re-service, no contracts, and the Squito Pest Control guarantee. Choose the level of coverage that fits your home and lifestyle."
             }
           </p>
 

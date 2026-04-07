@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description:
       "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
     url: "https://getsquito.com",
-    siteName: "Squito AI",
+    siteName: "Squito Pest Control",
     images: [{ url: "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c?auto=format&fit=crop&q=80&w=1200", width: 1200, height: 630 }],
     locale: "en_US",
     type: "website",
@@ -46,7 +46,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "PestControl",
-    "name": "Squito AI",
+    "name": "Squito Pest Control",
     "image": "https://images.unsplash.com/photo-1616421379377-160fa8ccdb5c",
     "telephone": "(800) 555-1234",
     "url": "https://getsquito.com",

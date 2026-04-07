@@ -2,8 +2,8 @@ import { Info } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Us | Squito AI Pest Control",
-  description: "Learn about the team behind Squito AI, Long Island's premier modern pest control service.",
+  title: "About Us | Squito Pest Control",
+  description: "Learn about the team behind Squito Pest Control, Long Island's premier modern pest control service.",
 };
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
               </h1>
               <div className="space-y-6 text-lg text-white/70 leading-relaxed">
                  <p>
-                    Founded in 2009, Squito AI was built on a simple premise: pest control doesn't have to be opaque, dangerous, or outdated. We set out to modernize the industry for Long Island homeowners and businesses.
+                    Founded in 2009, Squito Pest Control was built on a simple premise: pest control doesn't have to be opaque, dangerous, or outdated. We set out to modernize the industry for Long Island homeowners and businesses.
                  </p>
                  <p>
                     By leveraging cutting-edge, eco-friendly treatment protocols, transparent pricing, and industry-leading customer service, we eliminate the stress of pest management. We treat your property with the exact same care we treat our own.

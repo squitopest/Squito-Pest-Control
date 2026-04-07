@@ -2,7 +2,7 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Blog | Squito AI Pest Control",
+  title: "Blog | Squito Pest Control",
   description: "Expert pest control advice, seasonal tips, and guides for Long Island residents.",
 };
 
