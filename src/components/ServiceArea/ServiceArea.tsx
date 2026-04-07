@@ -148,7 +148,7 @@ export default function ServiceArea() {
             <div className="w-full max-w-lg mb-10">
               <label className="text-sm font-semibold text-white/60 mb-2 block flex items-center gap-2">
                 <Search size={14} className="text-green-400" />
-                Check if we service your town
+                Where do you need service?
               </label>
               <div className="relative">
                 <div className={`flex items-center gap-2 bg-background/70 border rounded-2xl px-4 py-3 transition-all duration-300 ${
