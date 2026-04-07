@@ -75,20 +75,83 @@ export async function POST(req: Request) {
       : planId === "ultimate-fortress" ? 39999   // $399.99
       : 19999;                                   // $199.99 — Essential
 
-    // Yearly prepayment amount in cents
+    // Advanced Line Item Construction for Subscriptions
     const isYearly = billing === "yearly";
-    const yearlyCharge = isYearly && !isOneTime
-      ? planId === "premium-shield" ? 86388      // $863.88
-        : planId === "ultimate-fortress" ? 124788// $1247.88
-        : 47988                                  // $479.88
-      : 0;
+    let lineItems = [];
+    let checkoutMode: "payment" | "subscription" = "payment";
+    const taxRate = 0.08625; // NY State + Nassau County sales tax: 8.625%
 
-    const activeInitialFee = isYearly ? 0 : initialFee;
-    const baseCharge = activeInitialFee + yearlyCharge;
+    if (isOneTime) {
+      checkoutMode = "payment";
+      const tax = Math.round(initialFee * taxRate);
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Squito Pest Control - ${planName}`,
+            description: `Appointment: ${date} at ${time} | Address: ${street}, ${city} ${zipCode}`,
+          },
+          unit_amount: initialFee + tax,
+        },
+        quantity: 1,
+      });
+    } else if (isYearly) {
+      checkoutMode = "subscription";
+      const yearlyCharge = planId === "premium-shield" ? 86388
+        : planId === "ultimate-fortress" ? 124788
+        : 47988;
+      const tax = Math.round(yearlyCharge * taxRate);
+      
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Yearly Subscription - ${planName}`,
+            description: `Address: ${street}, ${city} ${zipCode}`,
+          },
+          unit_amount: yearlyCharge + tax,
+          recurring: { interval: 'year' as const },
+        },
+        quantity: 1,
+      });
+    } else {
+      checkoutMode = "subscription";
+      const monthlyFee = planId === "premium-shield" ? 8999
+        : planId === "ultimate-fortress" ? 12999
+        : 4999;
+      
+      // Calculate split: The Initial Fee acts as a one-time charge, the monthly charge repeats.
+      // We charge the "Initial Fee" today alongside the "First Month" today so it equals the advertised initial fee exactly.
+      const initialFeeDifferential = initialFee - monthlyFee; 
+      
+      const setupTax = Math.round(initialFeeDifferential * taxRate);
+      const monthlyTax = Math.round(monthlyFee * taxRate);
 
-    // NY State + Nassau County sales tax: 8.625%
-    const taxAmount = Math.round(baseCharge * 0.08625);
-    const totalCharge = baseCharge + taxAmount;
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Initial Fee - ${planName}`,
+            description: `One-time initial service flush-out. Appointment: ${date} at ${time}`,
+          },
+          unit_amount: initialFeeDifferential + setupTax,
+        },
+        quantity: 1,
+      });
+
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Monthly Subscription - ${planName}`,
+            description: `Starting seamlessly today. Address: ${street}, ${city} ${zipCode}`,
+          },
+          unit_amount: monthlyFee + monthlyTax,
+          recurring: { interval: 'month' as const },
+        },
+        quantity: 1,
+      });
+    }
 
     // ⚠️ 🚨 PRODUCTION TODO 🚨 ⚠️
     // Set isTestDrive = false before going live!
@@ -140,20 +203,8 @@ export async function POST(req: Request) {
       const session = await stripe.checkout.sessions.create({
         customer: customer.id,
         billing_address_collection: "auto",
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: `Squito Pest Control - ${planName}`,
-                description: `Appointment: ${date} at ${time} | Address: ${street}, ${city} ${zipCode}`,
-              },
-              unit_amount: totalCharge, // Initial fee + NY sales tax (8.625%)
-            },
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
+        line_items: lineItems,
+        mode: checkoutMode,
         success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/book?cancel=true`,
         metadata: {
