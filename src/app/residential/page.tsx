@@ -83,9 +83,9 @@ export default function ResidentialPage() {
               <h2 className="text-3xl font-display font-bold text-white mb-4">Ready to reclaim your home?</h2>
               <p className="text-white/70 text-lg mb-8">Skip the gimmicks and long-term locked contracts. Get a free inspection tailored perfectly to your property's exact footprint.</p>
             </div>
-            <a href="/#contact" className="shrink-0 relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group">
+            <a href="/plans" className="shrink-0 relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group">
               <span className="relative z-10 flex items-center gap-2 shadow-sm">
-                Book Inspection <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                View Plans <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
             </a>
