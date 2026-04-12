@@ -89,21 +89,17 @@ function BookingContent() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
           const response = await fetch(
-            `https://api.geoapify.com/v1/geocode/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&apiKey=${GEOAPIFY_KEY}`
+            `/api/maps/reverse?lat=${position.coords.latitude}&lng=${position.coords.longitude}`
           );
           const data = await response.json();
           
-          if (data && data.features && data.features.length > 0) {
-            const result = data.features[0].properties;
-            const streetStr = result.housenumber ? `${result.housenumber} ${result.street}` : result.street;
-            
+          if (data && data.street) {
             setForm(prev => ({
               ...prev,
-              street: streetStr || result.formatted.split(',')[0],
-              city: result.village || result.hamlet || result.suburb || result.municipality || result.city || "",
-              zipCode: result.postcode || ""
+              street: data.street || "",
+              city: data.city || "",
+              zipCode: data.zipCode || ""
             }));
             setShowSuggestions(false);
           } else {
@@ -129,7 +125,7 @@ function BookingContent() {
     );
   };
 
-  // Geoapify Predictive Autocomplete
+  // Google Maps Predictive Autocomplete
   const handleAddressChange = async (val: string) => {
     setForm(prev => ({ ...prev, street: val }));
     
@@ -140,13 +136,11 @@ function BookingContent() {
     }
     
     try {
-      const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
-      // Proximity biased towards Islip, NY (approx center of Long Island) to give users hyper-accurate local recommendations
-      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&filter=countrycode:us&bias=proximity:-73.134960,40.789142&apiKey=${GEOAPIFY_KEY}`);
+      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`);
       const data = await res.json();
       
-      if (data && data.results) {
-        setSuggestions(data.results.filter((res: any) => res.street || Object.keys(res).length > 0));
+      if (data.status === 'OK' && data.predictions) {
+        setSuggestions(data.predictions);
         setShowSuggestions(true);
       }
     } catch (e) {
@@ -154,15 +148,24 @@ function BookingContent() {
     }
   };
 
-  const selectSuggestion = (suggestion: any) => {
-    const streetStr = suggestion.housenumber ? `${suggestion.housenumber} ${suggestion.street}` : suggestion.street;
-    setForm(prev => ({
-      ...prev,
-      street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
-      city: suggestion.village || suggestion.hamlet || suggestion.suburb || suggestion.municipality || suggestion.city || "",
-      zipCode: suggestion.postcode || ""
-    }));
+  const selectSuggestion = async (suggestion: any) => {
     setShowSuggestions(false);
+    setForm(prev => ({ ...prev, street: suggestion.description }));
+
+    try {
+      const res = await fetch(`/api/maps/details?place_id=${suggestion.place_id}`);
+      const data = await res.json();
+      if (data.street) {
+        setForm(prev => ({
+          ...prev,
+          street: data.street || suggestion.description,
+          city: data.city || "",
+          zipCode: data.zipCode || ""
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -296,7 +299,7 @@ function BookingContent() {
                   }}
                 />
                 
-                {/* Geoapify Interactive Dropdown */}
+                {/* Google Maps Interactive Dropdown */}
                 {showSuggestions && suggestions.length > 0 && (
                   <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
                     {suggestions.map((suggestion, i) => (
@@ -307,8 +310,8 @@ function BookingContent() {
                       >
                         <Map size={16} className="text-white/40 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-semibold text-white/90">{suggestion.address_line1}</p>
-                          <p className="text-xs text-white/50">{suggestion.address_line2}</p>
+                          <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
+                          <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
                         </div>
                       </div>
                     ))}
@@ -548,7 +551,7 @@ function BookingContent() {
               </div>
               <div className="flex items-center gap-2 opacity-60">
                  <Navigation size={16} className="text-white" />
-                 <span className="text-xs text-white">Geoapify Precision Mapping</span>
+                 <span className="text-xs text-white">Powered by Google Maps</span>
               </div>
             </div>
           </div>

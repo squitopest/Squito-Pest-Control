@@ -1,13 +1,24 @@
-import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-async function test() {
-  console.log("Fetching latest 3 bookings...");
-  const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(3);
-  console.log("Result:", JSON.stringify({ data, error }, null, 2));
+async function run() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL + '/rest/v1/';
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  // Hit openapi endpoint to see all tables PostgREST knows about
+  const res = await fetch(url, {
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Accept': 'application/openapi+json'
+    }
+  });
+  
+  if (res.ok) {
+    const data = await res.json();
+    console.log(Object.keys(data.paths).filter(p => !p.startsWith('/rpc')));
+  } else {
+    console.log("Error:", res.status, await res.text());
+  }
 }
-
-test();
+run();

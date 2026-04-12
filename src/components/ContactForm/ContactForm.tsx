@@ -51,7 +51,7 @@ export default function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Geoapify Predictive Autocomplete
+  // Google Maps Predictive Autocomplete
   const handleAddressChange = async (val: string) => {
     setForm(prev => ({ ...prev, street: val }));
     
@@ -62,13 +62,11 @@ export default function ContactForm() {
     }
     
     try {
-      const GEOAPIFY_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY || "fe143800e1084a298fb7fb8e34dab7d2";
-      // Proximity biased towards Islip, NY
-      const res = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(val)}&format=json&filter=countrycode:us&bias=proximity:-73.134960,40.789142&apiKey=${GEOAPIFY_KEY}`);
+      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`);
       const data = await res.json();
       
-      if (data && data.results) {
-        setSuggestions(data.results.filter((res: any) => res.street || Object.keys(res).length > 0));
+      if (data.status === 'OK' && data.predictions) {
+        setSuggestions(data.predictions);
         setShowSuggestions(true);
       }
     } catch (e) {
@@ -76,15 +74,24 @@ export default function ContactForm() {
     }
   };
 
-  const selectSuggestion = (suggestion: any) => {
-    const streetStr = suggestion.housenumber ? `${suggestion.housenumber} ${suggestion.street}` : suggestion.street;
-    setForm(prev => ({
-      ...prev,
-      street: streetStr || suggestion.address_line1 || suggestion.formatted.split(',')[0],
-      city: suggestion.village || suggestion.hamlet || suggestion.suburb || suggestion.municipality || suggestion.city || "",
-      zip: suggestion.postcode || ""
-    }));
+  const selectSuggestion = async (suggestion: any) => {
     setShowSuggestions(false);
+    setForm(prev => ({ ...prev, street: suggestion.description }));
+
+    try {
+      const res = await fetch(`/api/maps/details?place_id=${suggestion.place_id}`);
+      const data = await res.json();
+      if (data.street) {
+        setForm(prev => ({
+          ...prev,
+          street: data.street || suggestion.description,
+          city: data.city || "",
+          zip: data.zipCode || ""
+        }));
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -298,7 +305,7 @@ export default function ContactForm() {
                         }}
                       />
                       
-                      {/* Geoapify Interactive Dropdown */}
+                      {/* Google Maps Interactive Dropdown */}
                       {showSuggestions && suggestions.length > 0 && (
                         <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
                           {suggestions.map((suggestion, i) => (
@@ -309,8 +316,8 @@ export default function ContactForm() {
                             >
                               <Map size={16} className="text-white/40 flex-shrink-0" />
                               <div>
-                                <p className="text-sm font-semibold text-white/90">{suggestion.address_line1}</p>
-                                <p className="text-xs text-white/50">{suggestion.address_line2}</p>
+                                <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
+                                <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
                               </div>
                             </div>
                           ))}
