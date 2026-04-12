@@ -21,6 +21,7 @@ const navLinks = [
   { label: "Residential", href: "/residential" },
   { label: "Commercial", href: "/commercial" },
   { label: "Plans", href: "/plans" },
+  { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
 ];
