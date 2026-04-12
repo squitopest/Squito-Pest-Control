@@ -8,20 +8,21 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   {
     label: "Services",
-    href: "#services",
+    href: "/services",
     dropdown: [
       { label: "Residential", href: "/residential" },
       { label: "Commercial", href: "/commercial" },
-      { label: "Mosquito Control", href: "/#services" },
-      { label: "Termite Defense", href: "/#services" },
-      { label: "Rodent Removal", href: "/#services" },
-      { label: "Bed Bug Treatment", href: "/#services" },
+      { label: "Mosquito Control", href: "/services" },
+      { label: "Termite Defense", href: "/services" },
+      { label: "Rodent Removal", href: "/services" },
+      { label: "Bed Bug Treatment", href: "/services" },
     ],
   },
   { label: "Residential", href: "/residential" },
   { label: "Commercial", href: "/commercial" },
+  { label: "Plans", href: "/plans" },
   { label: "FAQ", href: "/faq" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Navbar() {

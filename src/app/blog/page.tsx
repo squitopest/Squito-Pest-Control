@@ -1,34 +1,11 @@
-import { BookOpen } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { blogPosts } from "@/data/blog";
 
 export const metadata = {
   title: "Blog | Squito Pest Control",
   description: "Expert pest control advice, seasonal tips, and guides for Long Island residents.",
 };
-
-const posts = [
-  {
-    title: "How to Prepare Your Long Island Yard for Mosquito Season",
-    excerpt: "Spring is here, which means mosquito season is just around the corner. Learn exactly what to clear out of your yard to eliminate breeding grounds before they hatch.",
-    date: "Mars 15, 2026",
-    category: "Prevention",
-    readTime: "5 min read"
-  },
-  {
-    title: "The Differences Between Flying Ants and Termites",
-    excerpt: "Spotted flying insects in your home this spring? Don't panic yet. Here's how to easily tell the difference between harmless flying ants and home-destroying termites.",
-    date: "Feb 28, 2026",
-    category: "Identification",
-    readTime: "4 min read"
-  },
-  {
-    title: "Why Mice Enter Homes in the Winter and How to Stop Them",
-    excerpt: "As temperatures drop on Long Island, rodents seek warmth and food. Discover the top 5 micro-entry points around your foundation and how to seal them properly.",
-    date: "Jan 10, 2026",
-    category: "Rodents",
-    readTime: "6 min read"
-  }
-];
 
 export default function BlogPage() {
   return (
@@ -50,13 +27,13 @@ export default function BlogPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-           {posts.map((post, i) => (
-             <article key={i} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer">
+           {blogPosts.map((post) => (
+             <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                 <div className="aspect-[16/9] bg-surface relative overflow-hidden">
-                   {/* Placeholder image representation */}
                    <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 to-transparent mix-blend-overlay" />
-                   <div className="absolute inset-0 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
-                      {i === 0 ? "🦟" : i === 1 ? "🐜" : "🐭"}
+                   <div className="absolute inset-0 flex items-center justify-center text-5xl group-hover:scale-125 transition-transform duration-500 will-change-transform">
+                      {post.icon}
                    </div>
                    <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border text-xs text-white px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
                       {post.category}
@@ -75,10 +52,10 @@ export default function BlogPage() {
                       {post.excerpt}
                    </p>
                    <div className="text-green-400 font-semibold group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                      Read Article <span className="text-xl">→</span>
+                      Read Article <ArrowRight size={18} />
                    </div>
                 </div>
-             </article>
+             </Link>
            ))}
         </div>
 

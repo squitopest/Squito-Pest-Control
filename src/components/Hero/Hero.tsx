@@ -50,14 +50,14 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center pt-32 lg:pt-24 pb-12 overflow-hidden" id="hero">
+    <section className="relative min-h-[90svh] lg:min-h-screen flex items-center justify-center pt-32 lg:pt-24 pb-12 overflow-hidden" id="hero">
       
       {/* Background Video — deferred for better LCP */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-[50%] left-[50%] w-[100vw] h-[100vw] lg:w-[100vw] lg:h-[56.25vw] -translate-x-1/2 -translate-y-1/2 min-h-screen min-w-[177.77vh]">
+        <div className="absolute top-[50%] left-[50%] w-[100vw] h-[100vw] lg:w-[100vw] lg:h-[56.25vw] -translate-x-1/2 -translate-y-1/2 min-h-[100svh] min-w-[177.77vh]">
           {videoReady && (
             <iframe
-              className="absolute top-0 left-0 w-full h-full pointer-events-none"
+              className="absolute top-0 left-0 w-full h-full pointer-events-none scale-[1.75] md:scale-100"
               src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
               allow="autoplay; encrypted-media"
               title="Background video"
