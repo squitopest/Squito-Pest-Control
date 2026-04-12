@@ -6,7 +6,7 @@ export type BlogPost = {
   date: string;
   category: string;
   readTime: string;
-  icon: string;
+  image: string;
   content: string;
 };
 
@@ -19,7 +19,7 @@ export const blogPosts: BlogPost[] = [
     date: "Mar 15, 2026",
     category: "Prevention",
     readTime: "5 min read",
-    icon: "🦟",
+    image: "/blog-mosquito.png",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">Spring on Long Island brings warmer weather, blooming flowers... and the return of mosquitoes. By taking action in early spring, you can dramatically reduce the mosquito population around your home before summer begins.</p>
       
@@ -47,7 +47,7 @@ export const blogPosts: BlogPost[] = [
     date: "Feb 28, 2026",
     category: "Identification",
     readTime: "4 min read",
-    icon: "🐜",
+    image: "/blog-termite.png",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">It's a homeowner's worst nightmare: spotting swarms of small flying insects indoors during the first warm days of spring. Are they termites preparing to feast on your foundation, or just flying ants looking to mate?</p>
       
@@ -73,7 +73,7 @@ export const blogPosts: BlogPost[] = [
     date: "Jan 10, 2026",
     category: "Rodents",
     readTime: "6 min read",
-    icon: "🐭",
+    image: "/blog-mice.png",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">As winter sets in on Long Island, humans aren't the only ones looking to stay warm indoors. Mice drop their outdoor inhibitions and aggressively seek shelter, warmth, and food sources—making your home a prime target.</p>
       

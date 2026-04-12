@@ -53,10 +53,16 @@ export default function BlogPost({ params }: Props) {
           <ArrowLeft size={16} /> Back to Blog
         </Link>
 
+        {/* Hero Image */}
+        <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden mb-10 border border-white/10">
+          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+        </div>
+
         {/* Header */}
         <header className="mb-12 border-b border-white/10 pb-12">
           <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
-            <span>{post.icon}</span> {post.category}
+            {post.category}
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-6 leading-tight tracking-tight">

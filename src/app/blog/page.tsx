@@ -31,10 +31,8 @@ export default function BlogPage() {
              <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                 <div className="aspect-[16/9] bg-surface relative overflow-hidden">
-                   <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 to-transparent mix-blend-overlay" />
-                   <div className="absolute inset-0 flex items-center justify-center text-5xl group-hover:scale-125 transition-transform duration-500 will-change-transform">
-                      {post.icon}
-                   </div>
+                   <img src={post.image} alt={post.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                    <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border text-xs text-white px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
                       {post.category}
                    </div>
