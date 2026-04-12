@@ -19,7 +19,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://getsquito.com"),
+  metadataBase: new URL("https://squitopestcontrol.com"),
   title: "Squito Pest Control - Long Island's Premier Pest Solutions",
   description:
     "Long Island's premier pest control company. Smart, safe, and effective pest elimination for homes and businesses. No contracts. Same-day service. 100% satisfaction guaranteed.",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     title: "Squito Pest Control - Long Island's Premier Pest Solutions",
     description:
       "Smart, safe, and effective pest elimination for homes and businesses across Long Island.",
-    url: "https://getsquito.com",
+    url: "https://squitopestcontrol.com",
     siteName: "Squito Pest Control",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Squito Pest Control" }],
     locale: "en_US",
@@ -54,9 +54,9 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "PestControl",
     "name": "Squito Pest Control",
-    "image": "https://getsquito.com/og-image.png",
+    "image": "https://squitopestcontrol.com/og-image.png",
     "telephone": "(800) 555-1234",
-    "url": "https://getsquito.com",
+    "url": "https://squitopestcontrol.com",
     "areaServed": "Long Island, NY",
     "priceRange": "$$",
   };

@@ -27,7 +27,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-display font-bold text-white mb-3">1. Agreement to Terms</h2>
             <p>
-              By accessing or using the Squito Pest Control website (getsquito.com) and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.
+              By accessing or using the Squito Pest Control website (squitopestcontrol.com) and services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.
             </p>
           </section>
 

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/success'],
     },
-    sitemap: 'https://getsquito.com/sitemap.xml',
+    sitemap: 'https://squitopestcontrol.com/sitemap.xml',
   }
 }
