@@ -1,16 +1,17 @@
 import { notFound } from "next/navigation";
 import { blogPosts } from "@/data/blog";
-import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 // Generate dynamic SEO metadata based on the blog post slug
-export function generateMetadata({ params }: Props): Metadata {
-  const post = blogPosts.find((p) => p.slug === params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) {
     return {
@@ -31,8 +32,9 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function BlogPost({ params }: Props) {
-  const post = blogPosts.find((p) => p.slug === params.slug);
+export default async function BlogPost({ params }: Props) {
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
 
   if (!post) {
     notFound();
@@ -78,10 +80,6 @@ export default function BlogPost({ params }: Props) {
               <Clock size={16} className="text-green-500" />
               {post.readTime}
             </div>
-            <button className="flex items-center gap-2 hover:text-white transition-colors ml-auto sm:ml-0">
-              <Share2 size={16} />
-              Share
-            </button>
           </div>
         </header>
 
@@ -96,7 +94,7 @@ export default function BlogPost({ params }: Props) {
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent pointer-events-none" />
           <h3 className="text-3xl font-display font-bold text-white mb-4 relative z-10">Need Professional Assistance?</h3>
           <p className="text-white/70 mb-8 max-w-2xl mx-auto text-lg relative z-10">
-            Don't let pests ruin your peace of mind. Our experts are ready to protect your home with safe, guaranteed treatments.
+            Don&apos;t let pests ruin your peace of mind. Our experts are ready to protect your home with safe, guaranteed treatments.
           </p>
           <Link href="/plans" className="btn-primary inline-flex text-lg px-8 py-4 relative z-10">
             View Protection Plans
