@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const recipientEmail = "service@getsquito.com";
+    const recipientEmail = "service@squitopestcontrol.com";
 
     const { data, error } = await resend.emails.send({
       from: "Squito Pest Control <service@squitopestcontrol.com>",
