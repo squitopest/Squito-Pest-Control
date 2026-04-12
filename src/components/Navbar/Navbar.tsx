@@ -12,10 +12,6 @@ const navLinks = [
     dropdown: [
       { label: "Residential", href: "/residential" },
       { label: "Commercial", href: "/commercial" },
-      { label: "Mosquito Control", href: "/services" },
-      { label: "Termite Defense", href: "/services" },
-      { label: "Rodent Removal", href: "/services" },
-      { label: "Bed Bug Treatment", href: "/services" },
     ],
   },
   { label: "Residential", href: "/residential" },
