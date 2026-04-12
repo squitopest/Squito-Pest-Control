@@ -130,6 +130,22 @@ export default function Hero() {
             </button>
           </div>
 
+          <div className="w-full sm:w-auto mt-2">
+            <a 
+              href="tel:6312031000" 
+              className="group relative flex items-center justify-center gap-3 w-full sm:w-[calc(100%-2rem)] md:w-auto py-3.5 px-8 rounded-full bg-green-500/10 border border-green-500/30 overflow-hidden transition-all duration-500 hover:border-green-500/80 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)]"
+            >
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/20 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              <div className="relative z-10 w-8 h-8 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center group-hover:bg-green-500 transition-colors duration-300">
+                <Phone size={16} className="text-green-400 group-hover:text-white transition-colors" />
+              </div>
+              <div className="relative z-10 flex flex-col items-start">
+                <span className="text-[10px] uppercase tracking-widest text-green-500/70 font-semibold leading-none mb-0.5">Call Now</span>
+                <span className="text-lg font-display font-bold text-white tracking-wide">(631) 203-1000</span>
+              </div>
+            </a>
+          </div>
+
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6">
             {["No contracts", "100% satisfaction", "Pet & kid safe"].map((text) => (
               <div key={text} className="flex items-center gap-2 text-sm font-medium text-white/80">
@@ -143,12 +159,7 @@ export default function Hero() {
         {/* Right Stats Card */}
         <div className="flex-1 w-full flex justify-center lg:justify-end">
           <div className="glass-card p-5 md:p-8 rounded-2xl w-full max-w-md animate-fade-in-up shadow-2xl border-green-500/20" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/10">
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)] animate-pulse" />
-              <span className="font-semibold text-white/90">Live Protection Active</span>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 md:gap-6 mb-8">
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
               {[
                 { num: "1,000+", label: "Homes Protected" },
                 { num: "Same Day", label: "Service Available" },
@@ -161,21 +172,6 @@ export default function Hero() {
                 </div>
               ))}
             </div>
-
-            <a 
-              href="tel:6312031000" 
-              className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-2xl bg-green-500/10 border border-green-500/30 overflow-hidden transition-all duration-500 hover:border-green-500/80 hover:shadow-[0_0_30px_rgba(34,197,94,0.3)]"
-            >
-              {/* Animated shimmer */}
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/20 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-              <div className="relative z-10 w-8 h-8 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center group-hover:bg-green-500 transition-colors duration-300">
-                <Phone size={16} className="text-green-400 group-hover:text-white transition-colors" />
-              </div>
-              <div className="relative z-10 flex flex-col items-start">
-                <span className="text-[10px] uppercase tracking-widest text-green-500/70 font-semibold leading-none mb-0.5">Call Now</span>
-                <span className="text-lg font-display font-bold text-white tracking-wide">(631) 203-1000</span>
-              </div>
-            </a>
           </div>
         </div>
       </div>

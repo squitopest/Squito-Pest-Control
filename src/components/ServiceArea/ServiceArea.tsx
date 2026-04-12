@@ -257,7 +257,7 @@ export default function ServiceArea() {
           </div>
 
           <div className="flex-1 w-full flex justify-center lg:justify-end animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="glass-card p-2 md:p-4 rounded-3xl w-full max-w-lg border border-green-500/20 shadow-2xl overflow-hidden relative group">
+            <div className="glass-card p-2 md:p-4 rounded-3xl w-full max-w-lg border border-green-500/20 overflow-hidden relative group">
               <div className="absolute inset-0 bg-green-500/5 blur-3xl rounded-full" />
               
               <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10 relative z-10">
