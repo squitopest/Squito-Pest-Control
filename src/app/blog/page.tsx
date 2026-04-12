@@ -1,13 +1,66 @@
 import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { blogPosts } from "@/data/blog";
+import { createAnonClient } from "@/lib/supabase";
+import { blogPosts as staticPosts } from "@/data/blog";
 
 export const metadata = {
   title: "Blog | Squito Pest Control",
   description: "Expert pest control advice, seasonal tips, and guides for Long Island residents.",
 };
 
-export default function BlogPage() {
+// Revalidate every hour so new posts appear without a full redeploy
+export const revalidate = 3600;
+
+type BlogPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  category: string;
+  read_time: string;
+  image: string;
+};
+
+async function getPosts(): Promise<BlogPost[]> {
+  try {
+    const supabase = createAnonClient();
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("slug, title, excerpt, date, category, read_time, image")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      // Fallback to static posts if Supabase is unavailable
+      return staticPosts.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        excerpt: p.excerpt,
+        date: p.date,
+        category: p.category,
+        read_time: p.readTime,
+        image: p.image,
+      }));
+    }
+
+    return data;
+  } catch {
+    // Fallback to static posts
+    return staticPosts.map(p => ({
+      slug: p.slug,
+      title: p.title,
+      excerpt: p.excerpt,
+      date: p.date,
+      category: p.category,
+      read_time: p.readTime,
+      image: p.image,
+    }));
+  }
+}
+
+export default async function BlogPage() {
+  const posts = await getPosts();
+
   return (
     <main className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-background">
       <div className="absolute top-0 right-1/2 translate-x-1/2 w-[800px] h-[600px] bg-green-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -27,7 +80,7 @@ export default function BlogPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-           {blogPosts.map((post) => (
+           {posts.map((post) => (
              <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                 <div className="aspect-[16/9] bg-surface relative overflow-hidden">
@@ -41,7 +94,7 @@ export default function BlogPage() {
                 <div className="p-8 flex flex-col flex-grow">
                    <div className="flex items-center justify-between text-sm text-white/50 mb-4">
                       <span>{post.date}</span>
-                      <span>{post.readTime}</span>
+                      <span>{post.read_time}</span>
                    </div>
                    <h2 className="text-2xl font-display font-bold text-white mb-4 group-hover:text-green-400 transition-colors leading-tight">
                       {post.title}
@@ -55,12 +108,6 @@ export default function BlogPage() {
                 </div>
              </Link>
            ))}
-        </div>
-
-        <div className="text-center">
-           <button className="px-8 py-3 rounded-full border border-border text-white hover:bg-white/5 transition-colors font-semibold">
-              Load More Posts
-           </button>
         </div>
       </div>
     </main>

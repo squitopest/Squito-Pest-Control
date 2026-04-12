@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { blogPosts } from "@/data/blog";
+import { createAnonClient } from "@/lib/supabase";
+import { blogPosts as staticPosts } from "@/data/blog";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import { Metadata } from "next";
@@ -8,10 +9,71 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+type BlogPost = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  seo_description: string;
+  date: string;
+  category: string;
+  read_time: string;
+  image: string;
+  content: string;
+};
+
+// Revalidate every hour
+export const revalidate = 3600;
+
+async function getPost(slug: string): Promise<BlogPost | null> {
+  try {
+    const supabase = createAnonClient();
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("published", true)
+      .single();
+
+    if (error || !data) {
+      // Fallback to static posts
+      const staticPost = staticPosts.find(p => p.slug === slug);
+      if (!staticPost) return null;
+      return {
+        slug: staticPost.slug,
+        title: staticPost.title,
+        excerpt: staticPost.excerpt,
+        seo_description: staticPost.seoDescription,
+        date: staticPost.date,
+        category: staticPost.category,
+        read_time: staticPost.readTime,
+        image: staticPost.image,
+        content: staticPost.content,
+      };
+    }
+
+    return data;
+  } catch {
+    // Fallback to static posts
+    const staticPost = staticPosts.find(p => p.slug === slug);
+    if (!staticPost) return null;
+    return {
+      slug: staticPost.slug,
+      title: staticPost.title,
+      excerpt: staticPost.excerpt,
+      seo_description: staticPost.seoDescription,
+      date: staticPost.date,
+      category: staticPost.category,
+      read_time: staticPost.readTime,
+      image: staticPost.image,
+      content: staticPost.content,
+    };
+  }
+}
+
 // Generate dynamic SEO metadata based on the blog post slug
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = await getPost(slug);
 
   if (!post) {
     return {
@@ -21,10 +83,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${post.title} | Squito Blog`,
-    description: post.seoDescription,
+    description: post.seo_description,
     openGraph: {
       title: post.title,
-      description: post.seoDescription,
+      description: post.seo_description,
       type: "article",
       publishedTime: post.date,
       authors: ["Squito Pest Control"],
@@ -34,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPost({ params }: Props) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const post = await getPost(slug);
 
   if (!post) {
     notFound();
@@ -78,7 +140,7 @@ export default async function BlogPost({ params }: Props) {
             </div>
             <div className="flex items-center gap-2">
               <Clock size={16} className="text-green-500" />
-              {post.readTime}
+              {post.read_time}
             </div>
           </div>
         </header>
