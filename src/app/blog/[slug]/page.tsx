@@ -3,6 +3,7 @@ import { createAnonClient } from "@/lib/supabase";
 import { blogPosts as staticPosts } from "@/data/blog";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
 
 type Props = {
@@ -119,7 +120,14 @@ export default async function BlogPost({ params }: Props) {
 
         {/* Hero Image */}
         <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden mb-10 border border-white/10">
-          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+          <Image
+            src={post.image}
+            alt={post.title}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 896px"
+            className="object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
         </div>
 

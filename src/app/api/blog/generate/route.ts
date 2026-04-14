@@ -1,7 +1,8 @@
 import { createServiceClient } from "@/lib/supabase";
 import { NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
 
-// Map pest categories to their corresponding blog images
+// Fallback images mapped to pest categories (used when DALL-E generation fails)
 const CATEGORY_IMAGES: Record<string, string> = {
   "Mosquitoes": "/blog-mosquito.png",
   "Termites": "/blog-termite.png",
@@ -46,6 +47,90 @@ const TOPIC_POOL = [
   { keyword: "natural mosquito repellent backyard", category: "Mosquitoes", slug_hint: "natural-mosquito-repellent-backyard" },
   { keyword: "what attracts mice to your house", category: "Rodents", slug_hint: "what-attracts-mice" },
 ];
+
+/**
+ * Generate a unique blog hero image using DALL-E 3 and upload it to Supabase Storage.
+ * Returns the public URL on success, or null on failure.
+ */
+async function generateAndUploadImage(
+  topic: { keyword: string; category: string; slug_hint: string },
+  supabase: ReturnType<typeof createServiceClient>
+): Promise<string | null> {
+  try {
+    const geminiApiKey = process.env.GOOGLE_GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      console.error("GOOGLE_GEMINI_API_KEY not configured");
+      return null;
+    }
+
+    // Map categories to specific visual subjects for accurate image generation
+    const PEST_VISUAL_SUBJECTS: Record<string, string> = {
+      "Mosquitoes": "a close-up of a mosquito on skin or hovering near a backyard patio at dusk, with warm lighting",
+      "Termites": "termite damage on wood framing inside a home, showing worker termites and damaged grain, macro detail",
+      "Rodents": "a house mouse peeking out from behind a kitchen baseboard or near a foundation crack, realistic and detailed",
+      "Ants": "a trail of carpenter ants marching along a wooden windowsill or door frame, sharp macro photography",
+      "Cockroaches": "a German cockroach on a kitchen counter near crumbs, photorealistic macro with shallow depth of field",
+      "Ticks": "a close-up of a deer tick on a green leaf blade in a grassy Long Island yard, sharp macro photography",
+      "Spiders": "a common house spider in its web in a basement corner or garage, photorealistic with dramatic lighting",
+      "Bed Bugs": "a close-up of bed bugs on a white mattress seam, realistic clinical macro photography style",
+      "Wasps": "a paper wasp nest under a residential home eave with wasps visible, shot from a safe distance",
+      "Fleas": "a close-up of a flea on pet fur, ultra-macro photography with sharp detail",
+      "Prevention": "a homeowner inspecting the perimeter of a clean, well-maintained Long Island suburban home exterior",
+      "Seasonal": "a split-season suburban yard scene showing seasonal pest activity, professional editorial style",
+      "Identification": "a side-by-side comparison scene of common household pests in a clinical identification setting",
+      "Home Protection": "a professional pest control technician inspecting and sealing entry points on a suburban home exterior",
+    };
+
+    const pestSubject = PEST_VISUAL_SUBJECTS[topic.category] || `a realistic scene of ${topic.category.toLowerCase()} pests in a suburban home`;
+    const imagePrompt = `Professional pest control blog hero image: ${pestSubject}. Wide landscape composition (16:9), photorealistic, high resolution, well-lit photography suitable for a premium dark-themed website. Suburban Long Island, New York setting. No text, no watermarks, no logos. Clean modern editorial photography.`;
+
+    // Step 1: Generate image with Nano Banana 2 (gemini-3.1-flash-image-preview)
+    const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-flash-image-preview",
+      contents: imagePrompt,
+    });
+
+    // Step 2: Extract the base64 image data from the response
+    const parts = response.candidates?.[0]?.content?.parts ?? [];
+    const imagePart = parts.find((p: { inlineData?: { data?: string; mimeType?: string } }) => p.inlineData?.data);
+
+    if (!imagePart?.inlineData?.data) {
+      console.error("No image data returned from Nano Banana 2");
+      return null;
+    }
+
+    const imageBuffer = Buffer.from(imagePart.inlineData.data, "base64");
+    const mimeType = imagePart.inlineData.mimeType || "image/png";
+    const ext = mimeType.includes("jpeg") ? "jpg" : "png";
+    const fileName = `${topic.slug_hint}.${ext}`;
+
+    // Step 3: Upload directly to Supabase Storage (no download needed — already in memory)
+    const { error: uploadError } = await supabase
+      .storage
+      .from("blog-images")
+      .upload(fileName, imageBuffer, {
+        contentType: mimeType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError.message);
+      return null;
+    }
+
+    // Step 4: Return the public URL
+    const { data: urlData } = supabase
+      .storage
+      .from("blog-images")
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  } catch (err) {
+    console.error("Nano Banana 2 image generation failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
 
 export async function GET(req: Request) {
   // Verify cron secret to prevent unauthorized access
@@ -157,8 +242,11 @@ Make the article specific to Long Island, NY where relevant.`;
       return NextResponse.json({ error: "Failed to parse AI response", raw: rawContent }, { status: 500 });
     }
 
-    // Get the appropriate image for this category
-    const image = CATEGORY_IMAGES[topic.category] || "/blog-mosquito.png";
+    // Generate a unique hero image with Nano Banana 2 and upload to Supabase Storage
+    const generatedImageUrl = await generateAndUploadImage(topic, supabase);
+
+    // Use the generated image URL, or fall back to a static category image
+    const image = generatedImageUrl || CATEGORY_IMAGES[topic.category] || "/blog-mosquito.png";
 
     // Format the date
     const now = new Date();
@@ -191,6 +279,8 @@ Make the article specific to Long Island, NY where relevant.`;
       success: true,
       message: `Published: "${parsed.title}"`,
       slug: topic.slug_hint,
+      imageGenerated: !!generatedImageUrl,
+      imageUrl: image,
     });
 
   } catch (err) {

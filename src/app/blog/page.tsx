@@ -1,5 +1,6 @@
 import { BookOpen, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { createAnonClient } from "@/lib/supabase";
 import { blogPosts as staticPosts } from "@/data/blog";
 
@@ -84,7 +85,13 @@ export default async function BlogPage() {
              <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                 <div className="aspect-[16/9] bg-surface relative overflow-hidden">
-                   <img src={post.image} alt={post.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform" />
+                   <Image
+                     src={post.image}
+                     alt={post.title}
+                     fill
+                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                     className="object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform"
+                   />
                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
                    <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border text-xs text-white px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
                       {post.category}
