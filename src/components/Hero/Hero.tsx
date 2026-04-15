@@ -31,6 +31,7 @@ export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [posterVisible, setPosterVisible] = useState(true);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -41,11 +42,16 @@ export default function Hero() {
       }, 400);
     }, 2800);
 
-    const videoTimer = setTimeout(() => setVideoReady(true), 100);
+    // Delay iframe mount slightly so it doesn't block LCP
+    const videoTimer = setTimeout(() => setVideoReady(true), 200);
+
+    // Fade out poster after YouTube has had time to load and hide its branding
+    const posterTimer = setTimeout(() => setPosterVisible(false), 4000);
 
     return () => {
       clearInterval(wordInterval);
       clearTimeout(videoTimer);
+      clearTimeout(posterTimer);
     };
   }, []);
 
@@ -58,11 +64,18 @@ export default function Hero() {
           {videoReady && (
             <iframe
               className="absolute top-0 left-0 w-full h-full pointer-events-none scale-[1.75] md:scale-100"
-              src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1`}
+              src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1`}
               allow="autoplay; encrypted-media"
               title="Background video"
+              loading="lazy"
             />
           )}
+          {/* Poster overlay — hides YouTube branding/title during initial load */}
+          <div
+            className={`absolute inset-0 bg-background transition-opacity duration-1000 ${
+              posterVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
+          />
         </div>
         {/* Dark Overlays (Lightened at user request) */}
         <div className="absolute inset-0 bg-background/60 z-10" />

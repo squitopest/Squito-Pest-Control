@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { filterTowns, isTownServiced, zipToTown, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
 
 export default function ServiceArea() {
@@ -266,10 +267,12 @@ export default function ServiceArea() {
               </div>
               
               <div className="aspect-[4/3] bg-background/50 rounded-2xl m-2 md:m-4 relative overflow-hidden border border-border group-hover:border-green-500/30 transition-colors">
-                <img 
+                <Image 
                   src="/long_island_map.png" 
                   alt="Long Island Service Area Map" 
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 scale-[1.05] translate-x-2"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 512px"
+                  className="object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 scale-[1.05] translate-x-2"
                 />
                 {/* Overlay to blur/hide Brooklyn and Queens on the left side */}
                 <div className="absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-background via-background/90 to-transparent" />

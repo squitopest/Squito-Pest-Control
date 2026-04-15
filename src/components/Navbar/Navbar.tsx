@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Phone, Menu, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const navLinks = [
   {
@@ -46,7 +47,7 @@ export default function Navbar() {
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="z-50 relative">
-            <img src="/logo.png" alt="Squito" className="h-[60px] md:h-[80px] w-auto drop-shadow-lg" />
+            <Image src="/logo.png" alt="Squito" width={120} height={80} priority className="h-[60px] md:h-[80px] w-auto drop-shadow-lg" />
           </Link>
 
           {/* Desktop nav links */}

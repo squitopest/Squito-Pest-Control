@@ -1,25 +1,20 @@
-"use client";
-
-import { useEffect } from "react";
+import dynamic from 'next/dynamic';
 import Hero from "@/components/Hero/Hero";
 import PestTicker from "@/components/PestTicker/PestTicker";
 import Stats from "@/components/Stats/Stats";
-import PestLibrary from "@/components/PestLibrary/PestLibrary";
 import Reviews from "@/components/Reviews/Reviews";
-import ServiceArea from "@/components/ServiceArea/ServiceArea";
-import ContactForm from "@/components/ContactForm/ContactForm";
 import Footer from "@/components/Footer/Footer";
+import ScrollReset from "@/components/ScrollReset";
+
+/* Below-fold sections — code-split into separate JS chunks for faster initial load */
+const PestLibrary = dynamic(() => import("@/components/PestLibrary/PestLibrary"));
+const ServiceArea = dynamic(() => import("@/components/ServiceArea/ServiceArea"));
+const ContactForm = dynamic(() => import("@/components/ContactForm/ContactForm"));
 
 export default function Home() {
-  useEffect(() => {
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
     <main>
+      <ScrollReset />
       <Hero />
       <PestTicker />
       <Stats />

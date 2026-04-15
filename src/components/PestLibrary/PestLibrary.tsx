@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle, Phone, Shield } from "lucide-react";
+import NextImage from "next/image";
 
 // ─── EXPANDED LONG ISLAND PEST DATABASE ───
 const pests = [
@@ -134,7 +135,7 @@ export default function PestLibrary() {
         onClick={() => setSelected(pest)}
         className={`group relative shrink-0 snap-start w-[130px] sm:w-[240px] h-[170px] sm:h-[320px] rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
       >
-        <img src={pest.image} alt={pest.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+        <NextImage src={pest.image} alt={pest.name} fill sizes="(max-width: 640px) 130px, 240px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
         <span className={`absolute top-2 sm:top-3 right-2 sm:right-3 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 sm:px-2.5 py-[3px] sm:py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
           {pest.risk}
@@ -251,7 +252,8 @@ export default function PestLibrary() {
       {selected && (
         <div className="fixed inset-0 z-[9999] bg-background/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up overflow-y-auto" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="bg-surface border border-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[95vh] my-auto">
-            <div className="w-full md:w-2/5 h-56 md:h-auto bg-cover bg-center shrink-0 border-b md:border-b-0 md:border-r border-border relative" style={{ backgroundImage: `url(${selected.image})` }}>
+            <div className="w-full md:w-2/5 h-56 md:h-auto shrink-0 border-b md:border-b-0 md:border-r border-border relative overflow-hidden">
+              <NextImage src={selected.image} alt={selected.name} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 md:from-background/40 to-transparent" />
               <span className={`absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border backdrop-blur-md ${(riskColors[selected.risk] || riskColors.Medium).badge}`}>
                 {selected.risk} Risk
