@@ -2,10 +2,28 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase";
 import { Resend } from "resend";
+import { validateEnv } from "@/lib/validateEnv";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function POST(req: Request) {
+  validateEnv([
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "RESEND_API_KEY",
+  ]);
+
   const payload = await req.text();
   const signature = req.headers.get("stripe-signature") as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -33,9 +51,7 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("Webhook signature verification failed.", err.message);
     return NextResponse.json({ 
-      error: "Webhook Error", 
-      details: err.message,
-      prefix: webhookSecret ? webhookSecret.substring(0, 8) : "none"
+      error: "Webhook Error",
     }, { status: 400 });
   }
 
@@ -44,20 +60,40 @@ export async function POST(req: Request) {
     const bookingId = session.metadata?.bookingId;
 
     if (bookingId) {
-      // Mark as paid in Database
       const supabase = createServiceClient();
-      
-      const { data: booking, error } = await supabase
+      const { data: existingBooking, error: fetchError } = await supabase
         .from("bookings")
-        .update({ status: "paid" })
+        .select("id, full_name, email, phone, zip_code, street, city, plan_id, service_date, service_time, stripe_payment_status")
         .eq("id", bookingId)
-        .select()
         .single();
 
-      if (error) {
-        console.error("Failed to update booking status in Supabase", error);
-      } else if (booking) {
+      if (fetchError || !existingBooking) {
+        console.error("Failed to load booking for Stripe webhook", fetchError);
+      } else if (existingBooking.stripe_payment_status === "paid") {
+        console.log(`Booking ${bookingId} already marked paid. Skipping duplicate webhook side effects.`);
+      } else {
+        const { data: booking, error } = await supabase
+          .from("bookings")
+          .update({ stripe_payment_status: "paid" })
+          .eq("id", bookingId)
+          .select()
+          .single();
+
+        if (error || !booking) {
+          console.error("Failed to update booking payment status in Supabase", error);
+          return NextResponse.json({ received: true });
+        }
+
         console.log(`Booking ${bookingId} successfully marked as PAID!`);
+        const safeFullName = escapeHtml(booking.full_name);
+        const safeEmail = escapeHtml(booking.email);
+        const safePhone = escapeHtml(booking.phone);
+        const safeStreet = escapeHtml(booking.street);
+        const safeCity = escapeHtml(booking.city);
+        const safeZip = escapeHtml(booking.zip_code);
+        const safeServiceDate = escapeHtml(booking.service_date);
+        const safeServiceTime = escapeHtml(booking.service_time);
+        const safePlanId = escapeHtml(booking.plan_id);
 
         // 1. Send Zapier Webhook
         if (process.env.ZAPIER_WEBHOOK_URL) {
@@ -74,6 +110,7 @@ export async function POST(req: Request) {
                 phone: booking.phone,
                 zip: booking.zip_code,
                 street: booking.street,
+                city: booking.city,
                 service: booking.plan_id,
                 date: booking.service_date,
                 time: booking.service_time,
@@ -94,12 +131,12 @@ export async function POST(req: Request) {
             html: `
               <div style="font-family: sans-serif; padding: 20px; color: #333;">
                 <h2 style="color: #22c55e;">New Squito Pest Control Purchase!</h2>
-                <p><strong>Customer:</strong> ${booking.full_name}</p>
-                <p><strong>Email:</strong> ${booking.email}</p>
-                <p><strong>Phone:</strong> ${booking.phone}</p>
-                <p><strong>Address:</strong> ${booking.street}, ${booking.zip_code}</p>
-                <p><strong>Plan/Service:</strong> ${booking.plan_id}</p>
-                <p><strong>Requested Date:</strong> ${booking.service_date} at ${booking.service_time}</p>
+                <p><strong>Customer:</strong> ${safeFullName}</p>
+                <p><strong>Email:</strong> ${safeEmail}</p>
+                <p><strong>Phone:</strong> ${safePhone}</p>
+                <p><strong>Address:</strong> ${safeStreet}${safeCity ? `, ${safeCity}` : ""} ${safeZip}</p>
+                <p><strong>Plan/Service:</strong> ${safePlanId}</p>
+                <p><strong>Requested Date:</strong> ${safeServiceDate} at ${safeServiceTime}</p>
                 <br />
                 <p><small>View in Stripe or Supabase for payment confirmation.</small></p>
               </div>
@@ -113,6 +150,8 @@ export async function POST(req: Request) {
         if (booking.email) {
           try {
             const planName = booking.plan_id?.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) || 'Pest Control Service';
+            const safePlanName = escapeHtml(planName);
+            const safeFirstName = escapeHtml(booking.full_name?.split(' ')[0] || 'there');
             await resend.emails.send({
               from: "Squito Pest Control <noreply@squitopestcontrol.com>",
               to: [booking.email],
@@ -134,17 +173,17 @@ export async function POST(req: Request) {
                   </div>
                   <!-- Body -->
                   <div style="padding: 32px 24px; color: #e0e0e0;">
-                    <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${booking.full_name?.split(' ')[0] || 'there'}</strong>,</p>
+                    <p style="font-size: 16px; line-height: 1.6;">Hi <strong>${safeFirstName}</strong>,</p>
                     <p style="font-size: 15px; line-height: 1.6; color: #b0b0b0;">Your payment has been received and your service is booked! Here are your details:</p>
                     
                     <div style="background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; margin: 24px 0;">
                       <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Plan</td></tr>
-                        <tr><td style="padding: 0 0 16px; color: white; font-size: 18px; font-weight: 700;">${planName}</td></tr>
+                        <tr><td style="padding: 0 0 16px; color: white; font-size: 18px; font-weight: 700;">${safePlanName}</td></tr>
                         <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Scheduled Date</td></tr>
-                        <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${booking.service_date} &bull; ${booking.service_time}</td></tr>
+                        <tr><td style="padding: 0 0 16px; color: white; font-size: 16px;">${safeServiceDate} &bull; ${safeServiceTime}</td></tr>
                         <tr><td style="padding: 8px 0; color: #22c55e; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Service Address</td></tr>
-                        <tr><td style="padding: 0 0 8px; color: white; font-size: 16px;">${booking.street}, ${booking.zip_code}</td></tr>
+                        <tr><td style="padding: 0 0 8px; color: white; font-size: 16px;">${safeStreet}${safeCity ? `, ${safeCity}` : ""} ${safeZip}</td></tr>
                       </table>
                     </div>
 
@@ -180,7 +219,7 @@ export async function POST(req: Request) {
       const supabase = createServiceClient();
       await supabase
         .from("bookings")
-        .update({ status: "expired" })
+        .update({ stripe_payment_status: "expired" })
         .eq("id", bookingId);
     }
   }

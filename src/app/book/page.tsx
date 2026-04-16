@@ -4,6 +4,12 @@ import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon, Map } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
+import {
+  isOneTimeService,
+  getOneTimeService,
+  getSubscriptionPlan,
+  TAX_RATE,
+} from "@/data/plans";
 
 function BookingContent() {
   const searchParams = useSearchParams();
@@ -41,38 +47,21 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray"];
-  const isOneTimeService = ONE_TIME_IDS.includes(planId ?? "");
+  const isOneTime = isOneTimeService(planId ?? "");
+  const oneTimePlan = isOneTime ? getOneTimeService(planId ?? "") : null;
+  const subPlan = !isOneTime ? (getSubscriptionPlan(planId ?? "") ?? getSubscriptionPlan("essential-defense")!) : null;
 
-  const planTitle = isOneTimeService
-    ? planId === "termite-inspection" ? "Termite Inspection"
-      : planId === "wasp-removal" ? "Wasp Nest Removal"
-      : "Mosquito Event Spray"
-    : planId === "premium-shield" ? "Premium Shield Plan"
-    : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
-    : "Essential Defense Plan";
-
-  const initialFee = isOneTimeService
-    ? planId === "termite-inspection" ? 149
-      : planId === "wasp-removal" ? 249
-      : 199 // Mosquito Event Spray
-    : planId === "premium-shield" ? 299.99
-    : planId === "ultimate-fortress" ? 399.99
-    : 199.99;
+  const planTitle = oneTimePlan?.name ?? subPlan?.name ?? "Essential Defense Plan";
+  const initialFee = oneTimePlan?.price ?? subPlan?.initialFee ?? 199.99;
 
   const isYearly = billing === "yearly";
-
-  const yearlyAmount = isYearly && !isOneTimeService
-    ? planId === "premium-shield" ? 863.88
-      : planId === "ultimate-fortress" ? 1247.88
-      : 479.88
-    : 0;
+  const yearlyAmount = isYearly && subPlan ? subPlan.yearlyTotal : 0;
 
   const activeInitialFee = isYearly ? 0 : initialFee;
   const subtotal = activeInitialFee + yearlyAmount;
 
-  // NY State + Nassau County sales tax (8.625%)
-  const NY_TAX_RATE = 0.08625;
+  // NY State + Nassau County sales tax — rate lives in src/data/plans.ts
+  const NY_TAX_RATE = TAX_RATE;
   const taxAmount = Math.round(subtotal * NY_TAX_RATE * 100) / 100;
   const totalDue = Math.round((subtotal + taxAmount) * 100) / 100;
 
@@ -170,6 +159,26 @@ function BookingContent() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.fullName || !form.email || !form.phone || !form.street || !form.city || !form.zipCode) {
+      setError("Please complete all required contact and address fields.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (form.phone.replace(/\D/g, "").length < 10) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+
+    if (!/^\d{5}$/.test(form.zipCode)) {
+      setError("Please enter a valid 5-digit ZIP code.");
+      return;
+    }
+
     if (!form.date || !form.time) {
       setError("Please select both an appointment date and time window.");
       return;
@@ -466,7 +475,7 @@ function BookingContent() {
           <div className="glass-card p-8 rounded-3xl sticky top-32">
             <h2 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">Order Summary</h2>
             
-            {isOneTimeService ? (
+            {isOneTime ? (
               /* ── One-Time Service Summary ── */
               <>
                 <div className="flex justify-between items-start mb-4">
@@ -512,7 +521,7 @@ function BookingContent() {
                   </div>
                 )}
 
-                {isYearly && !isOneTimeService && (
+                {isYearly && !isOneTime && (
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="text-emerald-400 font-semibold text-sm">Annual Plan Prepayment</p>
@@ -524,7 +533,7 @@ function BookingContent() {
 
                 <div className="mb-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
                   <p className="text-amber-300/80 text-xs leading-relaxed">
-                    {isYearly && !isOneTimeService 
+                    {isYearly && !isOneTime 
                       ? "All plan benefits unlock immediately. You are fully paid for the next 12 months!" 
                       : "All plan benefits unlock immediately once your initial service fee is processed. Your monthly subscription will begin the following month."}
                   </p>

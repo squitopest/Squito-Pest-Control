@@ -37,10 +37,44 @@
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
     overflow-x: hidden;
+    /* Subtle noise texture — adds grain to break up the flat dark background */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
   }
 
   html {
     scroll-behavior: smooth;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible {
+    @apply outline-none ring-2 ring-green-500 ring-offset-2 ring-offset-background;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    @apply cursor-not-allowed opacity-70;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -51,6 +85,32 @@
 
 .glass-card {
   @apply bg-card/60 border border-border backdrop-blur-xl;
+}
+
+/* ─── Text opacity scale ─────────────────────────────────────────────────────
+   Use these classes consistently so every page reads at the same visual weight.
+   body copy      → text-body    (white/75)
+   secondary copy → text-muted   (white/55)
+   labels/captions→ text-subtle  (white/40)
+   disabled/faint → text-ghost   (white/25)
+──────────────────────────────────────────────────────────────────────────── */
+.text-body   { color: rgba(255,255,255,0.75); }
+.text-muted  { color: rgba(255,255,255,0.55); }
+.text-subtle { color: rgba(255,255,255,0.40); }
+.text-ghost  { color: rgba(255,255,255,0.25); }
+
+/* Reusable ambient glow orbs — drop inside any section for background depth */
+.glow-orb {
+  @apply absolute pointer-events-none rounded-full blur-[140px];
+}
+.glow-orb-green {
+  @apply glow-orb bg-green-500/[0.08];
+}
+.glow-orb-teal {
+  @apply glow-orb bg-emerald-400/[0.05];
+}
+.glow-orb-accent {
+  @apply glow-orb bg-green-400/[0.06];
 }
 
 /* Custom Scrollbar */

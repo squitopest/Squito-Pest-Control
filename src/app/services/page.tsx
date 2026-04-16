@@ -1,10 +1,12 @@
 import { ShieldCheck, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Services | Squito Pest Control",
   description: "Comprehensive pest control services for residential and commercial properties across Long Island.",
-};
+  path: "/services",
+});
 
 export default function ServicesPage() {
   return (

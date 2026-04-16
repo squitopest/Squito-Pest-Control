@@ -2,6 +2,7 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { NextResponse } from 'next/server';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { validateEnv } from "@/lib/validateEnv";
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY || "mock-key",
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    validateEnv(["OPENAI_API_KEY"]);
     const { messages } = await req.json();
 
     // Sanitize: cap context window to the last 20 messages to prevent cost inflation

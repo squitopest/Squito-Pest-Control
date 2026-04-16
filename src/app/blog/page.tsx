@@ -3,11 +3,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { createAnonClient } from "@/lib/supabase";
 import { blogPosts as staticPosts } from "@/data/blog";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Blog | Squito Pest Control",
   description: "Expert pest control advice, seasonal tips, and guides for Long Island residents.",
-};
+  path: "/blog",
+});
 
 // Revalidate every hour so new posts appear without a full redeploy
 export const revalidate = 3600;

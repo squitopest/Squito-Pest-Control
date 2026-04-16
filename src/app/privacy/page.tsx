@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Privacy Policy | Squito Pest Control",
   description: "Learn how Squito Pest Control collects, uses, and protects your personal information.",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { validateEnv } from "@/lib/validateEnv";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,6 +10,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    validateEnv(["GOOGLE_MAPS_API_KEY"]);
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
        return NextResponse.json({ error: "Missing API Key" }, { status: 500 });

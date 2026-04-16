@@ -58,6 +58,11 @@ export default function Hero() {
   return (
     <section className="relative min-h-[90svh] lg:min-h-screen flex items-center justify-center pt-32 lg:pt-24 pb-12 overflow-hidden" id="hero">
       
+      {/* Ambient glow orbs for background depth */}
+      <div className="glow-orb-green w-[700px] h-[700px] -top-40 -left-40 z-0 opacity-60" />
+      <div className="glow-orb-teal w-[500px] h-[500px] top-1/2 right-0 translate-x-1/3 -translate-y-1/2 z-0" />
+      <div className="glow-orb-accent w-[400px] h-[400px] bottom-0 left-1/2 -translate-x-1/2 z-0 opacity-40" />
+
       {/* Background Video — deferred for better LCP */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-[50%] left-[50%] w-[100vw] h-[100vw] lg:w-[100vw] lg:h-[56.25vw] -translate-x-1/2 -translate-y-1/2 min-h-[100svh] min-w-[177.77vh]">
@@ -133,11 +138,11 @@ export default function Hero() {
                 const el = document.getElementById('library-pest-camera');
                 if (el) el.click();
               }}
-              className="group relative overflow-hidden inline-flex items-center justify-center px-8 py-4 rounded-full border border-white/20 bg-white/5 text-white font-bold text-base uppercase tracking-wider hover:bg-green-500/10 hover:border-green-500/50 transition-all backdrop-blur-md w-full sm:w-auto"
+              className="group relative overflow-hidden inline-flex items-center justify-center px-8 py-4 rounded-full border border-green-500/40 bg-green-500/10 text-white font-bold text-base uppercase tracking-wider hover:bg-green-500/20 hover:border-green-500/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.2)] transition-all backdrop-blur-md w-full sm:w-auto"
             >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/15 to-transparent group-hover:translate-x-full transition-transform duration-700" />
               <span className="relative z-10 flex items-center gap-2">
-                <Camera size={18} className="text-green-400" />
+                <Camera size={18} className="text-green-400 group-hover:scale-110 transition-transform" />
                 Pest Identifier
               </span>
             </button>

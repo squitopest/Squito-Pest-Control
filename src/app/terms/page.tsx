@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Terms of Service | Squito Pest Control",
   description: "Read the terms and conditions for using Squito Pest Control services and website.",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

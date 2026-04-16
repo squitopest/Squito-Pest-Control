@@ -1,10 +1,12 @@
 import { Mail } from "lucide-react";
 import ContactForm from "@/components/ContactForm/ContactForm";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "Contact Us | Squito Pest Control",
   description: "Get in touch with Squito Pest Control for same-day pest control service on Long Island.",
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

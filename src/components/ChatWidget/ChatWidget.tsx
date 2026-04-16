@@ -81,10 +81,10 @@ export default function ChatWidget() {
               </div>
             </div>
             <div className="flex gap-2">
-              <a href="tel:6312031000" className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-green-400 transition-colors title='Call Us'">
+              <a href="tel:6312031000" aria-label="Call Squito Pest Control" className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-green-400 transition-colors">
                 <Phone size={14} />
               </a>
-              <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors title='Close'">
+              <button onClick={() => setOpen(false)} aria-label="Close chat" className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors">
                 <X size={16} />
               </button>
             </div>

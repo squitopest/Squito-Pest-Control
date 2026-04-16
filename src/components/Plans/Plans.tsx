@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { Check, Zap, Shield, Star, FlaskConical, Bug, Droplets, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { SUBSCRIPTION_PLANS, ONE_TIME_SERVICES } from "@/data/plans";
 
 const plans = [
   {
+    ...SUBSCRIPTION_PLANS[0], // essential-defense
     name: "Essential Defense",
-    price: { monthly: 49.99, yearly: 39.99 },
-    initialFee: 199.99,
+    price: { monthly: SUBSCRIPTION_PLANS[0].monthlyPrice, yearly: SUBSCRIPTION_PLANS[0].yearlyMonthlyPrice },
     id: "essential-defense",
     desc: "Perfect for smaller homes or first-time customers.",
     icon: Shield,
@@ -26,9 +27,9 @@ const plans = [
     btnTheme: "bg-transparent border border-border hover:bg-white/5 text-white",
   },
   {
+    ...SUBSCRIPTION_PLANS[1], // premium-shield
     name: "Premium Shield",
-    price: { monthly: 89.99, yearly: 71.99 },
-    initialFee: 299.99,
+    price: { monthly: SUBSCRIPTION_PLANS[1].monthlyPrice, yearly: SUBSCRIPTION_PLANS[1].yearlyMonthlyPrice },
     id: "premium-shield",
     desc: "Most popular — full protection, inside and out.",
     icon: Star,
@@ -48,9 +49,9 @@ const plans = [
     btnTheme: "btn-primary w-full justify-center",
   },
   {
+    ...SUBSCRIPTION_PLANS[2], // ultimate-fortress
     name: "Ultimate Fortress",
-    price: { monthly: 129.99, yearly: 103.99 },
-    initialFee: 399.99,
+    price: { monthly: SUBSCRIPTION_PLANS[2].monthlyPrice, yearly: SUBSCRIPTION_PLANS[2].yearlyMonthlyPrice },
     id: "ultimate-fortress",
     desc: "Total coverage — yard, interior, and everything in between.",
     icon: Zap,
@@ -73,8 +74,8 @@ const plans = [
 
 const oneTimeServices = [
   {
-    name: "Termite Inspection",
-    price: 149,
+    ...ONE_TIME_SERVICES[0], // termite-inspection
+    price: ONE_TIME_SERVICES[0].price,
     label: "flat rate",
     image: "/termite-inspection.png",
     id: "termite-inspection",
@@ -93,8 +94,8 @@ const oneTimeServices = [
     gradient: "conic-gradient(from var(--angle, 0deg), #52525b, #3f3f46, #27272a, #71717a, #52525b)",
   },
   {
-    name: "Wasp Nest Removal",
-    price: 249,
+    ...ONE_TIME_SERVICES[1], // wasp-removal
+    price: ONE_TIME_SERVICES[1].price,
     label: "starting at",
     image: "/hornet-nest.png",
     id: "wasp-removal",
@@ -111,8 +112,8 @@ const oneTimeServices = [
     gradient: "conic-gradient(from var(--angle, 0deg), #f59e0b, #d97706, #b45309, #fbbf24, #f59e0b)",
   },
   {
-    name: "Mosquito Event Spray",
-    price: 199,
+    ...ONE_TIME_SERVICES[2], // mosquito-event-spray
+    price: ONE_TIME_SERVICES[2].price,
     label: "starting at",
     image: "/backyard-bbq.png",
     id: "mosquito-event-spray",

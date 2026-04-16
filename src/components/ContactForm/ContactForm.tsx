@@ -96,6 +96,8 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
     setError(null);
 
@@ -242,6 +244,7 @@ export default function ContactForm() {
                         id="firstName"
                        type="text"
                         required
+                        autoComplete="given-name"
                         placeholder="John"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.firstName}
@@ -254,6 +257,7 @@ export default function ContactForm() {
                        id="lastName"
                      type="text"
                         required
+                       autoComplete="family-name"
                        placeholder="Smith"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                        value={form.lastName}
@@ -269,6 +273,7 @@ export default function ContactForm() {
                         id="email"
                         type="email"
                         required
+                        autoComplete="email"
                         placeholder="john@example.com"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.email}
@@ -281,6 +286,8 @@ export default function ContactForm() {
                        id="phone"
                        type="tel"
                         required
+                       autoComplete="tel"
+                       inputMode="tel"
                        placeholder="(631) 555-0000"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.phone}
@@ -296,6 +303,7 @@ export default function ContactForm() {
                         id="street"
                         type="text"
                         required
+                        autoComplete="street-address"
                         placeholder="123 Main St"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.street}
@@ -330,6 +338,7 @@ export default function ContactForm() {
                         id="city"
                         type="text"
                         required
+                        autoComplete="address-level2"
                         placeholder="Islandia"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.city}
@@ -346,6 +355,9 @@ export default function ContactForm() {
                       required
                       placeholder="11749"
                       maxLength={5}
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      pattern="[0-9]{5}"
                       className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                       value={form.zip}
                       onChange={e => setForm(f => ({ ...f, zip: e.target.value }))}
@@ -385,6 +397,9 @@ export default function ContactForm() {
 
                  <button
                    type="submit"
+                   disabled={loading}
+                   aria-disabled={loading}
+                   aria-busy={loading}
                    className="group relative w-full mt-2 overflow-hidden rounded-2xl p-[1px] focus:outline-none focus:ring-2 focus:ring-green-500/50"
                  >
                    {/* Animated rotating gradient border */}
@@ -396,7 +411,7 @@ export default function ContactForm() {
                      }}
                    />
                    {/* Glass fill */}
-                   <span className="relative flex items-center justify-center gap-3 w-full px-8 py-4 rounded-2xl bg-background/80 backdrop-blur-xl font-display font-bold text-lg transition-all duration-500 group-hover:bg-green-500/10">
+                   <span className="relative flex items-center justify-center gap-3 w-full px-8 py-4 rounded-2xl bg-background/80 backdrop-blur-xl font-display font-bold text-lg transition-all duration-500 group-hover:bg-green-500/10 disabled:opacity-70">
                      {/* Inner shimmer sweep */}
                      <span className="absolute inset-0 rounded-2xl -translate-x-full bg-gradient-to-r from-transparent via-green-400/20 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
                      {/* Glow blob */}

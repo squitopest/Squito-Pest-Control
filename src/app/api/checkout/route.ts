@@ -1,19 +1,73 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase";
+import {
+  isOneTimeService,
+  getSubscriptionPlan,
+  getOneTimeService,
+  toCents,
+  TAX_RATE,
+} from "@/data/plans";
+import { validateEnv } from "@/lib/validateEnv";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeInput(value: unknown, maxLength: number) {
+  return String(value ?? "").trim().slice(0, maxLength);
+}
 
 export async function POST(req: Request) {
   try {
+    validateEnv([
+      "STRIPE_SECRET_KEY",
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
+    ]);
+
     const body = await req.json();
-    const { propertyType, zipCode, date, time, street, city, planId, fullName, email, phone, billing } = body;
+    const propertyType = normalizeInput(body.propertyType, 60) || "Residential";
+    const zipCode = normalizeInput(body.zipCode, 10);
+    const date = normalizeInput(body.date, 20);
+    const time = normalizeInput(body.time, 20);
+    const street = normalizeInput(body.street, 160);
+    const city = normalizeInput(body.city, 80);
+    const planId = normalizeInput(body.planId, 80) || "essential-defense";
+    const fullName = normalizeInput(body.fullName, 120);
+    const email = normalizeInput(body.email, 160);
+    const phone = normalizeInput(body.phone, 30);
+    const billing = normalizeInput(body.billing, 20);
 
     if (!zipCode || !date || !time || !street || !city || !fullName || !email || !phone) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const digitsOnlyPhone = phone.replace(/\D/g, "");
+    const isSupportedPlan =
+      isOneTimeService(planId) ||
+      Boolean(getSubscriptionPlan(planId));
+
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
+    }
+
+    if (digitsOnlyPhone.length < 10 || digitsOnlyPhone.length > 15) {
+      return NextResponse.json({ error: "Please enter a valid phone number." }, { status: 400 });
+    }
+
+    if (!/^\d{5}$/.test(zipCode)) {
+      return NextResponse.json({ error: "Please enter a valid 5-digit ZIP code." }, { status: 400 });
+    }
+
+    if (!isSupportedPlan) {
+      return NextResponse.json({ error: "Invalid plan selected." }, { status: 400 });
+    }
+
     const isMock = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.includes("mock") || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
-    // 1. Create Supabase Row
+    // 1. Create Supabase Row before charging the customer.
+    // If we can't persist the booking, we should not accept payment.
     const supabase = createServiceClient();
     let bookingId = "mock-booking-id-" + Math.random().toString(36).slice(2);
 
@@ -22,26 +76,36 @@ export async function POST(req: Request) {
         const { data, error } = await supabase
           .from("bookings")
           .insert([{
-            property_type: propertyType || "Residential",
+            property_type: propertyType,
             zip_code: zipCode,
             service_date: date,
             service_time: time,
-            street: `${street}, ${city}`,
-            plan_id: planId || "essential-defense",
+            street: street,
+            city: city,
+            plan_id: planId,
             full_name: fullName,
             email: email,
-            phone: phone
+            phone: phone,
+            stripe_payment_status: "pending",
           }])
           .select()
           .single();
 
         if (error) {
-          console.error("Supabase Warning - Booking table may not exist yet, bypassed for Stripe checkout:", error);
+          console.error("Supabase booking insert failed:", error);
+          return NextResponse.json(
+            { error: "We couldn't save your booking details. Please try again in a moment or call us directly." },
+            { status: 500 }
+          );
         } else if (data) {
           bookingId = data.id;
         }
       } catch (e) {
         console.error("Supabase Client Error:", e);
+        return NextResponse.json(
+          { error: "We couldn't save your booking details. Please try again in a moment or call us directly." },
+          { status: 500 }
+        );
       }
     }
 
@@ -53,37 +117,26 @@ export async function POST(req: Request) {
       });
     }
 
-    // One-time service IDs
-    const ONE_TIME_IDS = ["termite-inspection", "wasp-removal", "mosquito-event-spray"];
-    const isOneTime = ONE_TIME_IDS.includes(planId);
+    // Look up plan details from the single source of truth in src/data/plans.ts
+    const isOneTime = isOneTimeService(planId);
+    const oneTimePlan = isOneTime ? getOneTimeService(planId) : null;
+    const subPlan = !isOneTime ? (getSubscriptionPlan(planId) ?? getSubscriptionPlan("essential-defense")!) : null;
 
-    // Determine plan name
-    const planName = isOneTime
-      ? planId === "termite-inspection" ? "Termite Inspection"
-        : planId === "wasp-removal" ? "Wasp Nest Removal"
-        : "Mosquito Event Spray"
-      : planId === "premium-shield" ? "Premium Shield Plan"
-      : planId === "ultimate-fortress" ? "Ultimate Fortress Plan"
-      : "Essential Defense Plan";
+    const planName = oneTimePlan?.name ?? subPlan?.name ?? "Essential Defense Plan";
 
-    // Determine charge amount in cents
+    // All amounts in cents for Stripe
     const initialFee = isOneTime
-      ? planId === "termite-inspection" ? 14900  // $149
-        : planId === "wasp-removal" ? 24900      // $249
-        : 19900                                  // $199 — Mosquito Event Spray
-      : planId === "premium-shield" ? 29999      // $299.99
-      : planId === "ultimate-fortress" ? 39999   // $399.99
-      : 19999;                                   // $199.99 — Essential
+      ? toCents(oneTimePlan!.price)
+      : toCents(subPlan!.initialFee);
 
     // Advanced Line Item Construction for Subscriptions
     const isYearly = billing === "yearly";
     let lineItems = [];
     let checkoutMode: "payment" | "subscription" = "payment";
-    const taxRate = 0.08625; // NY State + Nassau County sales tax: 8.625%
 
     if (isOneTime) {
       checkoutMode = "payment";
-      const tax = Math.round(initialFee * taxRate);
+      const tax = Math.round(initialFee * TAX_RATE);
       lineItems.push({
         price_data: {
           currency: "usd",
@@ -97,11 +150,9 @@ export async function POST(req: Request) {
       });
     } else if (isYearly) {
       checkoutMode = "subscription";
-      const yearlyCharge = planId === "premium-shield" ? 86388
-        : planId === "ultimate-fortress" ? 124788
-        : 47988;
-      const tax = Math.round(yearlyCharge * taxRate);
-      
+      const yearlyCharge = toCents(subPlan!.yearlyTotal);
+      const tax = Math.round(yearlyCharge * TAX_RATE);
+
       lineItems.push({
         price_data: {
           currency: "usd",
@@ -116,16 +167,14 @@ export async function POST(req: Request) {
       });
     } else {
       checkoutMode = "subscription";
-      const monthlyFee = planId === "premium-shield" ? 8999
-        : planId === "ultimate-fortress" ? 12999
-        : 4999;
-      
-      // Calculate split: The Initial Fee acts as a one-time charge, the monthly charge repeats.
-      // We charge the "Initial Fee" today alongside the "First Month" today so it equals the advertised initial fee exactly.
-      const initialFeeDifferential = initialFee - monthlyFee; 
-      
-      const setupTax = Math.round(initialFeeDifferential * taxRate);
-      const monthlyTax = Math.round(monthlyFee * taxRate);
+      const monthlyFee = toCents(subPlan!.monthlyPrice);
+
+      // The Initial Fee covers the first visit flush-out. We split it into:
+      // a one-time differential charge today + the first recurring monthly charge today.
+      const initialFeeDifferential = initialFee - monthlyFee;
+
+      const setupTax = Math.round(initialFeeDifferential * TAX_RATE);
+      const monthlyTax = Math.round(monthlyFee * TAX_RATE);
 
       if (initialFeeDifferential > 0) {
         lineItems.push({
@@ -155,11 +204,10 @@ export async function POST(req: Request) {
       });
     }
 
-    // ⚠️ 🚨 PRODUCTION TODO 🚨 ⚠️
-    // Set isTestDrive = false before going live!
-    // While true, ALL customers bypass Stripe and get the success page for FREE.
-    // This means you will collect ZERO payments in production.
-    const isTestDrive = false; // <--- CHANGE TO false FOR REAL PAYMENTS
+    // isTestDrive = true bypasses Stripe and sends users straight to the success page for free.
+    // It is currently OFF (false), meaning real Stripe payments are active.
+    // Only set to true temporarily if you need to test the booking flow without charging.
+    const isTestDrive = false;
 
 
     let redirectUrl = "";

@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
+import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from "@/lib/site";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -85,12 +86,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${post.title} | Squito Blog`,
     description: post.seo_description,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.seo_description,
+      url: absoluteUrl(`/blog/${slug}`),
+      siteName: SITE_NAME,
+      images: [{ url: post.image || DEFAULT_OG_IMAGE, alt: post.title }],
       type: "article",
       publishedTime: post.date,
       authors: ["Squito Pest Control"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.seo_description,
+      images: [post.image || DEFAULT_OG_IMAGE],
     },
   };
 }

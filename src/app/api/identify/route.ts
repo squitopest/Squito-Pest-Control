@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { validateEnv } from "@/lib/validateEnv";
 
 export const maxDuration = 30;
 
@@ -128,6 +129,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    validateEnv(["OPENAI_API_KEY"]);
     const { image } = await req.json();
 
     if (!image || typeof image !== "string") {

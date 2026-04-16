@@ -1,10 +1,12 @@
 import { Info, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: "About Us | Squito Pest Control",
   description: "Learn about the team behind Squito Pest Control, Long Island's premier modern pest control service.",
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (
