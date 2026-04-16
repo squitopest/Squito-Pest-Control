@@ -112,7 +112,7 @@ export async function POST(req: Request) {
     if (isMock) {
       return NextResponse.json({
         success: true,
-        checkoutUrl: "/book?session_id=mock_success",
+        checkoutUrl: `/success?session_id=mock_success&booking_id=${bookingId}`,
         message: "MOCK MODE: Add real Stripe & Supabase keys to .env.local"
       });
     }
@@ -214,7 +214,7 @@ export async function POST(req: Request) {
 
     if (isTestDrive) {
       // Teleport straight to the success page as if they paid!
-      redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id=free_test_bypass_${bookingId}`;
+      redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id=free_test_bypass_${bookingId}&booking_id=${bookingId}`;
     } else {
       // Create or retrieve customer to pre-fill billing details
       let customer;

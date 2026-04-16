@@ -13,7 +13,7 @@ import {
 
 function BookingContent() {
   const searchParams = useSearchParams();
-  const planId = searchParams.get("plan");
+  const requestedPlanId = searchParams.get("plan");
   const billing = searchParams.get("billing") || "monthly";
   const sessionId = searchParams.get("session_id");
 
@@ -47,9 +47,12 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const isOneTime = isOneTimeService(planId ?? "");
-  const oneTimePlan = isOneTime ? getOneTimeService(planId ?? "") : null;
-  const subPlan = !isOneTime ? (getSubscriptionPlan(planId ?? "") ?? getSubscriptionPlan("essential-defense")!) : null;
+  const resolvedOneTimePlan = getOneTimeService(requestedPlanId ?? "");
+  const resolvedSubscriptionPlan = getSubscriptionPlan(requestedPlanId ?? "");
+  const isOneTime = Boolean(resolvedOneTimePlan);
+  const oneTimePlan = resolvedOneTimePlan;
+  const subPlan = !isOneTime ? (resolvedSubscriptionPlan ?? getSubscriptionPlan("essential-defense")!) : null;
+  const effectivePlanId = oneTimePlan?.id ?? subPlan?.id ?? "essential-defense";
 
   const planTitle = oneTimePlan?.name ?? subPlan?.name ?? "Essential Defense Plan";
   const initialFee = oneTimePlan?.price ?? subPlan?.initialFee ?? 199.99;
@@ -192,7 +195,7 @@ function BookingContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planId: planId || "essential-defense",
+          planId: effectivePlanId,
           propertyType: "Residential",
           fullName: form.fullName,
           email: form.email,

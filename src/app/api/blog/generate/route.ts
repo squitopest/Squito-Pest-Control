@@ -223,7 +223,8 @@ Make the article specific to Long Island, NY where relevant.`;
 
     if (!response.ok) {
       const err = await response.text();
-      return NextResponse.json({ error: "OpenAI API error", details: err }, { status: 500 });
+      console.error("Blog generation OpenAI API error:", err);
+      return NextResponse.json({ error: "OpenAI API error" }, { status: 500 });
     }
 
     const aiData = await response.json();
@@ -239,7 +240,8 @@ Make the article specific to Long Island, NY where relevant.`;
       const cleaned = rawContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       parsed = JSON.parse(cleaned);
     } catch {
-      return NextResponse.json({ error: "Failed to parse AI response", raw: rawContent }, { status: 500 });
+      console.error("Failed to parse AI response for blog generation.");
+      return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
     }
 
     // Generate a unique hero image with Nano Banana 2 and upload to Supabase Storage
@@ -272,7 +274,8 @@ Make the article specific to Long Island, NY where relevant.`;
       .insert(newPost);
 
     if (insertError) {
-      return NextResponse.json({ error: "Failed to save post", details: insertError.message }, { status: 500 });
+      console.error("Failed to save generated blog post:", insertError.message);
+      return NextResponse.json({ error: "Failed to save post" }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -285,6 +288,7 @@ Make the article specific to Long Island, NY where relevant.`;
 
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: "Generation failed", details: message }, { status: 500 });
+    console.error("Blog generation failed:", message);
+    return NextResponse.json({ error: "Generation failed" }, { status: 500 });
   }
 }
