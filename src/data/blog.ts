@@ -19,7 +19,7 @@ export const blogPosts: BlogPost[] = [
     date: "Mar 15, 2026",
     category: "Prevention",
     readTime: "5 min read",
-    image: "/blog-mosquito.png",
+    image: "/blog-mosquito.jpg",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">Spring on Long Island brings warmer weather, blooming flowers, and the return of one of the region's most persistent pests — the mosquito. Every year, Nassau and Suffolk County residents battle these bloodsuckers from May through October. But what if you could dramatically cut their numbers before the first bite? The answer lies in preparation.</p>
       
@@ -81,7 +81,7 @@ export const blogPosts: BlogPost[] = [
     date: "Feb 28, 2026",
     category: "Identification",
     readTime: "4 min read",
-    image: "/blog-termite.png",
+    image: "/blog-termite.jpg",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">It's a homeowner's worst nightmare: you wake up one warm spring morning and find a cluster of small, winged insects swarming near your windowsill. Your stomach drops. Are these termites? Are they eating your house right now?</p>
       
@@ -130,7 +130,7 @@ export const blogPosts: BlogPost[] = [
     date: "Jan 10, 2026",
     category: "Rodents",
     readTime: "6 min read",
-    image: "/blog-mice.png",
+    image: "/blog-mice.jpg",
     content: `
       <p class="mb-6 text-lg text-white/80 leading-relaxed">As winter settles over Long Island, you're not the only one looking to stay warm. Every fall and winter, thousands of Long Island homes become targets for house mice — tiny, determined rodents that can squeeze through openings you'd never think possible.</p>
       

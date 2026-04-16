@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
 import { DEFAULT_OG_IMAGE, SITE_NAME, absoluteUrl } from "@/lib/site";
+import { cache } from "react";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -26,15 +27,41 @@ type BlogPost = {
 // Revalidate every hour
 export const revalidate = 3600;
 
-async function getPost(slug: string): Promise<BlogPost | null> {
+const BLOG_FETCH_TIMEOUT_MS = 1500;
+
+const getPost = cache(async (slug: string): Promise<BlogPost | null> => {
   try {
     const supabase = createAnonClient();
-    const { data, error } = await supabase
+    const query = supabase
       .from("blog_posts")
       .select("*")
       .eq("slug", slug)
       .eq("published", true)
       .single();
+
+    const timeout = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), BLOG_FETCH_TIMEOUT_MS)
+    );
+
+    const result = await Promise.race([query, timeout]);
+
+    if (!result) {
+      const staticPost = staticPosts.find((p) => p.slug === slug);
+      if (!staticPost) return null;
+      return {
+        slug: staticPost.slug,
+        title: staticPost.title,
+        excerpt: staticPost.excerpt,
+        seo_description: staticPost.seoDescription,
+        date: staticPost.date,
+        category: staticPost.category,
+        read_time: staticPost.readTime,
+        image: staticPost.image,
+        content: staticPost.content,
+      };
+    }
+
+    const { data, error } = result;
 
     if (error || !data) {
       // Fallback to static posts
@@ -70,7 +97,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
       content: staticPost.content,
     };
   }
-}
+});
 
 // Generate dynamic SEO metadata based on the blog post slug
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -139,6 +166,7 @@ export default async function BlogPost({ params }: Props) {
             fill
             priority
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 896px"
+            quality={75}
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />

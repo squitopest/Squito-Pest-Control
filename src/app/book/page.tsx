@@ -23,7 +23,9 @@ function BookingContent() {
   const [locating, setLocating] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const autocompleteAbortRef = useRef<AbortController | null>(null);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -122,21 +124,39 @@ function BookingContent() {
     setForm(prev => ({ ...prev, street: val }));
     
     if (val.length < 3) {
+      autocompleteAbortRef.current?.abort();
       setSuggestions([]);
       setShowSuggestions(false);
+      setAutocompleteLoading(false);
       return;
     }
-    
+
+    autocompleteAbortRef.current?.abort();
+    const controller = new AbortController();
+    autocompleteAbortRef.current = controller;
+    setAutocompleteLoading(true);
+
     try {
-      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`);
+      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
       
       if (data.status === 'OK' && data.predictions) {
         setSuggestions(data.predictions);
         setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
-    } catch (e) {
-      console.error("Autocomplete Error", e);
+    } catch (e: any) {
+      if (e?.name !== "AbortError") {
+        console.error("Autocomplete Error", e);
+      }
+    } finally {
+      if (autocompleteAbortRef.current === controller) {
+        setAutocompleteLoading(false);
+      }
     }
   };
 
@@ -299,17 +319,20 @@ function BookingContent() {
                 <label className="text-sm font-semibold text-white/80 flex items-center gap-2">
                   <MapPin size={16} className="text-green-400" /> Street Address
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="123 Main St"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                      <input
+                        type="text"
+                        required
+                        placeholder="123 Main St"
+                        className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
                   value={form.street}
                   onChange={e => handleAddressChange(e.target.value)}
                   onFocus={() => {
                     if (suggestions.length > 0) setShowSuggestions(true);
                   }}
-                />
+                      />
+                      {autocompleteLoading && (
+                        <p className="mt-2 text-xs text-white/40">Looking up addresses...</p>
+                      )}
                 
                 {/* Google Maps Interactive Dropdown */}
                 {showSuggestions && suggestions.length > 0 && (

@@ -24,40 +24,48 @@ type BlogPost = {
   image: string;
 };
 
+const BLOG_FETCH_TIMEOUT_MS = 1500;
+
+function mapStaticPosts(): BlogPost[] {
+  return staticPosts.map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    excerpt: p.excerpt,
+    date: p.date,
+    category: p.category,
+    read_time: p.readTime,
+    image: p.image,
+  }));
+}
+
 async function getPosts(): Promise<BlogPost[]> {
   try {
     const supabase = createAnonClient();
-    const { data, error } = await supabase
+    const query = supabase
       .from("blog_posts")
       .select("slug, title, excerpt, date, category, read_time, image")
       .eq("published", true)
       .order("created_at", { ascending: false });
 
+    const timeout = new Promise<null>((resolve) =>
+      setTimeout(() => resolve(null), BLOG_FETCH_TIMEOUT_MS)
+    );
+
+    const result = await Promise.race([query, timeout]);
+
+    if (!result) {
+      return mapStaticPosts();
+    }
+
+    const { data, error } = result;
+
     if (error || !data || data.length === 0) {
-      // Fallback to static posts if Supabase is unavailable
-      return staticPosts.map(p => ({
-        slug: p.slug,
-        title: p.title,
-        excerpt: p.excerpt,
-        date: p.date,
-        category: p.category,
-        read_time: p.readTime,
-        image: p.image,
-      }));
+      return mapStaticPosts();
     }
 
     return data;
   } catch {
-    // Fallback to static posts
-    return staticPosts.map(p => ({
-      slug: p.slug,
-      title: p.title,
-      excerpt: p.excerpt,
-      date: p.date,
-      category: p.category,
-      read_time: p.readTime,
-      image: p.image,
-    }));
+    return mapStaticPosts();
   }
 }
 
@@ -83,7 +91,7 @@ export default async function BlogPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-           {posts.map((post) => (
+           {posts.map((post, index) => (
              <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
                 <div className="aspect-[16/9] bg-surface relative overflow-hidden">
@@ -92,6 +100,9 @@ export default async function BlogPage() {
                      alt={post.title}
                      fill
                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                     quality={70}
+                     priority={index === 0}
+                     fetchPriority={index === 0 ? "high" : "auto"}
                      className="object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform"
                    />
                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />

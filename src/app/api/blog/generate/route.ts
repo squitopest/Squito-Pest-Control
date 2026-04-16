@@ -4,20 +4,20 @@ import { GoogleGenAI } from "@google/genai";
 
 // Fallback images mapped to pest categories (used when DALL-E generation fails)
 const CATEGORY_IMAGES: Record<string, string> = {
-  "Mosquitoes": "/blog-mosquito.png",
-  "Termites": "/blog-termite.png",
-  "Rodents": "/blog-mice.png",
-  "Ants": "/blog-termite.png",
-  "Cockroaches": "/blog-mosquito.png",
-  "Ticks": "/blog-mosquito.png",
-  "Spiders": "/blog-mice.png",
-  "Bed Bugs": "/blog-termite.png",
-  "Wasps": "/blog-mosquito.png",
-  "Fleas": "/blog-mice.png",
-  "Prevention": "/blog-mosquito.png",
-  "Seasonal": "/blog-mosquito.png",
-  "Identification": "/blog-termite.png",
-  "Home Protection": "/blog-mice.png",
+  "Mosquitoes": "/blog-mosquito.jpg",
+  "Termites": "/blog-termite.jpg",
+  "Rodents": "/blog-mice.jpg",
+  "Ants": "/blog-termite.jpg",
+  "Cockroaches": "/blog-mosquito.jpg",
+  "Ticks": "/blog-mosquito.jpg",
+  "Spiders": "/blog-mice.jpg",
+  "Bed Bugs": "/blog-termite.jpg",
+  "Wasps": "/blog-mosquito.jpg",
+  "Fleas": "/blog-mice.jpg",
+  "Prevention": "/blog-mosquito.jpg",
+  "Seasonal": "/blog-mosquito.jpg",
+  "Identification": "/blog-termite.jpg",
+  "Home Protection": "/blog-mice.jpg",
 };
 
 // Pool of SEO-optimized topics for Long Island pest control
@@ -47,6 +47,28 @@ const TOPIC_POOL = [
   { keyword: "natural mosquito repellent backyard", category: "Mosquitoes", slug_hint: "natural-mosquito-repellent-backyard" },
   { keyword: "what attracts mice to your house", category: "Rodents", slug_hint: "what-attracts-mice" },
 ];
+
+function getPublishedDateSlug() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function buildRecurringSlug(baseSlug: string) {
+  return `${baseSlug}-${getPublishedDateSlug()}`;
+}
+
+function isAuthorizedCronRequest(req: Request) {
+  const authHeader = req.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
+    return true;
+  }
+
+  // Keep a manual fallback so the route can still be triggered intentionally
+  // outside Vercel Cron Jobs when needed.
+  const { searchParams } = new URL(req.url);
+  const legacySecret = searchParams.get("secret");
+  return Boolean(process.env.BLOG_CRON_SECRET && legacySecret === process.env.BLOG_CRON_SECRET);
+}
 
 /**
  * Generate a unique blog hero image using DALL-E 3 and upload it to Supabase Storage.
@@ -133,11 +155,7 @@ async function generateAndUploadImage(
 }
 
 export async function GET(req: Request) {
-  // Verify cron secret to prevent unauthorized access
-  const { searchParams } = new URL(req.url);
-  const secret = searchParams.get("secret");
-
-  if (secret !== process.env.BLOG_CRON_SECRET) {
+  if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -151,15 +169,17 @@ export async function GET(req: Request) {
     
     const existingSlugs = new Set((existingPosts || []).map((p: { slug: string }) => p.slug));
 
-    // Find an unused topic
+    // Prefer unused topics first so the early publishing cadence builds breadth.
     const availableTopics = TOPIC_POOL.filter(t => !existingSlugs.has(t.slug_hint));
-    
-    if (availableTopics.length === 0) {
-      return NextResponse.json({ message: "All topics have been covered. Add more topics to the pool." });
-    }
 
-    // Pick a random available topic
-    const topic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+    const baseTopicPool = availableTopics.length > 0 ? availableTopics : TOPIC_POOL;
+    const selectedTopic = baseTopicPool[Math.floor(Math.random() * baseTopicPool.length)];
+    const topic = {
+      ...selectedTopic,
+      slug_hint: availableTopics.length > 0
+        ? selectedTopic.slug_hint
+        : buildRecurringSlug(selectedTopic.slug_hint),
+    };
 
     // Generate the blog post using OpenAI
     const apiKey = process.env.OPENAI_API_KEY;
@@ -248,7 +268,7 @@ Make the article specific to Long Island, NY where relevant.`;
     const generatedImageUrl = await generateAndUploadImage(topic, supabase);
 
     // Use the generated image URL, or fall back to a static category image
-    const image = generatedImageUrl || CATEGORY_IMAGES[topic.category] || "/blog-mosquito.png";
+    const image = generatedImageUrl || CATEGORY_IMAGES[topic.category] || "/blog-mosquito.jpg";
 
     // Format the date
     const now = new Date();
@@ -284,6 +304,7 @@ Make the article specific to Long Island, NY where relevant.`;
       slug: topic.slug_hint,
       imageGenerated: !!generatedImageUrl,
       imageUrl: image,
+      reusedTopicPool: availableTopics.length === 0,
     });
 
   } catch (err) {

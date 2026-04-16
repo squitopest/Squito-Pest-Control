@@ -16,22 +16,51 @@ export async function GET(request: Request) {
        return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
     }
 
-    // Classic Places Autocomplete API
-    // Biased to Long Island coordinates, restricted to US
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-      input
-    )}&components=country:us&location=40.789142,-73.134960&radius=50000&key=${apiKey}`;
+    const response = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "suggestions.placePrediction.placeId,suggestions.placePrediction.text.text,suggestions.placePrediction.structuredFormat.mainText.text,suggestions.placePrediction.structuredFormat.secondaryText.text",
+      },
+      body: JSON.stringify({
+        input,
+        includedRegionCodes: ["us"],
+        locationBias: {
+          circle: {
+            center: {
+              latitude: 40.789142,
+              longitude: -73.13496,
+            },
+            radius: 50000,
+          },
+        },
+      }),
+    });
 
-    const response = await fetch(url);
     const data = await response.json();
 
-    if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
-      return NextResponse.json(data);
+    if (!response.ok) {
+      console.error("Places Autocomplete API error:", data);
+      return NextResponse.json({ error: "Autocomplete lookup failed." }, { status: 400 });
     }
 
-    // If classic API fails, fallback to try Places API (New)
-    console.error("Classic AutoComplete error or disabled:", data.status, data.error_message);
-    return NextResponse.json(data, { status: 400 });
+    const predictions = (data.suggestions || [])
+      .map((suggestion: any) => suggestion.placePrediction)
+      .filter(Boolean)
+      .map((prediction: any) => ({
+        place_id: prediction.placeId,
+        description: prediction.text?.text || "",
+        structured_formatting: {
+          main_text: prediction.structuredFormat?.mainText?.text || prediction.text?.text || "",
+          secondary_text: prediction.structuredFormat?.secondaryText?.text || "",
+        },
+      }));
+
+    return NextResponse.json({
+      status: "OK",
+      predictions,
+    });
 
   } catch (error: any) {
     console.error("Autocomplete Proxy Error:", error);

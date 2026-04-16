@@ -5,8 +5,7 @@ import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle, Phone, Shield } from
 import NextImage from "next/image";
 
 // ─── EXPANDED LONG ISLAND PEST DATABASE ───
-const pests = [
-  // Row 1
+const row1 = [
   { image: "/pests/pest_mosquito.png", name: "Mosquitoes", risk: "High", season: "June – September", tip: "Mosquitoes thrive in Long Island's humid coastal summers, breeding rapidly in any stagnant water. Carriers of West Nile Virus and EEE. Our professional barrier treatments target foliage where adults rest, cutting populations dramatically." },
   { image: "/pests/pest_tick.png", name: "Ticks", risk: "High", season: "April – November", tip: "Long Island is one of the highest Lyme disease risk zones in the US. Deer ticks hide in leaf litter and tall grass, latching onto humans and pets. Our perimeter yard treatments reduce tick populations by up to 90%." },
   { image: "/pests/pest_termite.png", name: "Termites", risk: "Critical", season: "Year-Round", tip: "Long Island's sandy glacial soil is perfect for Eastern Subterranean Termites. They silently destroy structural wood from the inside out, causing billions in damage annually. We deploy advanced baiting systems to eliminate entire colonies at the source." },
@@ -16,7 +15,17 @@ const pests = [
   { image: "/pests/pest_wasp.png", name: "Wasps & Hornets", risk: "High", season: "July – October", tip: "Eastern Yellowjackets and Bald-faced Hornets reach maximum colony size in late summer and become hyper-aggressive. Our technicians safely neutralize nests and apply preventative treatments to rooflines and eaves." },
   { image: "/pests/pest_ant.png", name: "Ants", risk: "Medium", season: "March – October", tip: "Pavement ants and odorous house ants invade Long Island homes by the thousands. Spraying visible ants only kills a fraction. Our strategic baits are carried back to the queen, destroying the entire colony from within." },
   { image: "/pests/pest_lanternfly.png", name: "Lanternflies", risk: "High", season: "July – First Frost", tip: "The invasive Spotted Lanternfly is now established on Long Island, decimating trees and crops. They excrete honeydew causing dangerous mold growth. We remove egg masses and apply professional tree treatments." },
-  // Row 2
+  { image: "/pests/pest_yellowjacket.png", name: "Yellowjackets", risk: "High", season: "July – October", tip: "Yellowjackets on Long Island become intensely aggressive in late summer, especially around outdoor dining and garbage areas. Their nests can hide underground or inside wall voids. We locate concealed nest sites and eliminate colonies before stings and swarms escalate." },
+  { image: "/pests/pest_boxelder_bug.png", name: "Boxelder Bugs", risk: "Low", season: "September – November", tip: "Boxelder bugs gather in large numbers on warm, sun-facing sides of Long Island homes each fall. They are mostly a nuisance but can stain surfaces when crushed. We apply exterior barrier treatments and reduce the sheltered entry points they use to slip indoors." },
+  { image: "/pests/pest_millipede.png", name: "Millipedes", risk: "Low", season: "Spring – Fall", tip: "Millipedes surge into damp Long Island basements and ground-level rooms after heavy rain. They do not bite, but their numbers can become overwhelming quickly. We target the moist exterior harborage zones that drive these invasions." },
+  { image: "/pests/pest_sowbug.png", name: "Sowbugs", risk: "Low", season: "Spring – Fall", tip: "Sowbugs cluster around mulch, stone borders, and damp foundations across Long Island. They thrive where moisture lingers and often signal drainage issues. We treat the perimeter and help dry out the conditions that keep them active." },
+  { image: "/pests/pest_drain_fly.png", name: "Drain Flies", risk: "Medium", season: "Year-Round", tip: "Drain flies breed in the organic film inside neglected drains, sump pits, and floor drains. In Long Island homes and restaurants, they often point to hidden moisture and buildup. We identify the breeding source and pair sanitation guidance with targeted treatment." },
+  { image: "/pests/pest_fruit_fly.png", name: "Fruit Flies", risk: "Low", season: "Year-Round", tip: "Fruit flies explode around overripe produce, recycling bins, and sticky drain residue. These tiny flies multiply fast in warm kitchens and commercial prep spaces. We trace the breeding source and knock down the population at the root instead of just chasing adults." },
+  { image: "/pests/pest_clothes_moth.png", name: "Clothes Moths", risk: "Medium", season: "Year-Round", tip: "Clothes moth larvae quietly damage wool, cashmere, silk, and stored natural-fiber items. They often go unnoticed in closets, attics, and underused storage areas. We inspect the infestation source and treat the fabric-damaging life stage before losses spread." },
+  { image: "/pests/pest_springtail.png", name: "Springtails", risk: "Low", season: "Spring – Fall", tip: "Springtails show up around leaking foundations, overwatered planters, and damp window tracks where moisture stays trapped. They do not bite, but big surges usually mean something around the property is staying too wet. We treat the moisture-heavy harborages and help dry out the source conditions keeping them active." },
+];
+
+const row2 = [
   { image: "/pests/pest_mouse.png", name: "Mice", risk: "High", season: "Oct – March", tip: "House mice squeeze through gaps as small as a dime. White-footed mice on Long Island are also Lyme disease reservoirs. We seal micro-entry points and deploy strategic interior trapping without harmful broadcast poisons." },
   { image: "/pests/pest_spider.png", name: "Spiders", risk: "Medium", season: "Aug – November", tip: "Wolf spiders and yellow sac spiders are common on Long Island — brown recluses are NOT native here. We clear existing webs and apply a protective perimeter barrier to keep them from returning." },
   { image: "/pests/pest_flea.png", name: "Fleas", risk: "Medium", season: "May – October", tip: "Cat fleas enter Long Island homes via pets or wildlife like raccoons and feral cats. They reproduce explosively in carpets and upholstery. We coordinate comprehensive interior and exterior treatments to permanently break the life cycle." },
@@ -26,16 +35,22 @@ const pests = [
   { image: "/pests/pest_centipede.png", name: "Centipedes", risk: "Low", season: "Spring – Fall", tip: "House centipedes are common in Long Island basements. While actually beneficial — they eat other pests — their alarming appearance sends most homeowners running. We reduce moisture and treat perimeter entry points." },
   { image: "/pests/pest_earwig.png", name: "Earwigs", risk: "Low", season: "June – August", tip: "European earwigs are attracted to moisture and mulch around Long Island home foundations. Despite the myth, they don't crawl into ears. We treat mulch beds, foundation perimeters, and entry points." },
   { image: "/pests/pest_cricket.png", name: "Camel Crickets", risk: "Low", season: "Late Summer – Fall", tip: "Camel crickets thrive in damp Long Island basements and crawl spaces. They don't chirp like house crickets, but they jump erratically when disturbed. We use perimeter treatments and address moisture issues." },
+  { image: "/pests/pest_gnat.png", name: "Gnats", risk: "Low", season: "Spring – Fall", tip: "Gnats build up fast around damp potting soil, overwatered plants, trash areas, and organic residue. Long Island homes often see spikes during warm, humid stretches. We identify the moisture source and reduce the breeding conditions that keep them swarming indoors." },
+  { image: "/pests/pest_hornet.png", name: "Hornets", risk: "High", season: "July – October", tip: "Hornets build large aerial nests in trees, soffits, and sheds across Long Island. Their colonies grow rapidly and can become dangerously defensive near doors and walkways. We remove active nests safely and treat likely rebuilding zones." },
+  { image: "/pests/pest_whitefly.png", name: "Whiteflies", risk: "Medium", season: "Spring – Fall", tip: "Whiteflies attack ornamental plants, greenhouse crops, and patio plantings by feeding on sap and coating leaves with sticky honeydew. On Long Island, they thrive in protected, warm landscaping zones. We target infested host plants and break the reproductive cycle." },
+  { image: "/pests/pest_clover_mite.png", name: "Clover Mites", risk: "Low", season: "Spring & Fall", tip: "Clover mites invade Long Island homes in large numbers during mild spring and fall weather, especially on sunny walls and windows. They do not bite, but they leave red stains when crushed. We create exterior exclusion zones and treat the perimeter before they mass inside." },
+  { image: "/pests/pest_powderpost_beetle.png", name: "Powderpost Beetles", risk: "High", season: "Year-Round", tip: "Powderpost beetles infest hardwood trim, stored lumber, and antique wood items, leaving fine powder and tiny exit holes behind. Long Island homes with older woodwork can go years before noticing the damage. We identify active infestations and treat the affected wood before structural loss spreads." },
+  { image: "/pests/pest_groundhog.png", name: "Groundhogs", risk: "Medium", season: "Spring – Fall", tip: "Groundhogs tunnel under sheds, decks, stoops, and retaining walls, weakening the soil around structures. Their burrows can also create trip hazards and lawn damage. We address active burrow sites and stop repeat denning around the property." },
+  { image: "/pests/pest_squirrel.png", name: "Squirrels", risk: "Medium", season: "Year-Round", tip: "Squirrels tear into rooflines, vents, and attic spaces to nest and raise young. Once inside, they can chew wiring and insulation and create loud scratching overhead. We identify entry points and help shut down the access routes they keep returning to." },
+  { image: "/pests/pest_opossum.png", name: "Opossums", risk: "Low", season: "Year-Round", tip: "Opossums are common nighttime visitors around Long Island garbage areas, crawl spaces, and sheds. They are usually shy, but they can spread fleas and create sanitation issues if they den on-site. We address attractants and problem sheltering spots so they move on." },
 ];
+const pests = [...row1, ...row2];
 
-const row1 = pests.slice(0, 9);
-const row2 = pests.slice(9);
-
-const riskColors: Record<string, { badge: string; glow: string }> = {
-  Low: { badge: "text-blue-400 bg-blue-500/15 border-blue-500/30", glow: "group-hover:shadow-[0_0_30px_rgba(96,165,250,0.25)]" },
-  Medium: { badge: "text-yellow-400 bg-yellow-500/15 border-yellow-500/30", glow: "group-hover:shadow-[0_0_30px_rgba(250,204,21,0.25)]" },
-  High: { badge: "text-orange-400 bg-orange-500/15 border-orange-500/30", glow: "group-hover:shadow-[0_0_30px_rgba(251,146,60,0.25)]" },
-  Critical: { badge: "text-red-400 bg-red-500/15 border-red-500/30", glow: "group-hover:shadow-[0_0_30px_rgba(248,113,113,0.25)]" },
+const riskColors: Record<string, { badge: string; dot: string }> = {
+  Low:      { badge: "text-sky-300 bg-sky-900/60 border-sky-700/50",        dot: "bg-sky-400" },
+  Medium:   { badge: "text-amber-300 bg-amber-900/60 border-amber-700/50",  dot: "bg-amber-400" },
+  High:     { badge: "text-orange-300 bg-orange-900/60 border-orange-700/50", dot: "bg-orange-400" },
+  Critical: { badge: "text-red-300 bg-red-900/60 border-red-700/50",        dot: "bg-red-500" },
 };
 
 type AIResult = {
@@ -133,23 +148,33 @@ export default function PestLibrary() {
       <button
         key={idx}
         onClick={() => setSelected(pest)}
-        className={`group relative shrink-0 snap-start w-[130px] sm:w-[240px] h-[170px] sm:h-[320px] rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 transition-all duration-500 hover:border-green-500/50 ${colors.glow}`}
+        className="group relative shrink-0 snap-start w-[130px] sm:w-[220px] h-[170px] sm:h-[300px] rounded-lg sm:rounded-xl overflow-hidden border border-white/8 hover:border-white/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
       >
-        <NextImage src={pest.image} alt={pest.name} fill sizes="(max-width: 640px) 130px, 240px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-        <span className={`absolute top-2 sm:top-3 right-2 sm:right-3 text-[8px] sm:text-[10px] font-bold uppercase tracking-widest px-2 sm:px-2.5 py-[3px] sm:py-1 rounded-full border backdrop-blur-md ${colors.badge}`}>
+        {/* Photo */}
+        <NextImage
+          src={pest.image}
+          alt={pest.name}
+          fill
+          sizes="(max-width: 640px) 130px, 220px"
+          className="object-cover transition-all duration-500 group-hover:scale-105 brightness-90 saturate-[0.65] group-hover:brightness-100 group-hover:saturate-100"
+        />
+
+        {/* Unified green tint — ties all images together */}
+        <div className="absolute inset-0 mix-blend-multiply pointer-events-none" style={{ backgroundColor: 'rgba(5, 46, 22, 0.15)' }} />
+
+        {/* Natural dark vignette — warmer than pure black */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/10" />
+
+        {/* Risk badge — top left, field-guide style */}
+        <div className={`absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center gap-1 px-2 py-0.5 rounded border text-[8px] sm:text-[9px] font-bold uppercase tracking-widest backdrop-blur-sm ${colors.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${colors.dot}`} />
           {pest.risk}
-        </span>
-        {/* Name + Season */}
-        <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4">
-          <h3 className="font-display font-bold text-white text-sm sm:text-lg leading-tight mb-0.5 sm:mb-1 drop-shadow-lg">{pest.name}</h3>
-          <p className="text-white/50 text-[9px] sm:text-xs font-medium">📅 {pest.season}</p>
         </div>
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-green-500/0 group-hover:bg-green-500/10 transition-colors duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <span className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            Learn More →
-          </span>
+
+        {/* Name + Season — bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4">
+          <h3 className="font-display font-bold text-white text-sm sm:text-base leading-tight mb-0.5 sm:mb-1">{pest.name}</h3>
+          <p className="text-white/45 text-[9px] sm:text-[11px] font-medium">{pest.season}</p>
         </div>
       </button>
     );
@@ -255,7 +280,8 @@ export default function PestLibrary() {
             <div className="w-full md:w-2/5 h-56 md:h-auto shrink-0 border-b md:border-b-0 md:border-r border-border relative overflow-hidden">
               <NextImage src={selected.image} alt={selected.name} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 md:from-background/40 to-transparent" />
-              <span className={`absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border backdrop-blur-md ${(riskColors[selected.risk] || riskColors.Medium).badge}`}>
+              <span className={`absolute top-4 left-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded border backdrop-blur-md ${(riskColors[selected.risk] || riskColors.Medium).badge}`}>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${(riskColors[selected.risk] || riskColors.Medium).dot}`} />
                 {selected.risk} Risk
               </span>
             </div>
@@ -316,7 +342,8 @@ export default function PestLibrary() {
                       <div>
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <h3 className="text-2xl font-display font-bold text-white">{aiResult.pestName}</h3>
-                          <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${(riskColors[aiResult.riskLevel] || riskColors.Medium).badge}`}>
+                          <span className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded border ${(riskColors[aiResult.riskLevel] || riskColors.Medium).badge}`}>
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${(riskColors[aiResult.riskLevel] || riskColors.Medium).dot}`} />
                             {aiResult.riskLevel} Risk
                           </span>
                         </div>

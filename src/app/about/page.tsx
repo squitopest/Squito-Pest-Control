@@ -21,17 +21,17 @@ export default function AboutPage() {
                 About Us
               </div>
               <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-6 tracking-tight">
-                Modern Defense for <span className="gradient-text">Long Island</span>
+                Built Here.<br /><span className="gradient-text">For Here.</span>
               </h1>
               <div className="space-y-6 text-lg text-white/70 leading-relaxed">
                  <p>
-                    Squito Pest Control was built on a simple premise: pest control doesn't have to be opaque, dangerous, or outdated. We set out to modernize the industry for Long Island homeowners and businesses.
+                    Squito was started by someone who grew up on Long Island, works on Long Island, and knows exactly what pests show up — and when. With over 6 years of hands-on field experience, I started Squito because I believed homeowners deserved better than long wait times, vague pricing, and technicians who've never seen your neighborhood.
                  </p>
                  <p>
-                    By leveraging cutting-edge, eco-friendly treatment protocols, transparent pricing, and industry-leading customer service, we eliminate the stress of pest management. We treat your property with the exact same care we treat our own.
+                    We're not a franchise. We don't send a different person every visit. When you call Squito, you get a local expert who knows how ant pressure spikes in Nassau every April, how termite season hits Suffolk hard in the spring, and where mosquitoes breed in your specific zip code.
                  </p>
                  <p>
-                    Our technicians are certified, insured, and deeply familiar with the unique ecosystem of Nassau and Suffolk counties. Whether it's the intense summer mosquito seasons or the winter rodent migrations, we have the specialized expertise to stop bugs at the source.
+                    Every treatment is tailored to your property and the season you're in. We use products that are safe for your family and pets — and we don't leave until the job is done right.
                  </p>
               </div>
               

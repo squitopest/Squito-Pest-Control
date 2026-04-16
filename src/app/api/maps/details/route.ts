@@ -12,17 +12,21 @@ export async function GET(request: Request) {
   try {
     validateEnv(["GOOGLE_MAPS_API_KEY"]);
     const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    
-    // Use Geocoding API or Places Details API to get precisely parsed address components.
-    // Geocoding API is usually best for resolving a place_id to street/city/zip explicitly.
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${place_id}&key=${apiKey}`;
+    if (!apiKey) {
+      return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
+    }
+    const url = `https://places.googleapis.com/v1/places/${place_id}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": "addressComponents.longText,addressComponents.types,formattedAddress",
+      },
+    });
     const data = await response.json();
 
-    if (data.status === 'OK' && data.results.length > 0) {
-      const result = data.results[0];
-      const components = result.address_components;
+    if (response.ok && data.addressComponents) {
+      const components = data.addressComponents;
 
       let streetNumber = "";
       let route = "";
@@ -31,24 +35,25 @@ export async function GET(request: Request) {
 
       // Parse Google Address Components into our flat payload structure
       for (const comp of components) {
-        if (comp.types.includes("street_number")) streetNumber = comp.long_name;
-        if (comp.types.includes("route")) route = comp.long_name;
+        if (comp.types.includes("street_number")) streetNumber = comp.longText;
+        if (comp.types.includes("route")) route = comp.longText;
         // City can be locality, sublocality, or neighborhood depending on NY mapping (e.g., Hamlet)
-        if (comp.types.includes("locality")) city = comp.long_name;
-        if (!city && comp.types.includes("sublocality")) city = comp.long_name;
-        if (!city && comp.types.includes("neighborhood")) city = comp.long_name;
-        if (comp.types.includes("postal_code")) zipCode = comp.long_name;
+        if (comp.types.includes("locality")) city = comp.longText;
+        if (!city && comp.types.includes("sublocality")) city = comp.longText;
+        if (!city && comp.types.includes("neighborhood")) city = comp.longText;
+        if (!city && comp.types.includes("postal_town")) city = comp.longText;
+        if (comp.types.includes("postal_code")) zipCode = comp.longText;
       }
 
       return NextResponse.json({
         street: `${streetNumber} ${route}`.trim(),
         city: city,
         zipCode: zipCode,
-        formatted: result.formatted_address,
+        formatted: data.formattedAddress,
       });
     }
 
-    return NextResponse.json(data, { status: 400 });
+    return NextResponse.json({ error: "Address details lookup failed." }, { status: 400 });
 
   } catch (error: any) {
     console.error("Details Proxy Error:", error);
