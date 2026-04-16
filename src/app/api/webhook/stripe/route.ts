@@ -126,7 +126,7 @@ export async function POST(req: Request) {
         try {
           await resend.emails.send({
             from: "Squito Pest Control <service@squitopestcontrol.com>",
-            to: ["service@squitopestcontrol.com"],
+            to: ["service@getsquito.com"],
             subject: `New Booking/Purchase: ${booking.plan_id}`,
             html: `
               <div style="font-family: sans-serif; padding: 20px; color: #333;">

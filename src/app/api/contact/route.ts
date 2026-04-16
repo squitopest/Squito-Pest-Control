@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Please enter a valid 5-digit ZIP code." }, { status: 400 });
     }
 
-    const recipientEmail = "service@squitopestcontrol.com";
+    const recipientEmail = "service@getsquito.com";
 
     const safeFirstName = escapeHtml(firstName);
     const safeLastName = escapeHtml(lastName);

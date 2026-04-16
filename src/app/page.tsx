@@ -7,7 +7,7 @@ import Footer from "@/components/Footer/Footer";
 import ScrollReset from "@/components/ScrollReset";
 
 /* Below-fold sections — code-split into separate JS chunks for faster initial load */
-const PestLibrary = dynamic(() => import("@/components/PestLibrary/PestLibrary"));
+const PestLibrary = dynamic(() => import("@/components/PestLibrary/PestLibraryTeaser"));
 const ServiceArea = dynamic(() => import("@/components/ServiceArea/ServiceArea"));
 const ContactForm = dynamic(() => import("@/components/ContactForm/ContactForm"));
 

@@ -151,13 +151,13 @@ export default function ContactForm() {
                   <div className="text-lg font-display font-bold text-white group-hover:text-green-400 transition-colors">(631) 203-1000</div>
                 </div>
               </a>
-              <a href="mailto:service@squitopestcontrol.com" className="flex items-center gap-4 group w-fit">
+              <a href="mailto:service@getsquito.com" className="flex items-center gap-4 group w-fit">
                 <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-green-500/20 group-hover:border-green-500/50 transition-all">
                   <Mail size={20} className="text-green-500" />
              </div>
                 <div>
                   <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-0.5">Email Us</div>
-                  <div className="text-lg font-semibold text-white group-hover:text-green-400 transition-colors">service@squitopestcontrol.com</div>
+                  <div className="text-lg font-semibold text-white group-hover:text-green-400 transition-colors">service@getsquito.com</div>
                 </div>
              </a>
               <div className="flex items-center gap-4 w-fit">

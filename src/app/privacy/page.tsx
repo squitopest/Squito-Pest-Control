@@ -88,7 +88,7 @@ export default function PrivacyPage() {
             </p>
             <div className="mt-4 space-y-2 text-white/60">
               <p>📞 <a href="tel:6312031000" className="text-green-400 hover:underline">(631) 203-1000</a></p>
-              <p>📧 <a href="mailto:service@squitopestcontrol.com" className="text-green-400 hover:underline">service@squitopestcontrol.com</a></p>
+              <p>📧 <a href="mailto:service@getsquito.com" className="text-green-400 hover:underline">service@getsquito.com</a></p>
             </div>
           </section>
         </div>

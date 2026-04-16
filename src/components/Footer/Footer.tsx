@@ -54,11 +54,11 @@ export default function Footer() {
                   <span className="text-sm font-semibold text-white group-hover:text-green-400 transition-colors">(631) 203-1000</span>
                 </div>
               </a>
-              <a href="mailto:service@squitopestcontrol.com" className="flex items-center gap-3 text-sm hover:text-green-400 transition-colors w-fit group">
+              <a href="mailto:service@getsquito.com" className="flex items-center gap-3 text-sm hover:text-green-400 transition-colors w-fit group">
                 <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-green-500/30 group-hover:bg-green-500/10 transition-all">
                   <Mail size={14} className="text-green-500" />
                 </div>
-                service@squitopestcontrol.com
+                service@getsquito.com
               </a>
               <div className="flex items-center gap-3 text-sm">
                 <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
