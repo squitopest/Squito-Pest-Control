@@ -686,7 +686,7 @@ export const PESTS: Pest[] = [
       'Inspect the exterior of your home for entry points every fall',
     ],
     lifeCycle: 'Gestation: 19–21 days → Litter of 6–8 pups → Sexually mature in 6 weeks → 8 litters per year possible. One pair can produce 60+ offspring per year.',
-    funFact: 'A house mouse produces up to 70 droppings per day. If you find just a few droppings in your kitchen, there are almost certainly many more you haven't found yet.',
+    funFact: "A house mouse produces up to 70 droppings per day. If you find just a few droppings in your kitchen, there are almost certainly many more you haven't found yet.",
   },
   {
     slug: 'deer-mice',
