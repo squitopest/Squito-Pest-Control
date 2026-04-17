@@ -2,8 +2,17 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { validateEnv } from "@/lib/validateEnv";
 import { createServiceClient } from "@/lib/supabase";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function GET(req: Request) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`checkout-session:${ip}`, 30, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down and try again shortly." },
+      { status: 429 }
+    );
+  }
+
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("session_id")?.trim();
 

@@ -1,7 +1,16 @@
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { validateEnv } from "@/lib/validateEnv";
 
 export async function GET(request: Request) {
+  const ip = getClientIp(request);
+  if (!rateLimit(`maps-autocomplete:${ip}`, 60, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please slow down and try again shortly." },
+      { status: 429 }
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const input = searchParams.get("input");
 

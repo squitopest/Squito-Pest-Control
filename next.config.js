@@ -19,6 +19,20 @@ const nextConfig = {
   },
 
   async headers() {
+    // HSTS: production deploys only (skip Vercel preview to avoid pinning preview URLs).
+    const isVercelProduction = process.env.VERCEL_ENV === "production";
+    const isLocalProductionBuild =
+      process.env.NODE_ENV === "production" && process.env.VERCEL !== "1";
+    const hstsHeaders =
+      isVercelProduction || isLocalProductionBuild
+        ? [
+            {
+              key: "Strict-Transport-Security",
+              value: "max-age=31536000",
+            },
+          ]
+        : [];
+
     return [
       {
         // Apply security headers to every route
@@ -44,6 +58,7 @@ const nextConfig = {
             key: "X-DNS-Prefetch-Control",
             value: "on",
           },
+          ...hstsHeaders,
         ],
       },
     ];

@@ -8,6 +8,7 @@ import {
   toCents,
   TAX_RATE,
 } from "@/data/plans";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { validateEnv } from "@/lib/validateEnv";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,6 +18,14 @@ function normalizeInput(value: unknown, maxLength: number) {
 }
 
 export async function POST(req: Request) {
+  const ip = getClientIp(req);
+  if (!rateLimit(`checkout:${ip}`, 15, 60_000)) {
+    return NextResponse.json(
+      { error: "Too many checkout attempts. Please wait a moment and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     validateEnv([
       "STRIPE_SECRET_KEY",

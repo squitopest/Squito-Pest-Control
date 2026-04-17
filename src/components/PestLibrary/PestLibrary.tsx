@@ -9,6 +9,13 @@ type AIResult =
   | { identified: true; pestName: string; riskLevel: string; season: string; description: string; confidence: string }
   | { identified: false; message: string };
 
+const AI_RISK_META: Record<string, { dot: string; badge: string }> = {
+  Critical: { dot: "bg-red-500",    badge: "bg-red-900/60 border-red-700/50 text-red-300" },
+  High:     { dot: "bg-orange-500", badge: "bg-orange-900/60 border-orange-700/50 text-orange-300" },
+  Medium:   { dot: "bg-yellow-400", badge: "bg-yellow-900/60 border-yellow-700/50 text-yellow-300" },
+  Low:      { dot: "bg-sky-400",    badge: "bg-sky-900/60 border-sky-700/50 text-sky-300" },
+};
+
 export default function PestLibrary() {
   const [activeCategory, setActiveCategory] = useState<PestCategory | "All">("All");
   const [selected, setSelected] = useState<Pest | null>(null);
@@ -38,6 +45,11 @@ export default function PestLibrary() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
+  // Revoke the preview object URL whenever it changes to avoid memory leaks
+  useEffect(() => {
+    return () => { if (previewUrl) URL.revokeObjectURL(previewUrl); };
+  }, [previewUrl]);
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -65,6 +77,7 @@ export default function PestLibrary() {
     new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
+        URL.revokeObjectURL(img.src);
         const canvas = document.createElement("canvas");
         let w = img.width, h = img.height;
         const max = 512;
@@ -74,7 +87,7 @@ export default function PestLibrary() {
         canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL("image/jpeg", 0.7));
       };
-      img.onerror = reject;
+      img.onerror = (e) => { URL.revokeObjectURL(img.src); reject(e); };
       img.src = URL.createObjectURL(file);
     });
 
@@ -190,7 +203,7 @@ export default function PestLibrary() {
         </p>
       </div>
 
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+      <input ref={fileInputRef} id="library-pest-camera" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
 
       {/* ── Pest Detail Modal ── */}
       {selected && (
@@ -304,8 +317,8 @@ export default function PestLibrary() {
                       <div>
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <h3 className="text-2xl font-display font-bold text-white">{aiResult.pestName}</h3>
-                          <span className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded border ${(RISK_META[aiResult.riskLevel as keyof typeof RISK_META] ?? RISK_META["Nuisance"]).badge}`}>
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${(RISK_META[aiResult.riskLevel as keyof typeof RISK_META] ?? RISK_META["Nuisance"]).dot}`} />
+                          <span className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded border ${(AI_RISK_META[aiResult.riskLevel] ?? AI_RISK_META.Low).badge}`}>
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${(AI_RISK_META[aiResult.riskLevel] ?? AI_RISK_META.Low).dot}`} />
                             {aiResult.riskLevel}
                           </span>
                         </div>
