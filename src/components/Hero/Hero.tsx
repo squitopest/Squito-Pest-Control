@@ -36,7 +36,7 @@ export default function Hero() {
           muted
           loop
           playsInline
-          preload="none"
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         >
           <source src="/success_video.mp4" type="video/mp4" />
