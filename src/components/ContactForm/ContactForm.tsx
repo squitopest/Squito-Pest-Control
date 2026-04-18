@@ -203,20 +203,6 @@ export default function ContactForm() {
                     </div>
                  </a>
 
-                 {/* Success Video Section */}
-                 <div className="w-full aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 relative shadow-2xl">
-                    <video 
-                      autoPlay 
-                      muted 
-                      loop 
-                      playsInline
-                      preload="auto"
-                      className="w-full h-full object-cover absolute top-0 left-0 pointer-events-none"
-                    >
-                      <source src="/success_video.mp4" type="video/mp4" />
-                      Your browser does not support HTML5 video.
-                    </video>
-                 </div>
                </div>
               ) : (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-left">

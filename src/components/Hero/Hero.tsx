@@ -5,13 +5,10 @@ import { ArrowRight, CheckCircle, Star, Phone, Camera } from "lucide-react";
 import Link from "next/link";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
-const YOUTUBE_VIDEO_ID = "ouaGJXqUaXc";
 
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
-  const [videoReady, setVideoReady] = useState(false);
-  const [posterVisible, setPosterVisible] = useState(true);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -22,14 +19,7 @@ export default function Hero() {
       }, 400);
     }, 2800);
 
-    const videoTimer = setTimeout(() => setVideoReady(true), 200);
-    const posterTimer = setTimeout(() => setPosterVisible(false), 4000);
-
-    return () => {
-      clearInterval(wordInterval);
-      clearTimeout(videoTimer);
-      clearTimeout(posterTimer);
-    };
+    return () => clearInterval(wordInterval);
   }, []);
 
   return (
@@ -41,18 +31,16 @@ export default function Hero() {
 
       {/* Background Video */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-[50%] left-[50%] w-[100vw] h-[100vw] lg:w-[100vw] lg:h-[56.25vw] -translate-x-1/2 -translate-y-1/2 min-h-[100svh] min-w-[177.77vh]">
-          {videoReady && (
-            <iframe
-              className="absolute top-0 left-0 w-full h-full pointer-events-none scale-[1.75] md:scale-100"
-              src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&showinfo=0&rel=0&disablekb=1&modestbranding=1&iv_load_policy=3&enablejsapi=1&playsinline=1`}
-              allow="autoplay; encrypted-media"
-              title="Background video"
-              loading="lazy"
-            />
-          )}
-          <div className={`absolute inset-0 bg-background transition-opacity duration-1000 ${posterVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} />
-        </div>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        >
+          <source src="/success_video.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-background/55 z-10" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/40 to-background z-10" />
       </div>
