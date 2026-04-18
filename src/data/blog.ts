@@ -189,5 +189,91 @@ export const blogPosts: BlogPost[] = [
         <p class="text-white/80 text-sm">If you've seen droppings, heard noises in your walls or ceiling, or spotted a mouse in your kitchen, the colony is likely already established. Contact Squito Pest Control for a professional exclusion inspection before the problem multiplies — literally.</p>
       </div>
     `
+  },
+  {
+    slug: "bed-bug-signs-long-island",
+    title: "When to Call an Exterminator for Bed Bugs: A Homeowner's Guide",
+    excerpt: "Unsure if you have bed bugs? Learn the signs to look for and when to stop trying DIY and call a professional before the infestation spreads to every room.",
+    seoDescription: "Identify bed bug signs early and learn when to call a professional exterminator on Long Island. Stop an infestation before it spreads.",
+    date: "Mar 19, 2026",
+    category: "Bed Bugs",
+    readTime: "7 min read",
+    image: "/blog-bedbug.jpg",
+    content: `
+      <p class="mb-6 text-lg text-white/80 leading-relaxed">Bed bugs are one of the most emotionally distressing pest infestations a homeowner can face. They're not caused by filth, they spread incredibly fast, and DIY treatments often make the problem worse by scattering bugs to new rooms.</p>
+
+      <p class="mb-8 text-white/70 leading-relaxed">Here's everything you need to know about identifying a bed bug problem — and exactly when to stop treating it yourself and pick up the phone.</p>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">The Early Warning Signs</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">Most infestations are caught in the early stage. The earliest signs are easy to miss if you don't know what to look for:</p>
+      <ul class="list-disc pl-6 mb-8 text-white/70 space-y-3">
+        <li><strong class="text-white">Bite marks in a line or cluster</strong> — Bed bug bites often appear in rows of 3 ("breakfast, lunch, dinner") on exposed skin</li>
+        <li><strong class="text-white">Small rust-colored stains on sheets</strong> — These are blood smears from bugs being crushed while feeding</li>
+        <li><strong class="text-white">Dark specks on the mattress seam</strong> — Bed bug fecal matter, which looks like a black marker dot</li>
+        <li><strong class="text-white">Shed skins</strong> — Clear, translucent shells near seams, headboards, and bed frames</li>
+        <li><strong class="text-white">A sweet, musty odor</strong> — Heavy infestations emit a distinctive smell from the bugs' scent glands</li>
+      </ul>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">Where Bed Bugs Hide</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">Despite their name, bed bugs don't only live in beds. In heavy infestations, they spread to every fabric surface in the room:</p>
+      <ul class="list-disc pl-6 mb-8 text-white/70 space-y-3">
+        <li>Mattress and box spring seams</li>
+        <li>Behind headboards and picture frames</li>
+        <li>Inside electrical outlets and switch plates</li>
+        <li>In couch cushion seams and under loose carpet edges</li>
+        <li>Inside nightstand drawers and behind baseboards</li>
+      </ul>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">When to Stop DIY and Call a Pro</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">Most over-the-counter sprays are repellent-based, not lethal on contact. This means they scatter bugs deeper into the walls and furniture — spreading the infestation into new rooms. Call a professional immediately if:</p>
+      <ul class="list-disc pl-6 mb-8 text-white/70 space-y-3">
+        <li>You find live bugs in more than one room</li>
+        <li>You've applied a store-bought spray and woken up with new bites</li>
+        <li>You find eggs (tiny white ovals, 1mm long) in multiple locations</li>
+        <li>Family members are showing allergic reactions to bites</li>
+        <li>You've had a recent overnight guest, hotel stay, or secondhand furniture delivery</li>
+      </ul>
+
+      <div class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl my-10">
+        <h4 class="text-red-400 font-bold text-lg mb-2">Do NOT Throw Out Furniture</h4>
+        <p class="text-white/80 text-sm">One of the biggest mistakes homeowners make is discarding a mattress or sofa. Moving infested furniture through your home spreads bugs to every room you pass through. Call Squito first — we can often save your furniture with professional treatment.</p>
+      </div>
+    `
+  },
+  {
+    slug: "common-spiders-long-island",
+    title: "Common Spiders Found on Long Island: Identification & Safety",
+    excerpt: "Spotted a spider in your home or garage? Most Long Island spiders are harmless, but a few are not. Learn to identify the ones that matter and when to be concerned.",
+    seoDescription: "Identify common spiders found on Long Island. Learn which are harmless and which require professional pest control intervention.",
+    date: "Feb 14, 2026",
+    category: "Identification",
+    readTime: "5 min read",
+    image: "/blog-spider.jpg",
+    content: `
+      <p class="mb-6 text-lg text-white/80 leading-relaxed">Long Island is home to dozens of spider species, and nearly all of them are completely harmless to humans. In fact, most spiders are beneficial — they eat flies, mosquitoes, and other insects you don't want in your home. But there are a few exceptions you should know about.</p>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">The Common Harmless Spiders</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">The vast majority of spiders you'll encounter on Long Island pose no threat:</p>
+      <ul class="list-disc pl-6 mb-8 text-white/70 space-y-3">
+        <li><strong class="text-white">Cellar Spider (Daddy Longlegs)</strong> — Long thin legs, pale body. Lives in corners and basements. Completely harmless.</li>
+        <li><strong class="text-white">House Spider</strong> — Small, yellowish-brown. Builds webs in corners and windowsills. Harmless.</li>
+        <li><strong class="text-white">Garden Spider</strong> — Large, black and yellow. Builds large orb webs outdoors. Beneficial garden predator.</li>
+        <li><strong class="text-white">Wolf Spider</strong> — Stout, hairy, fast-moving. Hunts on the ground. Intimidating but harmless to humans.</li>
+        <li><strong class="text-white">Jumping Spider</strong> — Small, often iridescent. Curious and harmless. Won't bite unless cornered.</li>
+      </ul>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">The One to Watch: Northern Black Widow</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">Yes, black widows exist on Long Island — specifically the Northern Black Widow (<em>Latrodectus variolus</em>). They're uncommon but present, particularly in wooded areas, woodpiles, and undisturbed outdoor storage.</p>
+      <p class="mb-4 text-white/70 leading-relaxed">Identification: Shiny black body, roughly 1.5 inches with legs extended. Red marking on the underside of the abdomen — on Northern Black Widows, this marking may appear as two separate red spots or a broken hourglass rather than the classic solid hourglass of the Southern species.</p>
+      <p class="mb-8 text-white/70 leading-relaxed">If you find one, do not handle it. Contact Squito for safe removal.</p>
+
+      <h2 class="text-3xl font-bold text-white mt-12 mb-6 tracking-tight">When Spider Numbers Become a Problem</h2>
+      <p class="mb-4 text-white/70 leading-relaxed">Spiders follow their food source. If you're seeing large numbers of spiders inside your home, it usually means you have an underlying insect infestation attracting them. Common culprits include flies, fungus gnats, and ants. Treating the prey population eliminates the predators naturally.</p>
+
+      <div class="bg-green-500/10 border border-green-500/30 p-6 rounded-2xl my-10">
+        <h4 class="text-green-400 font-bold text-lg mb-2">Spider Control Starts with Source Reduction</h4>
+        <p class="text-white/80 text-sm">Our general pest control program targets the insects that attract spiders — dramatically reducing spider populations without needing to target them directly. Contact us for a free assessment.</p>
+      </div>
+    `
   }
 ];

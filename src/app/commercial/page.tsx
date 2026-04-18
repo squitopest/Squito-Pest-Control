@@ -20,6 +20,22 @@ const faqs = [
   {
     question: "What types of businesses do you cover?",
     answer: "We cover a wide spectrum of commercial entities across Long Island including: Hospitals & Medical Facilities, Restaurants & Bars, Hotels & Hospitality, Warehouses & Logistics, Property Management (Multi-Family), and Retail Storefronts."
+  },
+  {
+    question: "Do commercial contracts require a long-term commitment?",
+    answer: "No long-term contracts are required. We earn your business every month through results. Most clients choose monthly or bi-monthly service plans because the consistency is what keeps them pest-free and audit-ready — not because we lock them in."
+  },
+  {
+    question: "How much does commercial pest control cost?",
+    answer: "Commercial pricing varies by property size, pest pressure, and service frequency. A small retail storefront might start around $75–$125/month, while a full-service restaurant or warehouse will typically range from $150–$400/month depending on scope. We provide detailed quotes after a free on-site evaluation — no guessing."
+  },
+  {
+    question: "What happens if there's a pest sighting between scheduled visits?",
+    answer: "Commercial accounts receive priority emergency dispatch. If a pest is spotted between scheduled services, call us and we'll have a technician on-site within 24 hours — often same-day. Your business reputation matters too much to wait."
+  },
+  {
+    question: "Are your products safe for food service environments?",
+    answer: "Yes. We exclusively use EPA-registered, food-safe formulations in food service environments. All products used in your facility come with complete Safety Data Sheets (SDS) that are kept in your on-site logbook for health inspector review. We never apply anything near open food prep areas and follow strict HACCP protocols."
   }
 ];
 

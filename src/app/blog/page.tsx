@@ -1,7 +1,6 @@
-import { BookOpen, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { BookOpen } from "lucide-react";
 import { createAnonClient } from "@/lib/supabase";
+import BlogList from "@/components/BlogList/BlogList";
 import { blogPosts as staticPosts } from "@/data/blog";
 import { createPageMetadata } from "@/lib/site";
 
@@ -90,45 +89,7 @@ export default async function BlogPage() {
            </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-           {posts.map((post, index) => (
-             <Link href={`/blog/${post.slug}`} key={post.slug} className="group glass-card rounded-3xl border border-border hover:border-green-500/50 transition-all overflow-hidden flex flex-col h-full cursor-pointer relative">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20" />
-                <div className="aspect-[16/9] bg-surface relative overflow-hidden">
-                   <Image
-                     src={post.image}
-                     alt={post.title}
-                     fill
-                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                     quality={70}
-                     priority={index === 0}
-                     fetchPriority={index === 0 ? "high" : "auto"}
-                     className="object-cover group-hover:scale-110 transition-transform duration-500 will-change-transform"
-                   />
-                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-                   <div className="absolute top-4 left-4 bg-background/80 backdrop-blur-md border border-border text-xs text-white px-3 py-1 rounded-full uppercase tracking-wider font-semibold">
-                      {post.category}
-                   </div>
-                </div>
-                
-                <div className="p-8 flex flex-col flex-grow">
-                   <div className="flex items-center justify-between text-sm text-white/50 mb-4">
-                      <span>{post.date}</span>
-                      <span>{post.read_time}</span>
-                   </div>
-                   <h2 className="text-2xl font-display font-bold text-white mb-4 group-hover:text-green-400 transition-colors leading-tight">
-                      {post.title}
-                   </h2>
-                   <p className="text-white/70 mb-6 flex-grow line-clamp-3">
-                      {post.excerpt}
-                   </p>
-                   <div className="text-green-400 font-semibold group-hover:translate-x-2 transition-transform inline-flex items-center gap-2">
-                      Read Article <ArrowRight size={18} />
-                   </div>
-                </div>
-             </Link>
-           ))}
-        </div>
+        <BlogList posts={posts} />
       </div>
     </main>
   );

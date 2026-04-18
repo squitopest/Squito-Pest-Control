@@ -556,8 +556,8 @@ function PlansContent() {
                     <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${accentText}`}>Best For</p>
                     <ul className="flex flex-col gap-2">
                       {plan.bestFor.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-sm text-white/70">
-                          <Leaf size={13} className={accentText} />
+                        <li key={item} className="flex items-center gap-2 text-base text-white/75">
+                          <Leaf size={14} className={accentText} />
                           {item}
                         </li>
                       ))}
@@ -568,7 +568,7 @@ function PlansContent() {
                     <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${accentText}`}>Pests Covered</p>
                     <div className="flex flex-wrap gap-2">
                       {plan.pestsIncluded.map((pest) => (
-                        <span key={pest} className={`text-xs px-2.5 py-1 rounded-full border font-medium ${accentBg} ${accentText}`}>
+                        <span key={pest} className={`text-sm px-3 py-1.5 rounded-full border font-medium ${accentBg} ${accentText}`}>
                           {pest}
                         </span>
                       ))}
@@ -635,7 +635,7 @@ function PlansContent() {
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5 text-white/60 text-sm leading-relaxed border-t border-white/5 pt-4">
+                  <div className="px-6 pb-5 text-white/65 text-base leading-relaxed border-t border-white/5 pt-4">
                     {faq.a}
                   </div>
                 )}

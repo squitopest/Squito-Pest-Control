@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Phone, Mail, MapPin, Send, CheckCircle, Map } from "lucide-react";
+import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2 } from "lucide-react";
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -45,7 +45,7 @@ export default function ContactForm() {
     city: "",
     zip: "",
     message: "",
-    service: "",
+    service: "Mosquito & Tick Control",
   });
 
   const [loading, setLoading] = useState(false);
@@ -226,14 +226,14 @@ export default function ContactForm() {
                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold transition-all ${type === "residential" ? 'bg-green-500 text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                       onClick={() => setType("residential")}
                     >
-                      🏠 Residential
+                      <Home size={15} /> Residential
                    </button>
                     <button
                      type="button"
                       className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold transition-all ${type === "commercial" ? 'bg-green-500 text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
                      onClick={() => setType("commercial")}
                    >
-                     🏢 Commercial
+                     <Building2 size={15} /> Commercial
                     </button>
                   </div>
 

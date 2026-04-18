@@ -83,10 +83,10 @@ export default function PestLibrary() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+              className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-200 cursor-pointer ${
                 activeCategory === cat
                   ? "bg-green-500 border-green-500 text-white shadow-[0_0_20px_rgba(34,197,94,0.35)]"
-                  : "bg-white/5 border-white/10 text-white/60 hover:border-white/20 hover:text-white"
+                  : "bg-white/8 border-white/20 text-white/80 hover:border-green-500/50 hover:text-white hover:bg-green-500/10"
               }`}
             >
               {cat}
