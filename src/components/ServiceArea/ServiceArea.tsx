@@ -268,7 +268,7 @@ export default function ServiceArea() {
               
               <div className="aspect-[4/3] bg-background/50 rounded-2xl m-2 md:m-4 relative overflow-hidden border border-border group-hover:border-green-500/30 transition-colors">
                 <Image 
-                  src="/long_island_map.png" 
+                  src="/long_island_map.webp" 
                   alt="Long Island Service Area Map" 
                   fill
                   sizes="(max-width: 1024px) 100vw, 512px"

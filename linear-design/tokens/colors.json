@@ -1,0 +1,83 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "core": {
+    "background": {
+      "value": "#ffffff",
+      "role": "background",
+      "name": "scrollbar-color"
+    },
+    "text-muted": {
+      "value": "#b4bcd0",
+      "role": "text-muted",
+      "name": "color-text-secondary"
+    },
+    "text-primary": {
+      "value": "#080808",
+      "role": "text-primary",
+      "name": "theme-color"
+    },
+    "border": {
+      "value": "#28282c",
+      "role": "border",
+      "name": "color-bg-quaternary"
+    },
+    "surface": {
+      "value": "#f4f2f4",
+      "role": "surface",
+      "name": "color-bg-tertiary"
+    },
+    "accent": {
+      "value": "#7170ff",
+      "role": "accent",
+      "name": "color-accent"
+    }
+  },
+  "status": {},
+  "extended": {
+    "color-text-quaternary": {
+      "value": "#62666d",
+      "role": "unknown",
+      "name": "color-text-quaternary"
+    },
+    "color-button-invert-bg": {
+      "value": "#e2e4e7",
+      "role": "unknown",
+      "name": "color-button-invert-bg"
+    },
+    "color-9c9da1": {
+      "value": "#9c9da1",
+      "role": "unknown"
+    },
+    "color-teal": {
+      "value": "#02b8cc",
+      "role": "info",
+      "name": "color-teal"
+    },
+    "color-indigo": {
+      "value": "#5e6ad2",
+      "role": "unknown",
+      "name": "color-indigo"
+    },
+    "color-f79ce0": {
+      "value": "#f79ce0",
+      "role": "unknown"
+    },
+    "color-101112": {
+      "value": "#101112",
+      "role": "unknown"
+    },
+    "color-6366f1": {
+      "value": "#6366f1",
+      "role": "unknown"
+    },
+    "color-link-primary": {
+      "value": "#828fff",
+      "role": "unknown",
+      "name": "color-link-primary"
+    }
+  },
+  "meta": {
+    "theme": "light",
+    "extracted": "2026-04-18"
+  }
+}

@@ -75,7 +75,7 @@ export default function ResidentialPage() {
 
         {/* Action Image & Booking */}
         <div className="relative rounded-3xl overflow-hidden glass-card mb-20">
-          <div className="absolute inset-0 bg-[url('/services/service_residential_bg_v5.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[url('/services/service_residential_bg_v5.webp')] bg-cover bg-center opacity-40 mix-blend-overlay" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
           
           <div className="relative z-10 p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">

@@ -91,7 +91,7 @@ export default function CommercialPage() {
 
         {/* Action Image & Booking */}
         <div className="relative rounded-3xl overflow-hidden glass-card mb-20">
-          <div className="absolute inset-0 bg-[url('/services/service_commercial_bg_v2.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[url('/services/service_commercial_bg_v2.webp')] bg-cover bg-center opacity-40 mix-blend-overlay" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
           
           <div className="relative z-10 p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">

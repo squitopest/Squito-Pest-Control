@@ -77,7 +77,7 @@ const oneTimeServices = [
     ...ONE_TIME_SERVICES[0], // termite-inspection
     price: ONE_TIME_SERVICES[0].price,
     label: "flat rate",
-    image: "/termite-inspection.png",
+    image: "/termite-inspection.webp",
     id: "termite-inspection",
     icon: FlaskConical,
     desc: "Full property inspection for termite activity, damage, and risk areas.",
@@ -97,7 +97,7 @@ const oneTimeServices = [
     ...ONE_TIME_SERVICES[1], // wasp-removal
     price: ONE_TIME_SERVICES[1].price,
     label: "starting at",
-    image: "/hornet-nest.png",
+    image: "/hornet-nest.webp",
     id: "wasp-removal",
     icon: Bug,
     desc: "Safe, same-day removal of active wasp, hornet, and yellow jacket nests.",
@@ -115,7 +115,7 @@ const oneTimeServices = [
     ...ONE_TIME_SERVICES[2], // mosquito-event-spray
     price: ONE_TIME_SERVICES[2].price,
     label: "starting at",
-    image: "/backyard-bbq.png",
+    image: "/backyard-bbq.webp",
     id: "mosquito-event-spray",
     icon: Droplets,
     desc: "One-time yard barrier spray — ideal before outdoor events, BBQs, or parties.",

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "WebFetch(domain:squito-app.vercel.app)"
+      "WebFetch(domain:squito-app.vercel.app)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"pest control service local business trustworthy professional\" --design-system -p \"Squito Website\" -f markdown)"
     ]
   }
 }

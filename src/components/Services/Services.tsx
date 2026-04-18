@@ -12,7 +12,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Enjoy Your Yard",
-    bgImage: "/services/service_mosquito_bg_v2.png"
+    bgImage: "/services/service_mosquito_bg_v2.webp"
   },
   {
     title: "Commercial Services",
@@ -21,7 +21,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Protect Your Business",
-    bgImage: "/services/service_commercial_bg_v2.png"
+    bgImage: "/services/service_commercial_bg_v2.webp"
   },
   {
     title: "Residential Protection",
@@ -30,7 +30,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Protect Your Home",
-    bgImage: "/services/service_residential_bg_v5.png"
+    bgImage: "/services/service_residential_bg_v5.webp"
   },
   {
     title: "Termite Defense",
@@ -39,7 +39,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Guard Your Home",
-    bgImage: "/services/service_termite_bg_v3.png"
+    bgImage: "/services/service_termite_bg_v3.webp"
   },
   {
     title: "Rodent Removal",
@@ -48,7 +48,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Remove Rodents",
-    bgImage: "/services/service_rodent_bg_v2.png"
+    bgImage: "/services/service_rodent_bg_v2.webp"
   },
   {
     title: "Bed Bug Treatment",
@@ -57,7 +57,7 @@ const services = [
     baseColor: "text-green-500",
     bgHover: "hover:border-green-500/50 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]",
     cta: "Get Treatment",
-    bgImage: "/services/service_bedbug_bg_v2.png"
+    bgImage: "/services/service_bedbug_bg_v2.webp"
   },
 ];
 
