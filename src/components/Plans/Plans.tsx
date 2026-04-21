@@ -154,6 +154,8 @@ export default function Plans() {
           {/* Billing Toggle */}
           <div className="flex flex-col sm:flex-row p-1.5 gap-1 bg-card/80 border border-border rounded-3xl sm:rounded-full backdrop-blur-md w-full max-w-sm sm:max-w-max mx-auto">
             <button
+              type="button"
+              aria-pressed={billing === "monthly"}
               className={`w-full sm:w-auto justify-center px-6 py-3 sm:py-2 rounded-2xl sm:rounded-full font-semibold text-sm transition-all ${
                 billing === "monthly" ? "bg-white/10 text-white shadow" : "text-white/60 hover:text-white"
               }`}
@@ -162,6 +164,8 @@ export default function Plans() {
               Monthly
             </button>
             <button
+              type="button"
+              aria-pressed={billing === "yearly"}
               className={`w-full sm:w-auto justify-center px-6 py-3 sm:py-2 rounded-2xl sm:rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${
                 billing === "yearly" ? "bg-white/10 text-white shadow" : "text-white/60 hover:text-white"
               }`}
@@ -171,6 +175,8 @@ export default function Plans() {
               <span className="bg-green-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">Save 20%</span>
             </button>
             <button
+              type="button"
+              aria-pressed={billing === "onetime"}
               className={`w-full sm:w-auto justify-center px-6 py-3 sm:py-2 rounded-2xl sm:rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${
                 billing === "onetime" ? "bg-white/10 text-white shadow" : "text-white/60 hover:text-white"
               }`}

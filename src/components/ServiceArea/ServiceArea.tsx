@@ -184,6 +184,7 @@ export default function ServiceArea() {
 
                 {/* View Plans Button — below the search bar for mobile visibility */}
                 <button
+                  type="button"
                   onClick={handleGoClick}
                   disabled={loading || (!query.trim())}
                   className={`mt-3 w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-sm transition-all duration-300 ${

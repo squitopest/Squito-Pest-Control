@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useState,
   useRef,
   useEffect,
@@ -8,6 +9,7 @@ import {
   useImperativeHandle,
 } from "react";
 import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle } from "lucide-react";
+import { useModalDismiss } from "@/lib/useModalDismiss";
 
 type AIResult =
   | { identified: true; pestName: string; riskLevel: string; season: string; description: string; confidence: string }
@@ -65,10 +67,16 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
   const [aiResult, setAiResult] = useState<AIResult | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useImperativeHandle(ref, () => ({
     openFilePicker: () => fileInputRef.current?.click(),
   }));
+
+  const clearAiResult = useCallback(() => {
+    setAiResult(null);
+    setPreviewUrl(null);
+  }, []);
 
   const modalOpen = scanning || !!aiResult;
   useEffect(() => {
@@ -77,6 +85,10 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
       document.body.style.overflow = "";
     };
   }, [modalOpen]);
+
+  // Don't allow Escape to dismiss while we're mid-API call — that could look
+  // like the request succeeded. Only wire dismiss when a result is on screen.
+  useModalDismiss(!!aiResult && !scanning, clearAiResult, closeButtonRef);
 
   useEffect(() => {
     return () => {
@@ -110,11 +122,6 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
     }
   };
 
-  const clearAiResult = () => {
-    setAiResult(null);
-    setPreviewUrl(null);
-  };
-
   return (
     <>
       <input
@@ -128,6 +135,10 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
 
       {(scanning || aiResult) && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-busy={scanning || undefined}
+          aria-label={scanning ? "Identifying pest" : "Pest identification result"}
           className="fixed inset-0 z-[9999] bg-background/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up overflow-y-auto"
           onClick={(e) => !scanning && e.target === e.currentTarget && clearAiResult()}
         >
@@ -174,7 +185,10 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
                         </div>
                       </div>
                       <button
+                        ref={closeButtonRef}
+                        type="button"
                         onClick={clearAiResult}
+                        aria-label="Close identification result"
                         className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-all shrink-0"
                       >
                         <X size={16} />
@@ -219,6 +233,7 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
                     <p className="text-white/60 text-sm mb-5 max-w-sm mx-auto">{aiResult.message}</p>
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
                       <button
+                        type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-white font-semibold rounded-xl transition-all text-sm"
                       >

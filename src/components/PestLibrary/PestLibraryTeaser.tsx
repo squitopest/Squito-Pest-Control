@@ -50,6 +50,7 @@ export default function PestLibraryTeaser() {
           <div className="flex items-center gap-2 shrink-0">
             {/* Scroll arrows — visible on larger screens */}
             <button
+              type="button"
               onClick={() => scroll("left")}
               aria-label="Scroll left"
               className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 hover:text-white hover:border-white/20 transition-all"
@@ -57,6 +58,7 @@ export default function PestLibraryTeaser() {
               <ChevronLeft size={16} />
             </button>
             <button
+              type="button"
               onClick={() => scroll("right")}
               aria-label="Scroll right"
               className="hidden sm:flex w-8 h-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/50 hover:text-white hover:border-white/20 transition-all"

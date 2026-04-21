@@ -72,6 +72,7 @@ export default class ErrorBoundary extends React.Component<
             📞 (631) 203-1000
           </a>
           <button
+            type="button"
             onClick={() => this.setState({ hasError: false, errorMessage: "" })}
             style={{
               marginTop: "1rem",

@@ -28,6 +28,7 @@ export default function BlogList({ posts }: { posts: Post[] }) {
         {categories.map((cat) => (
           <button
             key={cat}
+            type="button"
             onClick={() => setActive(cat)}
             className={`px-5 py-2 rounded-full text-sm font-semibold transition-all border cursor-pointer ${
               active === cat

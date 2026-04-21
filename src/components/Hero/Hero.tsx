@@ -30,13 +30,15 @@ export default function Hero() {
       <div className="glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
       {/* Background Video */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0" aria-hidden="true">
         <video
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
+          aria-hidden="true"
+          tabIndex={-1}
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         >
           <source src="/success_video.mp4" type="video/mp4" />
@@ -96,6 +98,7 @@ export default function Hero() {
             </Link>
 
             <button
+              type="button"
               onClick={() => {
                 const el = document.getElementById('library-pest-camera');
                 if (el) el.click();

@@ -3,6 +3,54 @@ import { stripe } from "@/lib/stripe";
 import { validateEnv } from "@/lib/validateEnv";
 import { createServiceClient } from "@/lib/supabase";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { getOneTimeService, getSubscriptionPlan } from "@/data/plans";
+
+type BookingSummary = {
+  planTitle: string;
+  fullName: string | null;
+  serviceDate: string | null;
+  serviceTime: string | null;
+  city: string | null;
+  zipCode: string | null;
+  amountTotalCents: number | null;
+  currency: string | null;
+};
+
+function buildPlanTitle(planId: string | null | undefined): string {
+  if (!planId) return "Squito Service";
+  return (
+    getSubscriptionPlan(planId)?.name ??
+    getOneTimeService(planId)?.name ??
+    "Squito Service"
+  );
+}
+
+async function loadBookingSummary(bookingId: string): Promise<BookingSummary | null> {
+  try {
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("full_name, service_date, service_time, city, zip_code, plan_id")
+      .eq("id", bookingId)
+      .single();
+
+    if (error || !data) return null;
+
+    return {
+      planTitle: buildPlanTitle(data.plan_id),
+      fullName: data.full_name ?? null,
+      serviceDate: data.service_date ?? null,
+      serviceTime: data.service_time ?? null,
+      city: data.city ?? null,
+      zipCode: data.zip_code ?? null,
+      amountTotalCents: null,
+      currency: null,
+    };
+  } catch (e) {
+    console.error("loadBookingSummary failed", e);
+    return null;
+  }
+}
 
 export async function GET(req: Request) {
   const ip = getClientIp(req);
@@ -39,20 +87,37 @@ export async function GET(req: Request) {
         return NextResponse.json({ verified: false, paymentStatus: "unverified" }, { status: 404 });
       }
 
+      const verified = data.stripe_payment_status === "paid";
+      const summary = verified ? await loadBookingSummary(bookingId) : null;
+
       return NextResponse.json({
-        verified: data.stripe_payment_status === "paid",
+        verified,
         mode: "mock",
         paymentStatus: data.stripe_payment_status,
+        booking: summary,
       });
     }
 
     validateEnv(["STRIPE_SECRET_KEY"]);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
+    const verified = session.status === "complete" && session.payment_status === "paid";
+    const bookingId = (session.metadata?.bookingId || "").trim();
+
+    let booking: BookingSummary | null = null;
+    if (verified && bookingId) {
+      booking = await loadBookingSummary(bookingId);
+      if (booking) {
+        booking.amountTotalCents = session.amount_total ?? null;
+        booking.currency = session.currency ?? null;
+      }
+    }
+
     return NextResponse.json({
-      verified: session.status === "complete" && session.payment_status === "paid",
+      verified,
       mode: session.mode,
       paymentStatus: session.payment_status,
+      booking,
     });
   } catch (error: any) {
     console.error("Checkout session verification failed:", error?.message || error);

@@ -1,23 +1,28 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { X, Camera, Shield, ChevronRight, ArrowRight } from "lucide-react";
 import NextImage from "next/image";
 import { PESTS, CATEGORIES, RISK_META, type Pest, type PestCategory } from "@/data/pests";
 import PestIdentifyCapture, { type PestIdentifyCaptureHandle } from "./PestIdentifyCapture";
+import { useModalDismiss } from "@/lib/useModalDismiss";
 
 export default function PestLibrary() {
   const [activeCategory, setActiveCategory] = useState<PestCategory | "All">("All");
   const [selected, setSelected] = useState<Pest | null>(null);
   const identifyRef = useRef<PestIdentifyCaptureHandle>(null);
+  const modalCloseRef = useRef<HTMLButtonElement | null>(null);
 
   const displayed = activeCategory === "All" ? PESTS : PESTS.filter(p => p.category === activeCategory);
 
+  const closeModal = useCallback(() => setSelected(null), []);
   const modalOpen = !!selected;
   useEffect(() => {
     document.body.style.overflow = modalOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [modalOpen]);
+
+  useModalDismiss(modalOpen, closeModal, modalCloseRef);
 
   useEffect(() => {
     const handleHash = () => {
@@ -51,6 +56,7 @@ export default function PestLibrary() {
 
             {/* Snap & Identify */}
             <button
+              type="button"
               onClick={() => identifyRef.current?.openFilePicker()}
               className="group relative overflow-hidden rounded-xl p-[1px] focus:outline-none mb-1"
             >
@@ -82,6 +88,7 @@ export default function PestLibrary() {
           {(["All", ...CATEGORIES] as const).map(cat => (
             <button
               key={cat}
+              type="button"
               onClick={() => setActiveCategory(cat)}
               className={`px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-200 cursor-pointer ${
                 activeCategory === cat
@@ -106,6 +113,7 @@ export default function PestLibrary() {
             return (
               <button
                 key={pest.slug}
+                type="button"
                 onClick={() => setSelected(pest)}
                 className="group relative rounded-xl overflow-hidden border border-white/8 hover:border-white/20 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl aspect-[2/3]"
               >
@@ -147,8 +155,11 @@ export default function PestLibrary() {
       {/* ── Pest Detail Modal ── */}
       {selected && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pest-modal-title"
           className="fixed inset-0 z-[9999] bg-background/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up overflow-y-auto"
-          onClick={e => e.target === e.currentTarget && setSelected(null)}
+          onClick={e => e.target === e.currentTarget && closeModal()}
         >
           <div className="bg-surface border border-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[95vh] my-auto">
             <div className="w-full md:w-2/5 h-56 md:h-auto shrink-0 border-b md:border-b-0 md:border-r border-border relative overflow-hidden">
@@ -162,10 +173,10 @@ export default function PestLibrary() {
             <div className="p-6 md:p-8 flex-1 overflow-y-auto">
               <div className="flex justify-between items-start mb-1">
                 <div>
-                  <h3 className="text-2xl md:text-3xl font-display font-bold text-white">{selected.name}</h3>
+                  <h3 id="pest-modal-title" className="text-2xl md:text-3xl font-display font-bold text-white">{selected.name}</h3>
                   <p className="text-white/40 text-sm italic mt-0.5">{selected.scientificName}</p>
                 </div>
-                <button onClick={() => setSelected(null)} className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-3 md:p-2 rounded-full transition-all shrink-0 ml-4">
+                <button ref={modalCloseRef} type="button" onClick={closeModal} aria-label="Close pest details" className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-3 md:p-2 rounded-full transition-all shrink-0 ml-4">
                   <X size={20} />
                 </button>
               </div>

@@ -104,9 +104,11 @@ export default function Navbar() {
 
           {/* Hamburger */}
           <button
+            type="button"
             className="lg:hidden relative z-50 p-2 text-white/80 hover:text-white"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
           >
             {menuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>

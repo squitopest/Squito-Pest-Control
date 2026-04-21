@@ -1,15 +1,57 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { CheckCircle2, ShieldCheck, Clock, MapPin, Truck, Check, AlertTriangle } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Clock, MapPin, Truck, Check, AlertTriangle, Calendar, User } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 type VerificationState = "loading" | "verified" | "unverified";
 
+type BookingSummary = {
+  planTitle: string;
+  fullName: string | null;
+  serviceDate: string | null;
+  serviceTime: string | null;
+  city: string | null;
+  zipCode: string | null;
+  amountTotalCents: number | null;
+  currency: string | null;
+};
+
+function formatBookingDate(iso: string | null): string | null {
+  if (!iso) return null;
+  // The DB stores YYYY-MM-DD; treat as local to avoid timezone shifting the day.
+  const parts = iso.split("-").map(Number);
+  if (parts.length !== 3 || parts.some((p) => Number.isNaN(p))) return iso;
+  const [y, m, d] = parts;
+  try {
+    return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function formatMoney(cents: number | null, currency: string | null): string | null {
+  if (cents == null) return null;
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: (currency || "usd").toUpperCase(),
+    }).format(cents / 100);
+  } catch {
+    return `$${(cents / 100).toFixed(2)}`;
+  }
+}
+
 function SuccessContent() {
   const [status, setStatus] = useState<VerificationState>("loading");
+  const [booking, setBooking] = useState<BookingSummary | null>(null);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -30,6 +72,7 @@ function SuccessContent() {
 
         if (!active) return;
         setStatus(response.ok && data.verified ? "verified" : "unverified");
+        if (response.ok && data.booking) setBooking(data.booking as BookingSummary);
       } catch {
         if (active) setStatus("unverified");
       }
@@ -41,6 +84,19 @@ function SuccessContent() {
       active = false;
     };
   }, [sessionId]);
+
+  // Booking completed — clear the sessionStorage draft so a future return to
+  // /book doesn't show a "we saved your details" banner for a form the user
+  // has already paid for.
+  useEffect(() => {
+    if (status === "verified" && typeof window !== "undefined") {
+      try {
+        window.sessionStorage.removeItem("squito:book:form:v1");
+      } catch {
+        // sessionStorage can be disabled in some browsers/incognito; safe to ignore.
+      }
+    }
+  }, [status]);
 
   if (status === "loading") {
     return (
@@ -107,6 +163,62 @@ function SuccessContent() {
           Welcome to the family! We look forward to keeping you pest-free.
         </h2>
 
+        {booking && (
+          <div className="w-full max-w-2xl mx-auto mt-8 mb-8 bg-background/50 border border-green-500/20 rounded-2xl p-6 text-left">
+            <div className="flex items-center justify-between gap-4 mb-5 pb-4 border-b border-white/5">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-green-400 font-semibold mb-1">Your Booking</p>
+                <p className="text-white font-bold text-lg">{booking.planTitle}</p>
+              </div>
+              {formatMoney(booking.amountTotalCents, booking.currency) && (
+                <p className="text-green-400 font-display font-bold text-2xl shrink-0">
+                  {formatMoney(booking.amountTotalCents, booking.currency)}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              {booking.fullName && (
+                <div className="flex items-start gap-3">
+                  <User size={16} className="text-white/40 mt-0.5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-white/40 text-xs uppercase tracking-wider">Name</p>
+                    <p className="text-white font-semibold">{booking.fullName}</p>
+                  </div>
+                </div>
+              )}
+              {(booking.city || booking.zipCode) && (
+                <div className="flex items-start gap-3">
+                  <MapPin size={16} className="text-white/40 mt-0.5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-white/40 text-xs uppercase tracking-wider">Service Area</p>
+                    <p className="text-white font-semibold">
+                      {[booking.city, booking.zipCode].filter(Boolean).join(", ")}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {booking.serviceDate && (
+                <div className="flex items-start gap-3">
+                  <Calendar size={16} className="text-white/40 mt-0.5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-white/40 text-xs uppercase tracking-wider">Service Date</p>
+                    <p className="text-white font-semibold">{formatBookingDate(booking.serviceDate)}</p>
+                  </div>
+                </div>
+              )}
+              {booking.serviceTime && (
+                <div className="flex items-start gap-3">
+                  <Clock size={16} className="text-white/40 mt-0.5 shrink-0" aria-hidden="true" />
+                  <div>
+                    <p className="text-white/40 text-xs uppercase tracking-wider">Arrival Window</p>
+                    <p className="text-white font-semibold">{booking.serviceTime}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="w-full max-w-2xl mx-auto aspect-video rounded-xl overflow-hidden bg-black/40 border border-white/10 relative shadow-2xl mt-8 mb-12">
           <video
             autoPlay
@@ -114,6 +226,8 @@ function SuccessContent() {
             loop
             playsInline
             preload="auto"
+            aria-hidden="true"
+            tabIndex={-1}
             className="w-full h-full object-cover absolute top-0 left-0 pointer-events-none"
           >
             <source src="/success_video.mp4" type="video/mp4" />
@@ -170,10 +284,10 @@ function SuccessContent() {
         </div>
 
         <Link
-          href="/#reviews"
+          href="/"
           className="inline-flex items-center justify-center px-12 py-5 rounded-2xl font-bold text-lg text-white bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.2)]"
         >
-          Return to Dashboard
+          Back to Home
         </Link>
 
         {sessionId && (

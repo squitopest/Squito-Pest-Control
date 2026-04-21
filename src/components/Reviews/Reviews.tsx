@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Star, Quote } from "lucide-react";
 
 const reviews = [
@@ -52,14 +52,24 @@ export default function Reviews() {
   const trackRef = useRef<HTMLDivElement>(null);
   const posRef = useRef(0);
   const frameRef = useRef<number>(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
 
+    // Respect OS-level motion preference — show the reviews statically and let
+    // users scroll the container with the horizontal scrollbar instead.
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionQuery.matches) {
+      track.style.transform = "";
+      setReducedMotion(true);
+      return;
+    }
+
     // We assume items are triplicated: [1, 2, 3] -> [1,2,3, 1,2,3, 1,2,3]
     const oneSetWidth = track.scrollWidth / 3;
-    posRef.current = oneSetWidth; 
+    posRef.current = oneSetWidth;
 
     let isPaused = false;
     const SPEED = 0.5;
@@ -79,7 +89,7 @@ export default function Reviews() {
 
     const handleEnter = () => { isPaused = true; };
     const handleLeave = () => { isPaused = false; };
-    
+
     track.addEventListener("mouseenter", handleEnter);
     track.addEventListener("mouseleave", handleLeave);
 
@@ -90,7 +100,7 @@ export default function Reviews() {
     };
   }, []);
 
-  const items = [...reviews, ...reviews, ...reviews];
+  const items = reducedMotion ? reviews : [...reviews, ...reviews, ...reviews];
 
   return (
     <section className="py-24 bg-background overflow-hidden relative" id="reviews">
@@ -115,7 +125,7 @@ export default function Reviews() {
       </div>
 
       {/* Full-bleed scroll track — lives outside the container so it touches both screen edges */}
-      <div className="relative w-full overflow-hidden mb-16">
+      <div className={`relative w-full mb-16 ${reducedMotion ? "overflow-x-auto" : "overflow-hidden"}`}>
         {/* Fade edges */}
         <div className="absolute left-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
