@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     const safeService = escapeHtml(service);
     const safeMessage = escapeHtml(message);
 
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: "Squito Pest Control <service@squitopestcontrol.com>",
       to: [recipientEmail],
       subject: `New Lead: ${service || "Pest Control Inquiry"} - ${zip}`,
@@ -191,7 +191,7 @@ export async function POST(req: Request) {
       console.error("Customer Confirmation Email Error:", custEmailError);
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Contact API Error:", error);
     return NextResponse.json(

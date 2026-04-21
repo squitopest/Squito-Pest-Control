@@ -13,12 +13,12 @@ const footerLinks = {
     { label: "Bed Bug Treatment", href: "/services" },
   ],
   "Pest Library": [
-    { label: "Mosquitoes", href: "/#mosquitoes" },
-    { label: "Cockroaches", href: "/#cockroaches" },
-    { label: "Termites", href: "/#termites" },
-    { label: "Rodents", href: "/#rats" },
-    { label: "Bed Bugs", href: "/#bed-bugs" },
-    { label: "View All Pests →", href: "/#pest-library" },
+    { label: "Mosquitoes", href: "/pest-library#culex-mosquito" },
+    { label: "Cockroaches", href: "/pest-library#german-roach" },
+    { label: "Termites", href: "/pest-library#sub-termites" },
+    { label: "Rodents", href: "/pest-library#norway-rats" },
+    { label: "Bed Bugs", href: "/pest-library#bed-bugs" },
+    { label: "View All Pests →", href: "/pest-library" },
   ],
   Company: [
     { label: "About Us", href: "/about" },

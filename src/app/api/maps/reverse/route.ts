@@ -12,11 +12,19 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const lat = searchParams.get("lat");
-  const lng = searchParams.get("lng");
+  const rawLat = searchParams.get("lat");
+  const rawLng = searchParams.get("lng");
 
-  if (!lat || !lng) {
+  if (!rawLat || !rawLng) {
     return NextResponse.json({ error: "Missing lat/lng parameters" }, { status: 400 });
+  }
+
+  // Coerce to numbers and range-check before we ever put them in a URL — stops
+  // both query-string injection and malformed requests hitting Google's API.
+  const lat = Number(rawLat);
+  const lng = Number(rawLng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    return NextResponse.json({ error: "Invalid lat/lng values" }, { status: 400 });
   }
 
   try {
@@ -26,7 +34,7 @@ export async function GET(request: Request) {
        return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
     }
 
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${encodeURIComponent(apiKey)}`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -58,10 +66,16 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json(data, { status: 400 });
+    // Don't forward Google's raw error payload to the browser — log it server-side
+    // and return a generic message.
+    console.error("Reverse Geocoding upstream error", {
+      status: data?.status,
+      error_message: data?.error_message,
+    });
+    return NextResponse.json({ error: "Could not resolve that location." }, { status: 400 });
 
   } catch (error: any) {
-    console.error("Reverse Geocoding Proxy Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Reverse Geocoding Proxy Error:", error?.message || error);
+    return NextResponse.json({ error: "Reverse geocoding failed." }, { status: 500 });
   }
 }

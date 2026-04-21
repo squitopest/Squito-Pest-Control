@@ -279,7 +279,7 @@ export async function POST(req: Request) {
         line_items: lineItems,
         mode: checkoutMode,
         success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/book?cancel=true`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/book?canceled=1`,
         metadata: {
           bookingId: bookingId,
         },
