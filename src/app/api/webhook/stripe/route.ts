@@ -68,7 +68,13 @@ export async function POST(req: Request) {
         .single();
 
       if (fetchError || !existingBooking) {
-        console.error("Failed to load booking for Stripe webhook", fetchError);
+        console.error("Failed to load booking for Stripe webhook", {
+          bookingId,
+          code: (fetchError as any)?.code,
+          message: fetchError?.message,
+          details: (fetchError as any)?.details,
+          hint: (fetchError as any)?.hint,
+        });
       } else if (existingBooking.stripe_payment_status === "paid") {
         console.log(`Booking ${bookingId} already marked paid. Skipping duplicate webhook side effects.`);
       } else {
@@ -80,7 +86,13 @@ export async function POST(req: Request) {
           .single();
 
         if (error || !booking) {
-          console.error("Failed to update booking payment status in Supabase", error);
+          console.error("Failed to update booking payment status in Supabase", {
+            bookingId,
+            code: (error as any)?.code,
+            message: error?.message,
+            details: (error as any)?.details,
+            hint: (error as any)?.hint,
+          });
           return NextResponse.json({ received: true });
         }
 
@@ -217,10 +229,20 @@ export async function POST(req: Request) {
 
     if (bookingId) {
       const supabase = createServiceClient();
-      await supabase
+      const { error } = await supabase
         .from("bookings")
         .update({ stripe_payment_status: "expired" })
         .eq("id", bookingId);
+
+      if (error) {
+        console.error("Failed to mark booking expired in Supabase", {
+          bookingId,
+          code: (error as any)?.code,
+          message: error.message,
+          details: (error as any)?.details,
+          hint: (error as any)?.hint,
+        });
+      }
     }
   }
 

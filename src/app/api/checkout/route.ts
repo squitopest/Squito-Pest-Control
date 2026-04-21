@@ -82,26 +82,36 @@ export async function POST(req: Request) {
 
     if (!isMock) {
       try {
+        const bookingRow: Record<string, unknown> = {
+          property_type: propertyType || "Residential",
+          zip_code: zipCode,
+          service_date: date,
+          service_time: time,
+          street: street,
+          city: city,
+          plan_id: planId,
+          full_name: fullName,
+          email: email,
+          phone: phone,
+          stripe_payment_status: "pending",
+        };
+
         const { data, error } = await supabase
           .from("bookings")
-          .insert([{
-            property_type: propertyType,
-            zip_code: zipCode,
-            service_date: date,
-            service_time: time,
-            street: street,
-            city: city,
-            plan_id: planId,
-            full_name: fullName,
-            email: email,
-            phone: phone,
-            stripe_payment_status: "pending",
-          }])
+          .insert([bookingRow])
           .select()
           .single();
 
         if (error) {
-          console.error("Supabase booking insert failed:", error);
+          // Surface the full Postgres error so schema drift (missing column,
+          // rename, RLS rejection, etc.) is immediately obvious in Vercel logs.
+          console.error("Supabase booking insert failed", {
+            code: (error as any).code,
+            message: error.message,
+            details: (error as any).details,
+            hint: (error as any).hint,
+            attemptedColumns: Object.keys(bookingRow),
+          });
           return NextResponse.json(
             { error: "We couldn't save your booking details. Please try again in a moment or call us directly." },
             { status: 500 }
@@ -109,8 +119,12 @@ export async function POST(req: Request) {
         } else if (data) {
           bookingId = data.id;
         }
-      } catch (e) {
-        console.error("Supabase Client Error:", e);
+      } catch (e: any) {
+        console.error("Supabase Client Error", {
+          name: e?.name,
+          message: e?.message,
+          stack: e?.stack,
+        });
         return NextResponse.json(
           { error: "We couldn't save your booking details. Please try again in a moment or call us directly." },
           { status: 500 }
