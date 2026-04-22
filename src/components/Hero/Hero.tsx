@@ -51,15 +51,20 @@ export default function Hero() {
       <div className="container relative z-20 mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="max-w-4xl flex flex-col items-start gap-7 animate-fade-in-up">
 
-          {/* Rating badge */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={13} fill="#fbbf24" color="#fbbf24" />
-              ))}
-            </div>
-            <span className="text-sm font-medium text-white/90">5-Star Rated · Nassau & Suffolk County</span>
-          </div>
+          {/* Primary CTA — lifted to the top so the first clickable thing on
+              the page is the one we actually want visitors to convert on.
+              The two secondary CTAs (Pest Identifier, Call Now) stay in their
+              original position below the body copy so users keep the message
+              context before choosing a non-conversion action. */}
+          <Link
+            href="/plans"
+            className="relative overflow-hidden inline-flex items-center justify-center px-10 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Get Protected <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </span>
+            <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
+          </Link>
 
           {/* Headline — big and bold */}
           <h1 className="font-display font-bold text-5xl md:text-7xl lg:text-[6.5rem] leading-[1.0] tracking-tight">
@@ -85,18 +90,8 @@ export default function Hero() {
             10+ years in the field. NO contracts. NO gimmicks. Just local experts who show up and get it done.
           </p>
 
-          {/* CTAs */}
+          {/* Secondary CTAs */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto mt-2">
-            <Link
-              href="/plans"
-              className="relative overflow-hidden inline-flex items-center justify-center px-10 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Get Protected <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-              </span>
-              <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
-            </Link>
-
             <button
               type="button"
               onClick={() => {
@@ -125,6 +120,17 @@ export default function Hero() {
                 <span className="text-base font-display font-bold text-white">(631) 203-1000</span>
               </div>
             </a>
+          </div>
+
+          {/* Rating badge — now a trust reinforcement alongside the badges
+              below, after the visitor has read the pitch and seen the CTAs. */}
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+            <div className="flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={13} fill="#fbbf24" color="#fbbf24" />
+              ))}
+            </div>
+            <span className="text-sm font-medium text-white/90">5-Star Rated · Nassau & Suffolk County</span>
           </div>
 
           {/* Trust badges */}

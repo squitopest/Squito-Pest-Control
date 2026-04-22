@@ -1,20 +1,42 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2 } from "lucide-react";
+import { useId, useState, useRef, useEffect, useCallback } from "react";
+import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2, ChevronDown, X, Loader2 } from "lucide-react";
 
 export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [type, setType] = useState<"residential" | "commercial">("residential");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  // The full form is long — collapsing it behind a drop-down keeps the home
+  // page dense and makes the "Free Inspection" CTA the actual call-to-action
+  // rather than something you scroll past.
+  const [formOpen, setFormOpen] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const autocompleteAbortRef = useRef<AbortController | null>(null);
+  const reactId = useId();
+  const formPanelId = `contact-form-panel-${reactId}`;
+  const suggestionListId = `contact-address-suggestions-${reactId}`;
+  const suggestionOptionId = (i: number) => `contact-address-option-${reactId}-${i}`;
+
+  // When the drop-down form opens, move focus into it so keyboard users don't
+  // have to tab back up through the page to start filling it out.
+  useEffect(() => {
+    if (formOpen) {
+      const t = setTimeout(() => firstNameRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
+  }, [formOpen]);
 
   // Handle clicking outside suggestions
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
+        setHighlightedIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -51,35 +73,58 @@ export default function ContactForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Google Maps Predictive Autocomplete
+  // Google Maps Predictive Autocomplete.
+  // Mirrors the hardened implementation on /book: aborts stale in-flight
+  // requests so late responses can't overwrite newer input, tracks a
+  // dedicated loading flag for a spinner, and resets the keyboard highlight.
   const handleAddressChange = async (val: string) => {
     setForm(prev => ({ ...prev, street: val }));
-    
+    setHighlightedIndex(-1);
+
     if (val.length < 3) {
+      autocompleteAbortRef.current?.abort();
       setSuggestions([]);
       setShowSuggestions(false);
+      setAutocompleteLoading(false);
       return;
     }
-    
+
+    autocompleteAbortRef.current?.abort();
+    const controller = new AbortController();
+    autocompleteAbortRef.current = controller;
+    setAutocompleteLoading(true);
+
     try {
-      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`);
+      const res = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(val)}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
-      
-      if (data.status === 'OK' && data.predictions) {
+
+      if (data.status === "OK" && data.predictions) {
         setSuggestions(data.predictions);
         setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
-    } catch (e) {
-      console.error("Autocomplete Error", e);
+    } catch (e: any) {
+      if (e?.name !== "AbortError") {
+        console.error("Autocomplete Error", e);
+      }
+    } finally {
+      if (autocompleteAbortRef.current === controller) {
+        setAutocompleteLoading(false);
+      }
     }
   };
 
-  const selectSuggestion = async (suggestion: any) => {
+  const selectSuggestion = useCallback(async (suggestion: any) => {
     setShowSuggestions(false);
+    setHighlightedIndex(-1);
     setForm(prev => ({ ...prev, street: suggestion.description }));
 
     try {
-      const res = await fetch(`/api/maps/details?place_id=${suggestion.place_id}`);
+      const res = await fetch(`/api/maps/details?place_id=${encodeURIComponent(suggestion.place_id)}`);
       const data = await res.json();
       if (data.street) {
         setForm(prev => ({
@@ -91,6 +136,33 @@ export default function ContactForm() {
       }
     } catch (e) {
       console.error(e);
+    }
+  }, []);
+
+  const handleAddressKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) {
+      if (e.key === "ArrowDown" && suggestions.length > 0) {
+        setShowSuggestions(true);
+        setHighlightedIndex(0);
+        e.preventDefault();
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i + 1) % suggestions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1));
+    } else if (e.key === "Enter") {
+      if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
+        e.preventDefault();
+        selectSuggestion(suggestions[highlightedIndex]);
+      }
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
     }
   };
 
@@ -181,14 +253,14 @@ export default function ContactForm() {
            </div>
          </div>
 
-         <div className="flex-1 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-           <div className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20">
-             {submitted ? (
+          <div className="flex-1 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+           {submitted ? (
+            <div className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20">
                 <div id="success-message" className="text-center py-8 flex flex-col items-center">
                   <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-6">
                     <CheckCircle size={32} className="text-green-500" />
                  </div>
-                 <h3 className="text-3xl font-display font-bold text-white mb-3">We'll be in touch shortly!</h3>
+                 <h3 className="text-3xl font-display font-bold text-white mb-3">We&apos;ll be in touch shortly!</h3>
                  <p className="text-white/70 mb-6 max-w-sm mx-auto text-sm">
                    Thanks for reaching out. A Squito specialist will contact you within the hour to schedule your free inspection.
                  </p>
@@ -204,7 +276,50 @@ export default function ContactForm() {
                  </a>
 
                </div>
-              ) : (
+            </div>
+            ) : !formOpen ? (
+              <button
+                type="button"
+                onClick={() => setFormOpen(true)}
+                aria-expanded={false}
+                aria-controls={formPanelId}
+                className="group relative w-full text-left glass-card rounded-3xl p-8 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20 overflow-hidden transition-all duration-300 hover:border-green-500/50 hover:shadow-[0_20px_60px_rgba(34,197,94,0.2)] cursor-pointer"
+              >
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                  <div className="shrink-0 w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center justify-center group-hover:bg-green-500/20 group-hover:border-green-500/60 transition-all">
+                    <Send size={24} className="text-green-400 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[10px] uppercase tracking-widest text-green-400 font-semibold mb-2">Free · No Obligation</div>
+                    <div className="text-2xl md:text-3xl font-display font-bold text-white mb-1">Start My Free Inspection</div>
+                    <div className="text-white/60 text-sm">Click to open the form — takes under a minute.</div>
+                  </div>
+                  <div className="shrink-0 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 group-hover:text-green-400 group-hover:border-green-500/50 group-hover:bg-green-500/10 transition-all">
+                    <ChevronDown size={20} />
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <div
+                id={formPanelId}
+                role="region"
+                aria-label="Free inspection form"
+                className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20 animate-fade-in-up"
+              >
+                <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-white/5">
+                  <h3 className="text-lg md:text-xl font-display font-bold text-white">
+                    Tell us about your pest issue
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setFormOpen(false)}
+                    aria-label="Close inspection form"
+                    className="shrink-0 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-left">
                   <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl mb-2">
                     <button
@@ -227,7 +342,8 @@ export default function ContactForm() {
                     <div className="space-y-2">
                      <label htmlFor="firstName" className="text-sm font-semibold text-white/80 ml-1">First Name *</label>
                       <input
-                        id="firstName"
+                       id="firstName"
+                       ref={firstNameRef}
                        type="text"
                         required
                         autoComplete="given-name"
@@ -294,28 +410,58 @@ export default function ContactForm() {
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
                         value={form.street}
                         onChange={e => handleAddressChange(e.target.value)}
+                        onKeyDown={handleAddressKeyDown}
                         onFocus={() => {
                           if (suggestions.length > 0) setShowSuggestions(true);
                         }}
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded={showSuggestions && suggestions.length > 0}
+                        aria-controls={suggestionListId}
+                        aria-activedescendant={
+                          highlightedIndex >= 0 ? suggestionOptionId(highlightedIndex) : undefined
+                        }
                       />
-                      
+                      {autocompleteLoading && (
+                        <p className="mt-2 text-xs text-white/40 flex items-center gap-2">
+                          <Loader2 size={12} className="animate-spin" aria-hidden="true" /> Looking up addresses…
+                        </p>
+                      )}
+
                       {/* Google Maps Interactive Dropdown */}
                       {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
-                          {suggestions.map((suggestion, i) => (
-                            <div 
-                              key={i} 
-                              onClick={() => selectSuggestion(suggestion)}
-                              className="px-4 py-3 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3"
-                            >
-                              <Map size={16} className="text-white/40 flex-shrink-0" />
-                              <div>
-                                <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
-                                <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <ul
+                          id={suggestionListId}
+                          role="listbox"
+                          aria-label="Matching addresses"
+                          className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                        >
+                          {suggestions.map((suggestion, i) => {
+                            const highlighted = i === highlightedIndex;
+                            return (
+                              <li
+                                key={suggestion.place_id ?? i}
+                                id={suggestionOptionId(i)}
+                                role="option"
+                                aria-selected={highlighted}
+                                onMouseEnter={() => setHighlightedIndex(i)}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  selectSuggestion(suggestion);
+                                }}
+                                className={`px-4 py-3 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 ${
+                                  highlighted ? "bg-white/10" : "hover:bg-white/5"
+                                }`}
+                              >
+                                <Map size={16} className="text-white/40 flex-shrink-0" aria-hidden="true" />
+                                <div>
+                                  <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
+                                  <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -424,12 +570,12 @@ export default function ContactForm() {
                    </p>
                  )}
 
-                 <p className="text-xs text-center text-white/40 max-w-sm mx-auto leading-relaxed">
-                   By submitting, you agree to be contacted by Squito. We never share your data.
-                 </p>
-               </form>
-             )}
+                <p className="text-xs text-center text-white/40 max-w-sm mx-auto leading-relaxed">
+                  By submitting, you agree to be contacted by Squito. We never share your data.
+                </p>
+              </form>
             </div>
+             )}
           </div>
         </div>
       </div>
