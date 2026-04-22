@@ -1,4 +1,4 @@
-import { Info, ArrowRight, Shield, Clock, Leaf, Award, MapPin, Star, CheckCircle, Users, Home, Building2, Phone } from "lucide-react";
+import { Info, ArrowRight, Shield, Clock, Leaf, Award, MapPin, CheckCircle, Phone } from "lucide-react";
 import Link from "next/link";
 import { createPageMetadata } from "@/lib/site";
 

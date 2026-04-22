@@ -1,4 +1,4 @@
-import { ShieldCheck, ArrowRight, Home, Building2, Bug, Zap, Rat, BedDouble, Sprout, Phone } from "lucide-react";
+import { ShieldCheck, ArrowRight, Home, Building2, Bug, Rat, BedDouble, Sprout, Phone } from "lucide-react";
 import Link from "next/link";
 import { createPageMetadata } from "@/lib/site";
 

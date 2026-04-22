@@ -64,7 +64,6 @@ export const TAX_RATE = 0.08625;
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
 
-type PlanId = (typeof SUBSCRIPTION_PLANS)[number]["id"];
 type OneTimeId = (typeof ONE_TIME_SERVICES)[number]["id"];
 
 /** Returns a subscription plan by ID, or undefined if not found */

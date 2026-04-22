@@ -261,7 +261,7 @@ function PlansContentInner() {
         setShowContactForm(false);
         setFormData({ name: "", email: "", message: "" });
       }, 3000);
-    } catch (err) {
+    } catch {
       setFormStatus("error");
       setTimeout(() => setFormStatus("idle"), 3000);
     }

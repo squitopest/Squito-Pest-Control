@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Star, Quote } from "lucide-react";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 const reviews = [
   {
@@ -52,18 +53,17 @@ export default function Reviews() {
   const trackRef = useRef<HTMLDivElement>(null);
   const posRef = useRef(0);
   const frameRef = useRef<number>(0);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  // Respect OS-level motion preference. Driven by useSyncExternalStore so we
+  // don't need to setState from inside the effect below.
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
 
-    // Respect OS-level motion preference — show the reviews statically and let
-    // users scroll the container with the horizontal scrollbar instead.
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (motionQuery.matches) {
+    if (reducedMotion) {
+      // Stop the rAF-driven translate and let the user scroll the row manually.
       track.style.transform = "";
-      setReducedMotion(true);
       return;
     }
 
@@ -98,7 +98,7 @@ export default function Reviews() {
       track.removeEventListener("mouseenter", handleEnter);
       track.removeEventListener("mouseleave", handleLeave);
     };
-  }, []);
+  }, [reducedMotion]);
 
   const items = reducedMotion ? reviews : [...reviews, ...reviews, ...reviews];
 

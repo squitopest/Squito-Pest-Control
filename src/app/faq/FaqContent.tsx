@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus, HelpCircle, ArrowRight, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
+import { Plus, Minus, HelpCircle, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
 
 const faqs = [
@@ -74,7 +74,7 @@ export default function FaqContent() {
         setShowContactForm(false);
         setFormData({ name: "", email: "", message: "" });
       }, 3000);
-    } catch (err) {
+    } catch {
       setFormStatus("error");
       setTimeout(() => setFormStatus("idle"), 3000);
     }

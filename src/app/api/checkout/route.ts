@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase";
 import {
@@ -154,7 +155,7 @@ export async function POST(req: Request) {
 
     // Advanced Line Item Construction for Subscriptions
     const isYearly = billing === "yearly";
-    let lineItems = [];
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let checkoutMode: "payment" | "subscription" = "payment";
 
     if (isOneTime) {
@@ -293,7 +294,7 @@ export async function POST(req: Request) {
             .from("bookings")
             .update({ stripe_session_id: session.id })
             .eq("id", bookingId);
-        } catch (e) {
+        } catch {
           console.warn("Could not update Supabase with session ID, bypassing.");
         }
       }

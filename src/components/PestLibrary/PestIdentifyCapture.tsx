@@ -9,6 +9,7 @@ import {
   useImperativeHandle,
 } from "react";
 import { X, Camera, ShieldAlert, ArrowRight, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 import { useModalDismiss } from "@/lib/useModalDismiss";
 
 type AIResult =
@@ -209,19 +210,19 @@ const PestIdentifyCapture = forwardRef<PestIdentifyCaptureHandle>(function PestI
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3">
-                      <a
+                      <Link
                         href="/plans"
                         className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all text-sm"
                       >
                         View Plans <ArrowRight size={16} />
-                      </a>
-                      <a
+                      </Link>
+                      <Link
                         href="/#contact"
                         onClick={clearAiResult}
                         className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 hover:border-green-500/50 text-white font-semibold rounded-xl transition-all text-sm"
                       >
                         Get Free Inspection
-                      </a>
+                      </Link>
                     </div>
                   </>
                 ) : (

@@ -62,7 +62,7 @@ const services = [
 ];
 
 export default function Services() {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const [, setHovered] = useState<number | null>(null);
   const ref = useScrollReveal();
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 export default function CustomCursor() {
   const dotRef = useRef<HTMLDivElement>(null);
@@ -8,14 +9,13 @@ export default function CustomCursor() {
 
   const [isClicking, setIsClicking] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
-  // Start as null: unknown until we can check the media query on the client
-  const [isTouchDevice, setIsTouchDevice] = useState<boolean | null>(null);
+  // `useSyncExternalStore` under the hood — returns `true` on SSR so we don't
+  // render a desktop-only cursor into the SSR markup and cause a hydration
+  // flash before we know the real pointer type.
+  const isTouchDevice = useMediaQuery("(pointer: coarse)", true);
 
   useEffect(() => {
-    // Detect touch/coarse pointer (mobile, tablet). If true, skip entirely.
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    setIsTouchDevice(isTouch);
-    if (isTouch) return; // No cursor on touch devices — do not attach any listeners
+    if (isTouchDevice) return; // No cursor on touch devices — do not attach any listeners
 
     let mouseX = -100;
     let mouseY = -100;
@@ -63,11 +63,9 @@ export default function CustomCursor() {
       window.removeEventListener("mouseup", onMouseUp);
       cancelAnimationFrame(animFrameId);
     };
-  }, []);
+  }, [isTouchDevice]);
 
-  // Don't render anything until we know the device type (avoids SSR mismatch)
-  // Also skip entirely on touch/mobile devices
-  if (isTouchDevice !== false) return null;
+  if (isTouchDevice) return null;
 
   return (
     <div className="hidden md:block pointer-events-none z-[99999] fixed inset-0">

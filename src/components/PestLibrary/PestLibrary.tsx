@@ -3,6 +3,7 @@
 import { useCallback, useState, useRef, useEffect } from "react";
 import { X, Camera, Shield, ChevronRight, ArrowRight } from "lucide-react";
 import NextImage from "next/image";
+import Link from "next/link";
 import { PESTS, CATEGORIES, RISK_META, type Pest, type PestCategory } from "@/data/pests";
 import PestIdentifyCapture, { type PestIdentifyCaptureHandle } from "./PestIdentifyCapture";
 import { useModalDismiss } from "@/lib/useModalDismiss";
@@ -225,12 +226,12 @@ export default function PestLibrary() {
                 </div>
               </div>
               <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
-                <a href="/plans" className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] text-sm w-full">
+                <Link href="/plans" className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] text-sm w-full">
                   View Plans <ArrowRight size={16} />
-                </a>
-                <a href="/#contact" onClick={() => setSelected(null)} className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 text-white font-semibold rounded-xl transition-all text-sm w-full">
+                </Link>
+                <Link href="/#contact" onClick={() => setSelected(null)} className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 text-white font-semibold rounded-xl transition-all text-sm w-full">
                   Get Free Inspection
-                </a>
+                </Link>
               </div>
             </div>
           </div>
