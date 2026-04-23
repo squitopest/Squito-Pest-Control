@@ -10,11 +10,6 @@ const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroa
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
-  // Gate the background video on viewport size + reduced-motion preference.
-  // On phones we skip the video entirely (saves ~1.7MB + decoder/GPU load)
-  // and lean on the poster image instead. On desktop the video mounts after
-  // first paint so the LCP content isn't blocked by a video download.
-  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -28,20 +23,6 @@ export default function Hero() {
     return () => clearInterval(wordInterval);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const desktop = window.matchMedia("(min-width: 768px)");
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const evaluate = () => setShouldLoadVideo(desktop.matches && !reduced.matches);
-    evaluate();
-    desktop.addEventListener("change", evaluate);
-    reduced.addEventListener("change", evaluate);
-    return () => {
-      desktop.removeEventListener("change", evaluate);
-      reduced.removeEventListener("change", evaluate);
-    };
-  }, []);
-
   return (
     <section className="relative min-h-[90svh] lg:min-h-screen flex items-center pt-32 lg:pt-28 pb-16 overflow-hidden" id="hero">
 
@@ -51,9 +32,10 @@ export default function Hero() {
       <div className="hidden md:block glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
       <div className="hidden md:block glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
-      {/* Hero backdrop. The poster image is always painted first (tiny, ~70KB
-          AVIF/WebP via next/image) so mobile gets instant LCP. On desktop we
-          mount the video on top once shouldLoadVideo flips true. */}
+      {/* Hero backdrop. Poster image paints first for instant LCP, video
+          layers on top with native autoplay. Video is `hidden md:block` so
+          mobile skips the ~1.8MB download (Safari + modern Chrome respect
+          display:none + preload on <video>). */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <Image
           src="/hero-poster.jpg"
@@ -63,26 +45,19 @@ export default function Hero() {
           sizes="100vw"
           className="object-cover"
         />
-        {shouldLoadVideo && (
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster="/hero-poster.jpg"
-            aria-hidden="true"
-            tabIndex={-1}
-            ref={(el) => {
-              // Dynamically-mounted <video> doesn't always auto-start after
-              // hydration (Safari in particular), so kick it off explicitly.
-              if (el && el.paused) el.play().catch(() => {});
-            }}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          >
-            <source src="/success_video.mp4" type="video/mp4" />
-          </video>
-        )}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/hero-poster.jpg"
+          aria-hidden="true"
+          tabIndex={-1}
+          className="hidden md:block absolute inset-0 w-full h-full object-cover pointer-events-none motion-reduce:hidden"
+        >
+          <source src="/success_video.mp4" type="video/mp4" />
+        </video>
         {/* No cream wash — the video should read as video, not as a tinted
             panel. Readability is handled by dark text-shadow halos on the
             copy itself. We keep only a short bottom fade so the hero
