@@ -45,9 +45,7 @@ export default function Navbar() {
         )}
       >
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl flex items-center justify-between">
-          {/* Logo — raster PNG on dark, CSS wordmark on light (swapped via
-              data-theme in globals.css until a dark-on-light logo asset
-              is supplied). */}
+          {/* Logo — green gradient wordmark asset, reads on both themes. */}
           <Link href="/" className="z-50 relative flex items-center" aria-label="Squito — home">
             <Image
               src="/logo.png"
@@ -55,12 +53,8 @@ export default function Navbar() {
               width={120}
               height={80}
               priority
-              className="logo-image h-[60px] md:h-[80px] w-auto drop-shadow-lg"
+              className="h-[60px] md:h-[80px] w-auto"
             />
-            <span className="logo-wordmark font-display font-extrabold text-2xl md:text-3xl tracking-tight text-foreground items-center gap-1.5">
-              SQUITO
-              <span className="inline-block w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
-            </span>
           </Link>
 
           {/* Desktop nav links */}

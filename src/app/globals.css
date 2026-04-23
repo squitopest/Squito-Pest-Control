@@ -364,17 +364,14 @@
 :root[data-theme="light"] .glow-orb-teal   { background-color: rgb(var(--glow-teal) / 0.07); }
 :root[data-theme="light"] .glow-orb-accent { background-color: rgb(var(--glow-green) / 0.08); }
 
-/* ─── Logo swap ─────────────────────────────────────────────────────────
-   The default logo (/logo.png) is white-on-transparent — invisible on a
-   light navbar. Until a dark-on-light variant is supplied, we hide the
-   raster logo in light theme and show a CSS wordmark instead. Using
-   display-toggle (not opacity) so there's no ghost element intercepting
-   clicks.
+/* ─── Logo ──────────────────────────────────────────────────────────────
+   /logo.png is a green-gradient "SQUITO" wordmark that reads cleanly on
+   both dark and light backgrounds, so we show the raster asset in every
+   theme. (Earlier build incorrectly assumed the logo was white-on-trans
+   and hid it in light theme — that override is intentionally removed.)
 ──────────────────────────────────────────────────────────────────────── */
 .logo-image    { display: block; }
 .logo-wordmark { display: none; }
-:root[data-theme="light"] .logo-image    { display: none; }
-:root[data-theme="light"] .logo-wordmark { display: inline-flex; }
 
 /* Custom Scrollbar — theme-aware */
 ::-webkit-scrollbar {

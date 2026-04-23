@@ -44,12 +44,8 @@ export default function Footer() {
                 alt="Squito Pest Control"
                 width={140}
                 height={93}
-                className="logo-image h-[60px] w-auto"
+                className="h-[60px] w-auto"
               />
-              <span className="logo-wordmark font-display font-extrabold text-2xl tracking-tight text-foreground items-center gap-1.5">
-                SQUITO
-                <span className="inline-block w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
-              </span>
             </div>
             <p className="text-sm leading-relaxed max-w-sm mb-8 text-subtle">
               Proudly serving Long Island, New York. We eliminate pests, not peace of mind.
