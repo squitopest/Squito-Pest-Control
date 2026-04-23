@@ -45,15 +45,18 @@ export default function Navbar() {
         )}
       >
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl flex items-center justify-between">
-          {/* Logo — green gradient wordmark asset, reads on both themes. */}
+          {/* Logo — green gradient wordmark asset, reads on both themes.
+              Intrinsic props match the real 16:9 source (1024×576) so Next's
+              Image component stops warning about mismatched dimensions when
+              CSS overrides the height. */}
           <Link href="/" className="z-50 relative flex items-center" aria-label="Squito — home">
             <Image
               src="/logo.png"
               alt="Squito"
-              width={120}
-              height={80}
+              width={256}
+              height={144}
               priority
-              className="h-[60px] md:h-[80px] w-auto"
+              className="h-[88px] md:h-[128px] w-auto"
             />
           </Link>
 

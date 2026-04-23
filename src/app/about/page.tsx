@@ -1,4 +1,4 @@
-import { Info, ArrowRight, Shield, Clock, Leaf, Award, MapPin, CheckCircle, Phone } from "lucide-react";
+import { Info, ArrowRight, Shield, Clock, Leaf, Award, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { createPageMetadata } from "@/lib/site";
 
@@ -8,11 +8,14 @@ export const metadata = createPageMetadata({
   path: "/about",
 });
 
+// Stats intentionally mirror the home page <Stats/> section so the same
+// numbers reinforce across pages. The home block uses 1,000+ / 5.0★ / 10+
+// plus a 100% Satisfaction pill — we surface all four here in a 4-up grid.
 const stats = [
-  { value: "6+", label: "Years on Long Island" },
-  { value: "1,200+", label: "Homes Protected" },
+  { value: "1,000+", label: "Homes & Businesses Served" },
+  { value: "5.0★", label: "Average Customer Rating" },
+  { value: "10+", label: "Years Serving Long Island" },
   { value: "100%", label: "Satisfaction Guarantee" },
-  { value: "4.9★", label: "Average Rating" },
 ];
 
 const values = [
@@ -43,12 +46,6 @@ const certifications = [
   "BBB Accredited",
   "NPMA Member",
   "Pet-Safe Products",
-];
-
-const serviceAreas = [
-  "Nassau County", "Suffolk County", "Islandia", "Hauppauge",
-  "Smithtown", "Commack", "Babylon", "Huntington",
-  "Brentwood", "Central Islip", "Bay Shore", "Patchogue",
 ];
 
 export default function AboutPage() {
@@ -102,13 +99,17 @@ export default function AboutPage() {
           </div>
 
           <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <div className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] rounded-3xl overflow-hidden glass-card shadow-2xl border border-white/10">
+            {/* Photo wrapper. Previously had `from-background/80` gradient + a
+                `border-white/10` — both read as a cream/white haze over the
+                image on the light theme. Dropped the gradient entirely and
+                switched to the token-aware `border-border` so the image sits
+                clean without a washed-out bottom. */}
+            <div className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-border">
               <img
                 src="/about-us-action.jpg"
                 alt="Squito Pest Control Technician"
                 className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
             </div>
           </div>
         </div>
@@ -158,35 +159,26 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Service Area */}
+        {/* Service Area — copy + single CTA that deep-links to the home-page
+            Service Area lookup (`#service-area`). The previous right-column
+            of town pills duplicated the home-page map/town-search UI and
+            confused the funnel; now the single action is "go punch in your
+            town on the real lookup". */}
         <div className="glass-card rounded-3xl border border-border p-10 md:p-14 animate-fade-in-up">
-          <div className="grid lg:grid-cols-2 gap-10 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
-                <MapPin size={14} />
-                Service Area
-              </div>
-              <h2 className="text-4xl font-display font-bold text-white mb-4">
-                Proudly Serving <span className="gradient-text">All of Long Island</span>
-              </h2>
-              <p className="text-white/60 text-lg mb-8 leading-relaxed">
-                From the North Shore to the South Shore, Nassau to the Hamptons — if you're on Long Island, we've got you covered. Same-day service available across Nassau and Suffolk County.
-              </p>
-              <Link href="/contact" className="btn-primary inline-flex items-center gap-2">
-                Check Your Area <ArrowRight size={18} />
-              </Link>
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
+              <MapPin size={14} />
+              Service Area
             </div>
-            <div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {serviceAreas.map((area) => (
-                  <div key={area} className="flex items-center gap-2 text-sm text-white/70 font-medium">
-                    <CheckCircle size={14} className="text-green-500 shrink-0" />
-                    {area}
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-white/40 mt-5">And all surrounding Long Island communities.</p>
-            </div>
+            <h2 className="text-4xl font-display font-bold text-white mb-4">
+              Proudly Serving <span className="gradient-text">All of Long Island</span>
+            </h2>
+            <p className="text-white/60 text-lg mb-8 leading-relaxed">
+              From the North Shore to the South Shore, Nassau to the Hamptons — if you&apos;re on Long Island, we&apos;ve got you covered. Same-day service available across Nassau and Suffolk County.
+            </p>
+            <Link href="/#service-area" className="btn-primary inline-flex items-center gap-2">
+              Check Your Area <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
 

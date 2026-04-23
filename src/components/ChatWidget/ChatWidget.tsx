@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useRef, useEffect } from "react";
-import { X, Send, Phone, Loader2, Bug } from "lucide-react";
+import { X, Send, Phone, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useChat } from "ai/react";
 import { type Message } from "ai";
@@ -62,7 +62,7 @@ export default function ChatWidget() {
     <>
       <button
         type="button"
-        className={`fixed bottom-6 right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-card hover:bg-card border border-border scale-90' : 'bg-primary hover:scale-110 p-0 overflow-hidden'}`}
+        className={`fixed bottom-6 right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-card hover:bg-card border border-border scale-90' : 'bg-primary hover:scale-110'}`}
         onClick={() => setOpen(!open)}
         aria-label={open ? "Close chat" : "Chat with Squito AI"}
         aria-expanded={open}
@@ -71,9 +71,27 @@ export default function ChatWidget() {
         {open ? (
           <X size={24} className="text-foreground/70" />
         ) : (
-          <Bug size={26} strokeWidth={2.25} className="text-primary-foreground" />
+          // Inner wrapper holds the `overflow-hidden` so the avatar image
+          // stays clipped to the circle, while the outer button DOES NOT
+          // clip — that lets the red "new message" dot sit proud of the
+          // circle instead of getting sliced off at the corners.
+          <span className="w-full h-full rounded-full overflow-hidden block">
+            <Image
+              src="/chat-avatar.png"
+              alt=""
+              width={112}
+              height={112}
+              priority
+              className="w-full h-full object-cover"
+            />
+          </span>
         )}
-        {!open && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse" />}
+        {!open && (
+          <span
+            aria-hidden="true"
+            className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"
+          />
+        )}
       </button>
 
       {open && (
@@ -87,16 +105,21 @@ export default function ChatWidget() {
           <div className="bg-card border-b border-border p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-border p-1.5">
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-border">
                   <Image
-                    src="/logo.png"
-                    alt="Squito"
-                    width={32}
-                    height={20}
-                    className="object-contain w-full h-auto"
+                    src="/chat-avatar.png"
+                    alt="Squito AI"
+                    width={80}
+                    height={80}
+                    className="object-cover w-full h-full"
                   />
                 </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
+                {/* Online pip sits outside the avatar circle — kept here as a
+                    sibling, not a child, so it never gets clipped. */}
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card"
+                />
               </div>
               <div>
                 <div className="font-display font-bold text-foreground leading-none mb-1 flex items-center gap-1">

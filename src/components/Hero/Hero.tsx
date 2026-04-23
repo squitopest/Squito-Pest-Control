@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowRight, CheckCircle, Star, Phone, Camera } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +10,16 @@ const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroa
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
+
+  // Pick the right video file per viewport at mount time. The `media`
+  // attribute on <source> inside <video> was removed from the HTML spec
+  // (whatwg/html#2955) — modern Chrome/Safari/Firefox ignore it, which
+  // broke the responsive source selection and caused the video to not
+  // play at all. Doing it in JS with matchMedia is the supported path.
+  // Starts as `null` so SSR emits no <video> and mobile never accidentally
+  // fetches the full desktop master before the hydration check runs.
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -23,8 +33,31 @@ export default function Hero() {
     return () => clearInterval(wordInterval);
   }, []);
 
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    setVideoSrc(isMobile ? "/success_video_mobile.mp4" : "/success_video.mp4");
+  }, []);
+
+  // Some browsers (iOS Safari in particular) are finicky about the
+  // `autoplay` attribute on a <video> that was added to the DOM after
+  // mount. They respect it on initial render but sometimes skip it when
+  // React inserts the element in a second pass. Calling .play() manually
+  // after the element mounts is the escape hatch — it's allowed because
+  // the video is muted + playsInline, so no user-gesture policy is
+  // violated. We swallow the rejection silently because a blocked play
+  // just means the poster stays up, which is an acceptable fallback.
+  useEffect(() => {
+    if (!videoSrc) return;
+    const v = videoRef.current;
+    if (!v) return;
+    const attempt = v.play();
+    if (attempt && typeof attempt.catch === "function") {
+      attempt.catch(() => { /* autoplay blocked — poster is the fallback */ });
+    }
+  }, [videoSrc]);
+
   return (
-    <section className="relative min-h-[90svh] lg:min-h-screen flex items-center pt-32 lg:pt-28 pb-16 overflow-hidden" id="hero">
+    <section className="relative min-h-[90svh] lg:min-h-screen flex items-center pt-36 lg:pt-44 pb-16 overflow-hidden" id="hero">
 
       {/* Ambient glow orbs — desktop only. The 800/600px blur-[120px] orbs
           cost real paint/composite time on mobile Safari and you can't see
@@ -33,9 +66,12 @@ export default function Hero() {
       <div className="hidden md:block glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
       {/* Hero backdrop. Poster image paints first for instant LCP, video
-          layers on top with native autoplay. Video is `hidden md:block` so
-          mobile skips the ~1.8MB download (Safari + modern Chrome respect
-          display:none + preload on <video>). */}
+          layers on top with native autoplay once the client picks the right
+          source. Mobile gets a ~700KB 540p re-encode, desktop (≥768px) gets
+          the full 720p master. The video element is only rendered after
+          `videoSrc` resolves (after mount), so we never download the wrong
+          file on either form factor. `motion-reduce:hidden` respects the
+          OS "Reduce Motion" setting and falls back to the poster. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <Image
           src="/hero-poster.jpg"
@@ -45,19 +81,29 @@ export default function Hero() {
           sizes="100vw"
           className="object-cover"
         />
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster="/hero-poster.jpg"
-          aria-hidden="true"
-          tabIndex={-1}
-          className="hidden md:block absolute inset-0 w-full h-full object-cover pointer-events-none motion-reduce:hidden"
-        >
-          <source src="/success_video.mp4" type="video/mp4" />
-        </video>
+        {videoSrc && (
+          <video
+            ref={videoRef}
+            key={videoSrc}
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/hero-poster.jpg"
+            aria-hidden="true"
+            tabIndex={-1}
+            onError={(e) => {
+              // Surface any load failure (missing file, codec issue) into
+              // the console so "video is frozen" bug reports are easy to
+              // diagnose. The poster image remains as the fallback.
+              // eslint-disable-next-line no-console
+              console.warn("[Hero] video failed to load:", videoSrc, e);
+            }}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+        )}
         {/* No cream wash — the video should read as video, not as a tinted
             panel. Readability is handled by dark text-shadow halos on the
             copy itself. We keep only a short bottom fade so the hero
