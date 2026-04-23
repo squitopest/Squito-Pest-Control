@@ -99,10 +99,13 @@ export default function PestLibraryTeaser() {
                     alt={pest.name}
                     fill
                     sizes="176px"
-                    className="object-cover transition-all duration-500 group-hover:scale-105 brightness-90 saturate-[0.65] group-hover:brightness-100 group-hover:saturate-100"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 mix-blend-multiply pointer-events-none" style={{ backgroundColor: "rgba(5,46,22,0.15)" }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/5" />
+                  {/* Keep just a soft bottom-to-top dark gradient so the pest
+                      name stays legible over bright photo areas. No more
+                      global dim or green-multiply wash — photos read full
+                      color now. */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                   <div className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded border text-[8px] font-bold uppercase tracking-widest backdrop-blur-sm ${meta.badge}`}>
                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${meta.dot}`} />
                     {pest.risk}
