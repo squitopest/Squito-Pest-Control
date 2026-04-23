@@ -104,11 +104,11 @@ export default function Hero() {
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           />
         )}
-        {/* No cream wash — the video should read as video, not as a tinted
-            panel. Readability is handled by dark text-shadow halos on the
-            copy itself. We keep only a short bottom fade so the hero
-            doesn't cut abruptly into the page below. */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background z-10" />
+        {/* Hero bleeds directly into the next section. We used to render a
+            h-24 gradient fading to `background` here to soften the edge,
+            but on the light theme `background` is cream and that fade read
+            as a white shadow bleeding over the pest-name ticker right
+            below. Removed entirely — the hard edge is cleaner. */}
       </div>
 
       {/* Content — full width, left-aligned. `on-photo` keeps text-white
