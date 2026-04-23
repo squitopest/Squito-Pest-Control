@@ -78,13 +78,11 @@ export default function Hero() {
             <source src="/success_video.mp4" type="video/mp4" />
           </video>
         )}
-        {/* Left-side reading tint — stronger than before so dark letters
-            read crisply on any video frame without needing to darken the
-            whole video. Right ~50% still shows the video cleanly. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/30 to-transparent z-10" />
-        {/* Tight bottom blend so only the final ~15% of the hero fades into
-            the page, leaving the middle of the video fully visible. */}
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background z-10" />
+        {/* No cream wash — the video should read as video, not as a tinted
+            panel. Readability is handled by dark text-shadow halos on the
+            copy itself. We keep only a short bottom fade so the hero
+            doesn't cut abruptly into the page below. */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-background z-10" />
       </div>
 
       {/* Content — full width, left-aligned */}
@@ -106,17 +104,16 @@ export default function Hero() {
             <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
           </Link>
 
-          {/* Headline — big and bold. Cream halo drop-shadow on the dark
-              line keeps letters crisp over any video frame; the gradient
-              "Pest Control." line is left untouched so the gradient paint
-              reads as intended. */}
+          {/* Headline — big and bold. Dark drop-shadow reinforces letter
+              edges over video frames without adding any cream wash. The
+              gradient "Pest Control." line is left untouched. */}
           <h1 className="font-display font-bold text-5xl md:text-7xl lg:text-[6.5rem] leading-[1.0] tracking-tight">
-            <span className="block text-foreground [text-shadow:0_2px_16px_rgba(236,227,210,0.75),0_0_2px_rgba(236,227,210,0.9)]">Smart. Safe.</span>
+            <span className="block text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.25),0_0_14px_rgba(0,0,0,0.12)]">Smart. Safe.</span>
             <span className="block gradient-text">Pest Control.</span>
           </h1>
 
           {/* Rotating subline */}
-          <div className="text-2xl md:text-3xl font-display font-semibold text-foreground leading-snug [text-shadow:0_1px_10px_rgba(236,227,210,0.7)]">
+          <div className="text-2xl md:text-3xl font-display font-semibold text-foreground leading-snug [text-shadow:0_1px_2px_rgba(0,0,0,0.22)]">
             <span>Eliminating </span>
             <span
               className={`text-primary transition-opacity duration-300 ${
@@ -129,7 +126,7 @@ export default function Hero() {
           </div>
 
           {/* Body copy */}
-          <p className="text-lg text-body max-w-xl leading-relaxed font-medium [text-shadow:0_1px_8px_rgba(236,227,210,0.7)]">
+          <p className="text-lg text-body max-w-xl leading-relaxed font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.2)]">
             10+ years in the field. NO contracts. NO gimmicks. Just local experts who show up and get it done.
           </p>
 
@@ -177,11 +174,11 @@ export default function Hero() {
             <span className="text-sm font-semibold text-foreground">5-Star Rated · Nassau &amp; Suffolk County</span>
           </div>
 
-          {/* Trust badges — beefed up to medium weight foreground with a
-              subtle cream halo so they don't disappear against the video. */}
+          {/* Trust badges — subtle dark shadow instead of cream halo so
+              they don't add any white wash against the video. */}
           <div className="flex flex-wrap items-center gap-6 pt-2">
             {["No contracts", "Same-day service", "Pet & family safe"].map((text) => (
-              <div key={text} className="flex items-center gap-2 text-sm font-semibold text-foreground [text-shadow:0_1px_6px_rgba(236,227,210,0.7)]">
+              <div key={text} className="flex items-center gap-2 text-sm font-semibold text-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.2)]">
                 <CheckCircle size={15} className="text-primary shrink-0" />
                 {text}
               </div>
