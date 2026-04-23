@@ -3,12 +3,29 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase";
 import {
+  calculateSpecialtyQuote,
+  getSpecialtyService,
+  serializeSpecialtySelection,
+} from "@/data/specialtyServices";
+import {
+  getSubscriptionCheckoutBreakdown,
   isOneTimeService,
-  getSubscriptionPlan,
   getOneTimeService,
-  toCents,
+  formatSelectedPlanName,
+  isQuoteOnlySize,
+  resolvePropertySize,
   TAX_RATE,
 } from "@/data/plans";
+import {
+  formatMosquitoTickBillingSummary,
+  formatMosquitoTickPackageName,
+  getMosquitoTickBillingPlan,
+  getMosquitoTickPackage,
+  getMosquitoTickReservationPlan,
+  isMosquitoTickYardSize,
+  type MosquitoTickBillingPlan,
+  type MosquitoTickPackage,
+} from "@/data/mosquitoTickPackages";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
 import { validateEnv } from "@/lib/validateEnv";
 
@@ -44,19 +61,56 @@ export async function POST(req: Request) {
     const street = normalizeInput(body.street, 160);
     const city = normalizeInput(body.city, 80);
     const planId = normalizeInput(body.planId, 80) || "essential-defense";
+    const serviceType = normalizeInput(body.serviceType, 40);
+    const serviceId = normalizeInput(body.serviceId, 80);
+    const propertySize = resolvePropertySize(normalizeInput(body.propertySize, 20));
     const fullName = normalizeInput(body.fullName, 120);
     const email = normalizeInput(body.email, 160);
     const phone = normalizeInput(body.phone, 30);
     const billing = normalizeInput(body.billing, 20);
+    // Promo code flows through as an optional string. We validate with Stripe
+    // before applying so bad/expired codes fall back to the manual entry field
+    // rather than failing checkout.
+    const promoInput = normalizeInput(body.promo, 40).toUpperCase();
+    const isSpecialtyCheckout = serviceType === "specialty";
+    const isMosquitoTickCheckout = serviceType === "mosquito-tick";
+    const mosquitoTickSizeRaw = normalizeInput(body.mosquitoTickSize ?? serviceId, 20);
+    const mosquitoTickIntentRaw = normalizeInput(body.mosquitoTickIntent, 20);
+    const mosquitoTickIntent: "current" | "reserve" =
+      mosquitoTickIntentRaw === "reserve" ? "reserve" : "current";
+    const mosquitoTickPackage: MosquitoTickPackage | null =
+      isMosquitoTickCheckout && isMosquitoTickYardSize(mosquitoTickSizeRaw)
+        ? getMosquitoTickPackage(mosquitoTickSizeRaw) ?? null
+        : null;
+    const mosquitoTickBillingPlan: MosquitoTickBillingPlan | null =
+      isMosquitoTickCheckout && mosquitoTickPackage && !mosquitoTickPackage.quoteOnly
+        ? mosquitoTickIntent === "reserve"
+          ? getMosquitoTickReservationPlan(mosquitoTickPackage)
+          : getMosquitoTickBillingPlan(mosquitoTickPackage)
+        : null;
 
-    if (!zipCode || !date || !time || !street || !city || !fullName || !email || !phone) {
+    const specialtyService = isSpecialtyCheckout ? getSpecialtyService(serviceId) : null;
+    const specialtyQuote = isSpecialtyCheckout ? calculateSpecialtyQuote(serviceId, body.selection) : null;
+
+    // Reservation flows don't require a date/time since the team calls in late March.
+    const isReservationSignup = Boolean(
+      isMosquitoTickCheckout && mosquitoTickBillingPlan?.mode === "off-season-reservation"
+    );
+    const requiredBaseMissing = !zipCode || !street || !city || !fullName || !email || !phone;
+    const requiredScheduleMissing = !isReservationSignup && (!date || !time);
+
+    if (requiredBaseMissing || requiredScheduleMissing) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const digitsOnlyPhone = phone.replace(/\D/g, "");
     const isSupportedPlan =
-      isOneTimeService(planId) ||
-      Boolean(getSubscriptionPlan(planId));
+      isMosquitoTickCheckout
+        ? Boolean(mosquitoTickPackage && mosquitoTickBillingPlan && !mosquitoTickPackage.quoteOnly)
+        : isSpecialtyCheckout
+        ? Boolean(specialtyService && specialtyQuote)
+        : isOneTimeService(planId) ||
+          Boolean(getSubscriptionCheckoutBreakdown(planId, "small", "monthly"));
 
     if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
@@ -74,6 +128,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid plan selected." }, { status: 400 });
     }
 
+    if (isSpecialtyCheckout && (!specialtyQuote || specialtyQuote.quoteOnly)) {
+      return NextResponse.json(
+        { error: "This specialty service requires a custom quote before checkout." },
+        { status: 400 }
+      );
+    }
+
+    if (isMosquitoTickCheckout && (!mosquitoTickPackage || mosquitoTickPackage.quoteOnly || !mosquitoTickBillingPlan)) {
+      return NextResponse.json(
+        { error: "This yard size requires a custom quote before checkout." },
+        { status: 400 }
+      );
+    }
+
+    if (!isSpecialtyCheckout && !isMosquitoTickCheckout && !isOneTimeService(planId) && isQuoteOnlySize(propertySize)) {
+      return NextResponse.json(
+        { error: "This home fit requires a custom quote before checkout." },
+        { status: 400 }
+      );
+    }
+
     const isMock = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.includes("mock") || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
     // 1. Create Supabase Row before charging the customer.
@@ -83,14 +158,64 @@ export async function POST(req: Request) {
 
     if (!isMock) {
       try {
+        const mosquitoTickSummary = isMosquitoTickCheckout && mosquitoTickPackage && mosquitoTickBillingPlan
+          ? `${formatMosquitoTickPackageName(mosquitoTickPackage)} — ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
+          : null;
+
         const bookingRow: Record<string, unknown> = {
           property_type: propertyType || "Residential",
           zip_code: zipCode,
-          service_date: date,
-          service_time: time,
+          service_date: date || (isReservationSignup ? "Reservation — schedule in late March" : ""),
+          service_time: time || (isReservationSignup ? "We'll confirm by phone" : ""),
           street: street,
           city: city,
-          plan_id: planId,
+          plan_id: isMosquitoTickCheckout
+            ? `mosquito-tick-${mosquitoTickPackage?.id ?? "unknown"}`
+            : isSpecialtyCheckout
+              ? specialtyService?.id ?? serviceId ?? "specialty-service"
+              : planId,
+          property_size: isMosquitoTickCheckout
+            ? null
+            : !isSpecialtyCheckout && isOneTimeService(planId)
+              ? null
+              : !isSpecialtyCheckout
+                ? propertySize
+                : null,
+          service_type: isMosquitoTickCheckout
+            ? "mosquito_tick"
+            : isSpecialtyCheckout
+              ? "specialty"
+              : isOneTimeService(planId)
+                ? "one_time"
+                : "plan",
+          service_id: isMosquitoTickCheckout
+            ? mosquitoTickPackage?.id ?? null
+            : isSpecialtyCheckout
+              ? specialtyService?.id ?? null
+              : null,
+          pricing_selection: isMosquitoTickCheckout
+            ? {
+                intent: mosquitoTickIntent,
+                mode: mosquitoTickBillingPlan?.mode,
+                size: mosquitoTickPackage?.id,
+                monthsRemaining: mosquitoTickBillingPlan?.monthsRemaining,
+                seasonYear: mosquitoTickBillingPlan?.seasonYear,
+              }
+            : isSpecialtyCheckout
+              ? specialtyQuote?.selection ?? null
+              : null,
+          quoted_price_cents: isMosquitoTickCheckout
+            ? mosquitoTickBillingPlan
+              ? Math.round(mosquitoTickBillingPlan.monthlyPrice * 100)
+              : null
+            : isSpecialtyCheckout
+              ? specialtyQuote?.subtotalCents ?? null
+              : null,
+          service_summary: isMosquitoTickCheckout
+            ? mosquitoTickSummary
+            : isSpecialtyCheckout
+              ? specialtyQuote?.serviceSummary ?? null
+              : null,
           full_name: fullName,
           email: email,
           phone: phone,
@@ -142,23 +267,105 @@ export async function POST(req: Request) {
     }
 
     // Look up plan details from the single source of truth in src/data/plans.ts
-    const isOneTime = isOneTimeService(planId);
+    const isOneTime = !isSpecialtyCheckout && !isMosquitoTickCheckout && isOneTimeService(planId);
     const oneTimePlan = isOneTime ? getOneTimeService(planId) : null;
-    const subPlan = !isOneTime ? (getSubscriptionPlan(planId) ?? getSubscriptionPlan("essential-defense")!) : null;
+    const subscriptionBreakdown = !isSpecialtyCheckout && !isMosquitoTickCheckout && !isOneTime
+      ? getSubscriptionCheckoutBreakdown(planId, propertySize, billing === "yearly" ? "yearly" : "monthly")
+      : null;
 
-    const planName = oneTimePlan?.name ?? subPlan?.name ?? "Essential Defense Plan";
+    if (!isSpecialtyCheckout && !isMosquitoTickCheckout && !isOneTime && (!subscriptionBreakdown || subscriptionBreakdown.quoteOnly)) {
+      return NextResponse.json(
+        { error: "This property size requires a custom quote before checkout." },
+        { status: 400 }
+      );
+    }
+
+    const planName = isMosquitoTickCheckout
+      ? mosquitoTickPackage
+        ? formatMosquitoTickPackageName(mosquitoTickPackage)
+        : "Mosquito & Tick Package"
+      : isSpecialtyCheckout
+      ? specialtyService?.name ?? "Specialty Service"
+      : isOneTime
+      ? oneTimePlan?.name ?? "Squito Pest Control Service"
+      : formatSelectedPlanName(planId, propertySize);
 
     // All amounts in cents for Stripe
-    const initialFee = isOneTime
-      ? toCents(oneTimePlan!.price)
-      : toCents(subPlan!.initialFee);
+    const initialFee = isMosquitoTickCheckout
+      ? 0
+      : isSpecialtyCheckout
+      ? specialtyQuote!.subtotalCents
+      : isOneTime
+      ? Math.round(oneTimePlan!.price * 100)
+      : subscriptionBreakdown!.initialFeeCents;
 
-    // Advanced Line Item Construction for Subscriptions
+    // Advanced line item construction for one-time purchases and subscriptions.
     const isYearly = billing === "yearly";
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let checkoutMode: "payment" | "subscription" = "payment";
+    let mosquitoTickSubscriptionData:
+      | Stripe.Checkout.SessionCreateParams.SubscriptionData
+      | null = null;
 
-    if (isOneTime) {
+    if (isMosquitoTickCheckout && mosquitoTickPackage && mosquitoTickBillingPlan) {
+      checkoutMode = "subscription";
+      const monthlyCents = Math.round(mosquitoTickBillingPlan.monthlyPrice * 100);
+      const monthlyTaxCents = Math.round(monthlyCents * TAX_RATE);
+
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Squito Mosquito & Tick - ${mosquitoTickPackage.label}`,
+            description: mosquitoTickBillingPlan.mode === "off-season-reservation"
+              ? `Monthly seasonal subscription. Billing begins April 1, ${mosquitoTickBillingPlan.seasonYear}. Auto-cancels October 31, ${mosquitoTickBillingPlan.seasonYear}.`
+              : `Monthly seasonal subscription. ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Auto-cancels October 31, ${mosquitoTickBillingPlan.seasonYear}.`,
+          },
+          unit_amount: monthlyCents + monthlyTaxCents,
+          recurring: { interval: "month" as const },
+        },
+        quantity: 1,
+      });
+
+      // Stripe Checkout Sessions don't accept `cancel_at` directly in
+      // subscription_data — we stash the target cancel timestamp in metadata
+      // and the `checkout.session.completed` webhook applies it via
+      // `stripe.subscriptions.update({ cancel_at })` once the subscription exists.
+      //   - trial_end:   for off-season reservations only — no charge until April 1
+      //   - billing_cycle_anchor: unspecified (Stripe uses signup time), so in-season signups renew on the same day each month
+      const cancelAtUnix = Math.floor(
+        mosquitoTickBillingPlan.subscriptionEndDate.getTime() / 1000
+      );
+      const subData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+        metadata: {
+          productType: "mosquito-tick",
+          yardSize: mosquitoTickPackage.id,
+          yardLabel: mosquitoTickPackage.label,
+          signupMode: mosquitoTickBillingPlan.mode,
+          seasonYear: String(mosquitoTickBillingPlan.seasonYear),
+          monthsRemaining: String(mosquitoTickBillingPlan.monthsRemaining),
+          cancelAtUnix: String(cancelAtUnix),
+          bookingId,
+        },
+      };
+      if (mosquitoTickBillingPlan.mode === "off-season-reservation") {
+        subData.trial_end = Math.floor(mosquitoTickBillingPlan.firstChargeDate.getTime() / 1000);
+      }
+      mosquitoTickSubscriptionData = subData;
+    } else if (isSpecialtyCheckout) {
+      checkoutMode = "payment";
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Squito Pest Control - ${planName}`,
+            description: `${specialtyQuote!.detailSummary} | Appointment: ${date} at ${time} | Address: ${street}, ${city} ${zipCode}`,
+          },
+          unit_amount: specialtyQuote!.totalDueCents,
+        },
+        quantity: 1,
+      });
+    } else if (isOneTime) {
       checkoutMode = "payment";
       const tax = Math.round(initialFee * TAX_RATE);
       lineItems.push({
@@ -173,32 +380,31 @@ export async function POST(req: Request) {
         quantity: 1,
       });
     } else if (isYearly) {
-      checkoutMode = "subscription";
-      const yearlyCharge = toCents(subPlan!.yearlyTotal);
-      const tax = Math.round(yearlyCharge * TAX_RATE);
+      checkoutMode = "payment";
+      const yearlyCharge = subscriptionBreakdown!.yearlyTotalCents;
+      const tax = subscriptionBreakdown!.taxCents;
 
       lineItems.push({
         price_data: {
           currency: "usd",
           product_data: {
-            name: `Yearly Subscription - ${planName}`,
-            description: `Address: ${street}, ${city} ${zipCode}`,
+            name: `Annual Prepay - ${planName}`,
+            description: `One-time annual payment. Address: ${street}, ${city} ${zipCode}`,
           },
           unit_amount: yearlyCharge + tax,
-          recurring: { interval: 'year' as const },
         },
         quantity: 1,
       });
     } else {
       checkoutMode = "subscription";
-      const monthlyFee = toCents(subPlan!.monthlyPrice);
+      const monthlyFee = subscriptionBreakdown!.monthlyPriceCents;
 
       // The Initial Fee covers the first visit flush-out. We split it into:
       // a one-time differential charge today + the first recurring monthly charge today.
       const initialFeeDifferential = initialFee - monthlyFee;
 
       const setupTax = Math.round(initialFeeDifferential * TAX_RATE);
-      const monthlyTax = Math.round(monthlyFee * TAX_RATE);
+      const monthlyTax = subscriptionBreakdown!.taxCents - setupTax;
 
       if (initialFeeDifferential > 0) {
         lineItems.push({
@@ -236,10 +442,66 @@ export async function POST(req: Request) {
 
     let redirectUrl = "";
 
+    // Validate and resolve the promo code (if any) up-front so we can both
+    // preserve it in the cancel_url AND apply it to the Stripe session.
+    // Stripe requires the promotion_code ID (prefix `promo_`), not the
+    // customer-facing code string. Silent fallback on lookup failure lets the
+    // customer still enter a code at Stripe's payment page.
+    let resolvedPromoId: string | null = null;
+    let promoLookupFailed = false;
+    if (promoInput) {
+      try {
+        const promoList = await stripe.promotionCodes.list({
+          code: promoInput,
+          active: true,
+          limit: 1,
+        });
+        if (promoList.data.length > 0) {
+          resolvedPromoId = promoList.data[0].id;
+        } else {
+          promoLookupFailed = true;
+          console.warn(`Promo code "${promoInput}" not found or inactive.`);
+        }
+      } catch (promoErr: any) {
+        promoLookupFailed = true;
+        console.warn("Promo code lookup failed, falling back to manual entry.", promoErr?.message);
+      }
+    }
+
     if (isTestDrive) {
       // Teleport straight to the success page as if they paid!
       redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id=free_test_bypass_${bookingId}&booking_id=${bookingId}`;
     } else {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const cancelUrl = new URL("/book", appUrl);
+      cancelUrl.searchParams.set("canceled", "1");
+
+      if (isMosquitoTickCheckout && mosquitoTickPackage) {
+        cancelUrl.searchParams.set("serviceType", "mosquito-tick");
+        cancelUrl.searchParams.set("size", mosquitoTickPackage.id);
+        cancelUrl.searchParams.set("billing", "monthly");
+        cancelUrl.searchParams.set("intent", mosquitoTickIntent);
+      } else if (isSpecialtyCheckout) {
+        cancelUrl.searchParams.set("serviceType", "specialty");
+        cancelUrl.searchParams.set("serviceId", specialtyService?.id ?? serviceId);
+        cancelUrl.searchParams.set("billing", "onetime");
+        if (specialtyQuote?.selection) {
+          cancelUrl.searchParams.set("selection", serializeSpecialtySelection(specialtyQuote.selection));
+        }
+      } else {
+        cancelUrl.searchParams.set("plan", planId);
+        cancelUrl.searchParams.set("billing", billing || "monthly");
+        if (!isOneTimeService(planId)) {
+          cancelUrl.searchParams.set("size", propertySize);
+        }
+      }
+
+      // Preserve promo through Stripe bounces so the discount chip
+      // re-appears on /book if the customer comes back.
+      if (promoInput && !promoLookupFailed) {
+        cancelUrl.searchParams.set("promo", promoInput);
+      }
+
       // Create or retrieve customer to pre-fill billing details
       let customer;
       const existingCustomers = await stripe.customers.list({ email: email, limit: 1 });
@@ -274,17 +536,57 @@ export async function POST(req: Request) {
       }
 
       // Regular Stripe Flow with auto billing (1-click checkout)
-      const session = await stripe.checkout.sessions.create({
+      const sessionParams: Stripe.Checkout.SessionCreateParams = {
         customer: customer.id,
         billing_address_collection: "auto",
         line_items: lineItems,
         mode: checkoutMode,
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/book?canceled=1`,
+        success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: cancelUrl.toString(),
+        // Mutually exclusive with `discounts` — so only enable the promo field
+        // when we DIDN'T auto-apply a code.
+        ...(resolvedPromoId
+          ? { discounts: [{ promotion_code: resolvedPromoId }] }
+          : { allow_promotion_codes: true }),
         metadata: {
           bookingId: bookingId,
+          propertySize,
+          billing,
+          serviceType: isMosquitoTickCheckout
+            ? "mosquito-tick"
+            : isSpecialtyCheckout
+              ? "specialty"
+              : "standard",
+          serviceId: isMosquitoTickCheckout
+            ? mosquitoTickPackage?.id ?? ""
+            : isSpecialtyCheckout
+              ? specialtyService?.id ?? ""
+              : planId,
+          serviceSummary: isMosquitoTickCheckout && mosquitoTickPackage && mosquitoTickBillingPlan
+            ? `${formatMosquitoTickPackageName(mosquitoTickPackage)} — ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
+            : isSpecialtyCheckout
+              ? specialtyQuote?.serviceSummary ?? ""
+              : planName,
+          ...(isMosquitoTickCheckout && mosquitoTickBillingPlan
+            ? {
+                mosquitoTickMode: mosquitoTickBillingPlan.mode,
+                mosquitoTickSize: mosquitoTickPackage?.id ?? "",
+                mosquitoTickSeasonYear: String(mosquitoTickBillingPlan.seasonYear),
+                mosquitoTickMonthsRemaining: String(mosquitoTickBillingPlan.monthsRemaining),
+                mosquitoTickCancelAtUnix: String(
+                  Math.floor(mosquitoTickBillingPlan.subscriptionEndDate.getTime() / 1000)
+                ),
+              }
+            : {}),
+          ...(promoInput
+            ? { promoCode: promoInput, promoApplied: resolvedPromoId ? "yes" : "fallback" }
+            : {}),
         },
-      });
+      };
+      if (mosquitoTickSubscriptionData) {
+        sessionParams.subscription_data = mosquitoTickSubscriptionData;
+      }
+      const session = await stripe.checkout.sessions.create(sessionParams);
       redirectUrl = session.url || "/book";
 
       // Update Supabase with Session ID securely if real Stripe session

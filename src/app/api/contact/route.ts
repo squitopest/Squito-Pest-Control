@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const firstName = normalizeInput(body.firstName, 80);
     const lastName = normalizeInput(body.lastName, 80);
+    const leadType = normalizeInput(body.type, 40);
     const email = normalizeInput(body.email, 160);
     const phone = normalizeInput(body.phone, 30);
     const street = normalizeInput(body.street, 160);
@@ -71,6 +72,7 @@ export async function POST(req: Request) {
 
     const safeFirstName = escapeHtml(firstName);
     const safeLastName = escapeHtml(lastName);
+    const safeLeadType = escapeHtml(leadType);
     const safeEmail = escapeHtml(email);
     const safePhone = escapeHtml(phone);
     const safeStreet = escapeHtml(street);
@@ -87,6 +89,7 @@ export async function POST(req: Request) {
         <div style="font-family: sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #22c55e;">New Squito Pest Control Website Lead!</h2>
           <p><strong>Name:</strong> ${safeFirstName} ${safeLastName}</p>
+          <p><strong>Lead Type:</strong> ${safeLeadType || "Not specified"}</p>
           <p><strong>Email:</strong> ${safeEmail}</p>
           <p><strong>Phone:</strong> ${safePhone}</p>
           <p><strong>Service Address:</strong> ${safeStreet}, ${safeCity} ${safeZip}</p>
@@ -117,6 +120,7 @@ export async function POST(req: Request) {
             type: "lead",
             firstName,
             lastName,
+            leadType: leadType || "Not specified",
             email,
             phone,
             street,

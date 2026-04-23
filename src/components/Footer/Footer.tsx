@@ -7,10 +7,11 @@ const footerLinks = {
   Services: [
     { label: "Residential Pest Control", href: "/residential" },
     { label: "Commercial Services", href: "/commercial" },
-    { label: "Mosquito & Tick Control", href: "/services" },
-    { label: "Termite Defense", href: "/services" },
-    { label: "Rodent Removal", href: "/services" },
-    { label: "Bed Bug Treatment", href: "/services" },
+    { label: "Mosquito & Tick Control", href: "/services/mosquito-tick" },
+    { label: "Specialty Services", href: "/services/specialty" },
+    { label: "Mosquito Event Spray", href: "/services/specialty/event-mosquito-spray" },
+    { label: "Termite Inspection", href: "/services/specialty/termite-inspection" },
+    { label: "Bed Bug Treatment", href: "/services/specialty/bed-bug-treatment" },
   ],
   "Pest Library": [
     { label: "Mosquitoes", href: "/pest-library#culex-mosquito" },

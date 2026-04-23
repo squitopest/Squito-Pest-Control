@@ -1,7 +1,14 @@
 import { MetadataRoute } from 'next'
+import { getBookableSpecialtyServices } from "@/data/specialtyServices";
  
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://squitopestcontrol.com';
+  const specialtyUrls = getBookableSpecialtyServices().map((service) => ({
+    url: `${baseUrl}/services/specialty/${service.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.75,
+  }));
   
   return [
     {
@@ -35,6 +42,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
+      url: `${baseUrl}/services/specialty`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/services/mosquito-tick`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/book`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
@@ -64,5 +83,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.6,
     },
+    ...specialtyUrls,
   ]
 }

@@ -38,3 +38,7 @@ next-env.d.ts
 # supabase CLI runtime scratch — auto-generated per-machine and per-link,
 # never meant to be committed.
 supabase/.temp/
+
+# Local CLI binaries (Stripe CLI, etc.) — per-developer tooling, never shipped.
+/bin/
+*.exe

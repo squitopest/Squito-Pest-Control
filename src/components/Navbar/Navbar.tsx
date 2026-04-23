@@ -13,11 +13,13 @@ const navLinks = [
     dropdown: [
       { label: "Residential", href: "/residential" },
       { label: "Commercial", href: "/commercial" },
+      { label: "Specialty Services", href: "/services/specialty" },
     ],
   },
   { label: "Plans", href: "/plans" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
+  { label: "Mosquito & Tick", href: "/services/mosquito-tick" },
   { label: "Contact", href: "/contact" },
 ];
 

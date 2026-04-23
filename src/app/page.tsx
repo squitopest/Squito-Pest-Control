@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import dynamic from 'next/dynamic';
 import Hero from "@/components/Hero/Hero";
 import PestIdentifyCapture from "@/components/PestLibrary/PestIdentifyCapture";
@@ -24,7 +25,9 @@ export default function Home() {
       <Reviews />
       <PestLibrary />
       <ServiceArea />
-      <ContactForm />
+      <Suspense fallback={<div className="py-16 text-center text-white/50">Loading contact form...</div>}>
+        <ContactForm />
+      </Suspense>
       <Footer />
     </main>
   );

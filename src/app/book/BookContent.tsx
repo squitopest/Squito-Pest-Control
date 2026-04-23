@@ -1,14 +1,39 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef, useCallback } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon, Map, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon, Map, Loader2, Bug, CalendarClock, Snowflake, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import Footer from "@/components/Footer/Footer";
 import {
+  DEFAULT_PROPERTY_SIZE,
   getOneTimeService,
-  getSubscriptionPlan,
+  getSubscriptionCheckoutBreakdown,
   TAX_RATE,
+  buildQuoteRequestHref,
+  formatSelectedPlanName,
+  getPropertySizeConfig,
+  resolvePropertySize,
+  type PropertySize,
 } from "@/data/plans";
+import {
+  buildSpecialtyQuoteHref,
+  calculateSpecialtyQuote,
+  deserializeSpecialtySelection,
+  getSpecialtyService,
+} from "@/data/specialtyServices";
+import {
+  DEFAULT_MOSQUITO_TICK_SIZE,
+  buildMosquitoTickHelpHref,
+  buildMosquitoTickQuoteHref,
+  formatMosquitoTickBillingSummary,
+  formatMosquitoTickPackageName,
+  getMosquitoTickBillingPlan,
+  getMosquitoTickPackage,
+  getMosquitoTickReservationPlan,
+  resolveMosquitoTickYardSize,
+} from "@/data/mosquitoTickPackages";
+import PropertySizeSelector from "@/components/Plans/PropertySizeSelector";
 
 type FormState = {
   fullName: string;
@@ -19,6 +44,12 @@ type FormState = {
   zipCode: string;
   date: string;
   time: string;
+};
+
+type GeolocationRequestOptions = {
+  enableHighAccuracy: boolean;
+  timeout: number;
+  maximumAge?: number;
 };
 
 const EMPTY_FORM: FormState = {
@@ -39,8 +70,16 @@ const suggestionOptionId = (i: number) => `address-suggestion-${i}`;
 function BookingContent() {
   const searchParams = useSearchParams();
   const requestedPlanId = searchParams.get("plan");
-  const billing = searchParams.get("billing") || "monthly";
+  const requestedServiceType = searchParams.get("serviceType");
+  const requestedServiceId = searchParams.get("serviceId");
+  const requestedSpecialtySelection = searchParams.get("selection");
+  const requestedSize = resolvePropertySize(searchParams.get("size"));
   const wasCancelled = searchParams.get("canceled") === "1" || searchParams.get("cancelled") === "1";
+  // Promo code: auto-applied at Stripe checkout when present. Normalized to
+  // upper-case + trimmed, max 40 chars (Stripe promotion codes are case-insensitive
+  // but Stripe's own dashboard stores them upper-cased).
+  const rawPromo = searchParams.get("promo") ?? "";
+  const promoCode = rawPromo.trim().toUpperCase().slice(0, 40);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +95,7 @@ function BookingContent() {
   const autocompleteAbortRef = useRef<AbortController | null>(null);
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [propertySize, setPropertySize] = useState<PropertySize>(requestedSize || DEFAULT_PROPERTY_SIZE);
 
   // Restore any in-progress form if the user was bounced back from Stripe
   // (or just bailed on the tab and came back). Reusing sessionStorage keeps the
@@ -93,25 +133,141 @@ function BookingContent() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const resolvedOneTimePlan = getOneTimeService(requestedPlanId ?? "");
-  const resolvedSubscriptionPlan = getSubscriptionPlan(requestedPlanId ?? "");
-  const isOneTime = Boolean(resolvedOneTimePlan);
+  // ─── Mosquito & Tick package resolution ─────────────────────────────────────
+  // URL params:
+  //   serviceType=mosquito-tick
+  //   size=small|medium|large|xl
+  //   intent=current|reserve   (only meaningful during end-of-season-nudge)
+  const isMosquitoTick = requestedServiceType === "mosquito-tick";
+  const mosquitoTickSize = isMosquitoTick
+    ? resolveMosquitoTickYardSize(searchParams.get("size") ?? DEFAULT_MOSQUITO_TICK_SIZE)
+    : null;
+  const mosquitoTickPackage = mosquitoTickSize ? getMosquitoTickPackage(mosquitoTickSize) ?? null : null;
+  const urlIntent = searchParams.get("intent");
+  const [mosquitoTickIntent, setMosquitoTickIntent] = useState<"current" | "reserve" | null>(
+    urlIntent === "current" || urlIntent === "reserve" ? urlIntent : null
+  );
+
+  // Compute the billing plan once per render. Recomputed if the user flips
+  // between "book what's left" and "reserve for April" from the dual-CTA
+  // picker below.
+  const mosquitoTickBillingPlan = useMemo(() => {
+    if (!mosquitoTickPackage) return null;
+    if (mosquitoTickIntent === "reserve") {
+      return getMosquitoTickReservationPlan(mosquitoTickPackage);
+    }
+    return getMosquitoTickBillingPlan(mosquitoTickPackage);
+  }, [mosquitoTickPackage, mosquitoTickIntent]);
+
+  const mosquitoTickNeedsChoice =
+    isMosquitoTick &&
+    mosquitoTickBillingPlan?.mode === "end-of-season-nudge" &&
+    mosquitoTickIntent === null;
+  const mosquitoTickIsReservation =
+    isMosquitoTick && mosquitoTickBillingPlan?.mode === "off-season-reservation";
+  const mosquitoTickIsQuoteOnly = isMosquitoTick && mosquitoTickPackage?.quoteOnly === true;
+
+  const specialtyService =
+    !isMosquitoTick && requestedServiceType === "specialty"
+      ? getSpecialtyService(requestedServiceId ?? "")
+      : null;
+  const specialtySelection = specialtyService ? deserializeSpecialtySelection(requestedSpecialtySelection) : null;
+  const specialtyQuote = specialtyService ? calculateSpecialtyQuote(specialtyService.id, specialtySelection) : null;
+  const isSpecialty = Boolean(specialtyService);
+  const billing = isMosquitoTick
+    ? "monthly"
+    : isSpecialty
+      ? "onetime"
+      : searchParams.get("billing") || "monthly";
+
+  const resolvedOneTimePlan = !isSpecialty && !isMosquitoTick ? getOneTimeService(requestedPlanId ?? "") : undefined;
+  const isOneTime = Boolean(resolvedOneTimePlan) || isSpecialty;
   const oneTimePlan = resolvedOneTimePlan;
-  const subPlan = !isOneTime ? (resolvedSubscriptionPlan ?? getSubscriptionPlan("essential-defense")!) : null;
-  const effectivePlanId = oneTimePlan?.id ?? subPlan?.id ?? "essential-defense";
-
-  const planTitle = oneTimePlan?.name ?? subPlan?.name ?? "Essential Defense Plan";
-  const initialFee = oneTimePlan?.price ?? subPlan?.initialFee ?? 199.99;
-
   const isYearly = billing === "yearly";
-  const yearlyAmount = isYearly && subPlan ? subPlan.yearlyTotal : 0;
+  const effectivePlanId = oneTimePlan?.id ?? requestedPlanId ?? "essential-defense";
+  const checkoutBreakdown = !isOneTime && !isMosquitoTick
+    ? getSubscriptionCheckoutBreakdown(effectivePlanId, propertySize, isYearly ? "yearly" : "monthly")
+    : null;
+  const isQuoteOnlyPlan = !isOneTime && !isMosquitoTick && propertySize === "xl";
+  const quoteHref = buildQuoteRequestHref({
+    planId: effectivePlanId,
+    size: propertySize,
+    billing,
+    source: "book page",
+  });
+  const specialtyQuoteHref = specialtyService
+    ? buildSpecialtyQuoteHref(specialtyService.id, specialtySelection ?? undefined, "specialty checkout")
+    : "/contact";
+  const mosquitoTickQuoteHref = mosquitoTickPackage
+    ? buildMosquitoTickQuoteHref(mosquitoTickPackage.id, "mosquito-tick checkout")
+    : "/contact";
+  const mosquitoTickHelpHref = buildMosquitoTickHelpHref("mosquito-tick checkout");
 
-  const activeInitialFee = isYearly ? 0 : initialFee;
-  const subtotal = activeInitialFee + yearlyAmount;
+  // Mosquito & tick monthly pricing (tax is added per monthly charge, same as
+  // the existing subscription flow).
+  const mosquitoTickMonthlyPrice = mosquitoTickBillingPlan?.monthlyPrice ?? 0;
+  const mosquitoTickMonthlyTax = Math.round(mosquitoTickMonthlyPrice * TAX_RATE * 100) / 100;
+  const mosquitoTickMonthlyTotal = Math.round((mosquitoTickMonthlyPrice + mosquitoTickMonthlyTax) * 100) / 100;
+  const mosquitoTickSeasonSubtotal = mosquitoTickBillingPlan?.seasonTotalBeforeTax ?? 0;
+  const mosquitoTickSeasonTax = Math.round(mosquitoTickSeasonSubtotal * TAX_RATE * 100) / 100;
+  const mosquitoTickSeasonTotal = Math.round((mosquitoTickSeasonSubtotal + mosquitoTickSeasonTax) * 100) / 100;
 
-  const NY_TAX_RATE = TAX_RATE;
-  const taxAmount = Math.round(subtotal * NY_TAX_RATE * 100) / 100;
-  const totalDue = Math.round((subtotal + taxAmount) * 100) / 100;
+  const planTitle = isMosquitoTick
+    ? mosquitoTickPackage
+      ? formatMosquitoTickPackageName(mosquitoTickPackage)
+      : "Mosquito & Tick Package"
+    : isSpecialty
+    ? specialtyService?.name ?? "Specialty Service"
+    : isOneTime
+      ? oneTimePlan?.name ?? "Squito Service"
+      : formatSelectedPlanName(effectivePlanId, propertySize);
+  const initialFee = isMosquitoTick
+    ? 0
+    : isSpecialty
+    ? specialtyQuote?.subtotal ?? 0
+    : isOneTime
+      ? oneTimePlan?.price ?? 0
+    : checkoutBreakdown && !checkoutBreakdown.quoteOnly
+      ? checkoutBreakdown.initialFee
+      : 0;
+  const yearlyAmount = isYearly && checkoutBreakdown && !checkoutBreakdown.quoteOnly ? checkoutBreakdown.yearlyTotal : 0;
+  const subtotal = isMosquitoTick
+    ? mosquitoTickMonthlyPrice
+    : isSpecialty
+    ? specialtyQuote?.subtotal ?? 0
+    : isOneTime
+      ? oneTimePlan?.price ?? 0
+    : checkoutBreakdown && !checkoutBreakdown.quoteOnly
+      ? checkoutBreakdown.subtotal
+      : 0;
+  const taxAmount = isMosquitoTick
+    ? mosquitoTickMonthlyTax
+    : isSpecialty
+    ? specialtyQuote?.taxAmount ?? 0
+    : isOneTime
+      ? Math.round(((oneTimePlan?.price ?? 0) * TAX_RATE) * 100) / 100
+    : checkoutBreakdown && !checkoutBreakdown.quoteOnly
+      ? checkoutBreakdown.taxAmount
+      : 0;
+  const totalDue = isMosquitoTick
+    ? mosquitoTickIsReservation
+      ? 0 // reservation signups aren't charged until April 1
+      : mosquitoTickMonthlyTotal
+    : isSpecialty
+    ? specialtyQuote?.totalDue ?? 0
+    : isOneTime
+      ? Math.round((subtotal + taxAmount) * 100) / 100
+    : checkoutBreakdown && !checkoutBreakdown.quoteOnly
+      ? checkoutBreakdown.totalDueToday
+      : 0;
+  const taxRateLabel = `${(TAX_RATE * 100).toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}%`;
+  const specialtySummary = specialtyQuote?.detailSummary ?? null;
+
+  const requestCurrentPosition = useCallback((options: GeolocationRequestOptions) => {
+    return new Promise<GeolocationPosition>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+  }, []);
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -122,43 +278,62 @@ function BookingContent() {
     setLocating(true);
     setError(null);
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const response = await fetch(
-            `/api/maps/reverse?lat=${position.coords.latitude}&lng=${position.coords.longitude}`
-          );
-          const data = await response.json();
+    (async () => {
+      try {
+        let position: GeolocationPosition;
 
-          if (data && data.street) {
-            setForm(prev => ({
-              ...prev,
-              street: data.street || "",
-              city: data.city || "",
-              zipCode: data.zipCode || ""
-            }));
-            setShowSuggestions(false);
-          } else {
-            setError("Could not pinpoint exact address. Please enter manually.");
+        try {
+          position = await requestCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        } catch (highAccuracyError: unknown) {
+          const geoError = highAccuracyError as GeolocationPositionError;
+
+          if (geoError.code === 1) {
+            throw geoError;
           }
-        } catch {
-          setError("Failed to fetch address details.");
-        } finally {
-          setLocating(false);
+
+          position = await requestCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 15000,
+            maximumAge: 300000,
+          });
         }
-      },
-      (geoError) => {
-        setLocating(false);
-        if (geoError.code === 1) {
-          setError("Location access was denied. Please allow location access in your browser settings, or enter your address manually.");
-        } else if (geoError.code === 2) {
-          setError("Location unavailable. Please enter your address manually.");
+
+        const response = await fetch(
+          `/api/maps/reverse?lat=${position.coords.latitude}&lng=${position.coords.longitude}`
+        );
+        const data = await response.json();
+
+        if (data && (data.street || data.formatted)) {
+          setForm((prev) => ({
+            ...prev,
+            street: data.street || data.formatted || "",
+            city: data.city || "",
+            zipCode: data.zipCode || "",
+          }));
+          setShowSuggestions(false);
         } else {
-          setError("Location request timed out. Please enter your address manually.");
+          setError("We found your location but couldn't match it to a street address. Please enter it manually.");
         }
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+      } catch (rawError: unknown) {
+        const geoError = rawError as GeolocationPositionError;
+
+        if (geoError?.code === 1) {
+          setError("Location access was denied. Please allow location access in your browser settings, or enter your address manually.");
+        } else if (geoError?.code === 2) {
+          setError("We couldn't get a reliable location from your device. Try again on Wi-Fi or enter your address manually.");
+        } else if (geoError?.code === 3) {
+          setError("Location lookup timed out. Please try once more or enter your address manually.");
+        } else {
+          setError("Failed to fetch address details.");
+        }
+      } finally {
+        setLocating(false);
+      }
+    })();
   };
 
   const handleAddressChange = async (val: string) => {
@@ -252,6 +427,24 @@ function BookingContent() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isMosquitoTick) {
+      if (mosquitoTickIsQuoteOnly || !mosquitoTickPackage || !mosquitoTickBillingPlan) {
+        setError("This yard size needs a custom quote. Please use the quote request flow.");
+        return;
+      }
+      if (mosquitoTickNeedsChoice) {
+        setError("Please choose whether to start this season or reserve for April 1.");
+        return;
+      }
+    } else if (isSpecialty && (!specialtyQuote || specialtyQuote.quoteOnly)) {
+      setError("This specialty service needs a custom quote before checkout.");
+      return;
+    } else if (!isSpecialty && !isMosquitoTick && (isQuoteOnlyPlan || !checkoutBreakdown || checkoutBreakdown.quoteOnly)) {
+      setError("This home fit needs a custom quote. Please use the quote request flow instead.");
+      return;
+    }
+
     if (!form.fullName || !form.email || !form.phone || !form.street || !form.city || !form.zipCode) {
       setError("Please complete all required contact and address fields.");
       return;
@@ -272,7 +465,11 @@ function BookingContent() {
       return;
     }
 
-    if (!form.date || !form.time) {
+    // For in-season mosquito-tick bookings we still collect date/time preferences
+    // for the first treatment. For off-season reservations, the team schedules
+    // in late March so no date/time is required.
+    const requireDateTime = !mosquitoTickIsReservation;
+    if (requireDateTime && (!form.date || !form.time)) {
       setError("Please select both an appointment date and time window.");
       return;
     }
@@ -286,6 +483,16 @@ function BookingContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planId: effectivePlanId,
+          serviceType: isMosquitoTick ? "mosquito-tick" : isSpecialty ? "specialty" : undefined,
+          serviceId: isMosquitoTick
+            ? mosquitoTickPackage?.id
+            : isSpecialty
+              ? specialtyService?.id
+              : undefined,
+          selection: isSpecialty ? specialtyQuote?.selection : undefined,
+          mosquitoTickSize: isMosquitoTick ? mosquitoTickPackage?.id : undefined,
+          mosquitoTickIntent: isMosquitoTick ? (mosquitoTickIntent ?? "current") : undefined,
+          promo: promoCode || undefined,
           propertyType: "Residential",
           fullName: form.fullName,
           email: form.email,
@@ -293,9 +500,18 @@ function BookingContent() {
           street: form.street,
           city: form.city,
           zipCode: form.zipCode,
-          date: form.date,
-          time: form.time === "AM" ? "8am - 12pm" : form.time === "PM" ? "12pm - 4pm" : "4pm - 8pm",
+          date: form.date || (mosquitoTickIsReservation ? "Schedule in late March" : ""),
+          time: form.time === "AM"
+            ? "8am - 12pm"
+            : form.time === "PM"
+              ? "12pm - 4pm"
+              : form.time === "EVE"
+                ? "4pm - 8pm"
+                : mosquitoTickIsReservation
+                  ? "We'll confirm by phone"
+                  : "",
           billing: billing,
+          propertySize,
         }),
       });
 
@@ -337,6 +553,39 @@ function BookingContent() {
         <p className="text-white/70 text-lg">Schedule your inspection and finalize your protection plan.</p>
       </div>
 
+      {!isOneTime && !isMosquitoTick && (
+        <div className="mb-10 glass-card p-6 rounded-3xl">
+          <PropertySizeSelector value={propertySize} onChange={setPropertySize} />
+        </div>
+      )}
+
+      {isMosquitoTick && mosquitoTickPackage && !mosquitoTickIsQuoteOnly && mosquitoTickBillingPlan && (
+        <div className="mb-10 glass-card p-6 md:p-8 rounded-3xl border border-green-500/20">
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/15 border border-green-500/30 flex-shrink-0">
+              <Bug size={22} className="text-green-300" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-1">
+                Mosquito &amp; Tick Package
+              </p>
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
+                {mosquitoTickPackage.label}
+              </h2>
+              <p className="text-white/60 text-sm mt-1">
+                {mosquitoTickPackage.sqftRangeLabel}
+              </p>
+            </div>
+            <Link
+              href={mosquitoTickHelpHref}
+              className="hidden md:inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              Change yard size
+            </Link>
+          </div>
+        </div>
+      )}
+
       {restoredFromCancel && (
         <div
           role="status"
@@ -350,6 +599,168 @@ function BookingContent() {
         </div>
       )}
 
+      {requestedServiceType === "specialty" && (!specialtyService || !specialtyQuote) ? (
+        <div className="glass-card rounded-3xl border border-amber-500/25 bg-amber-500/5 p-8 md:p-10">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+            We couldn&apos;t load that specialty service configuration.
+          </h2>
+          <p className="text-white/65 text-lg leading-relaxed mb-6">
+            Head back to the specialty catalog, reselect the service options you want, and we&apos;ll bring you back here with the correct pricing.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/services/specialty"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+            >
+              Browse Specialty Services
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+            >
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      ) : isMosquitoTick && mosquitoTickIsQuoteOnly ? (
+        <div className="glass-card rounded-3xl border border-amber-500/25 bg-amber-500/5 p-8 md:p-10">
+          <div className="max-w-3xl">
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-300 mb-5">
+              Custom Quote Needed
+            </p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              Let&apos;s price your estate with a tailored quote.
+            </h2>
+            <p className="text-white/65 text-lg leading-relaxed mb-6">
+              Yards larger than one acre take a little more coordination &mdash; equipment, timing, and coverage scale differently for bigger properties.
+              Send us a quick request and we&apos;ll build a package that fits.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href={mosquitoTickQuoteHref}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+              >
+                Request Custom Quote
+              </Link>
+              <a
+                href="tel:6312031000"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Call (631) 203-1000
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : mosquitoTickNeedsChoice && mosquitoTickPackage && mosquitoTickBillingPlan ? (
+        <div className="glass-card rounded-3xl border border-white/10 p-8 md:p-10">
+          <div className="max-w-3xl">
+            <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-green-300 mb-5">
+              Season Almost Over
+            </p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              The current mosquito &amp; tick season ends October 31.
+            </h2>
+            <p className="text-white/65 text-lg leading-relaxed mb-8">
+              You can still book for what&apos;s left of this season &mdash; or reserve your spot for April 1 and skip the rush.
+              Either way, there&apos;s no initial fee and you can cancel anytime.
+            </p>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setMosquitoTickIntent("current")}
+                className="text-left rounded-2xl border border-green-500/30 bg-green-500/5 p-6 hover:border-green-500/60 hover:bg-green-500/10 transition-colors"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/20">
+                    <CalendarClock size={18} className="text-green-300" />
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-green-300">
+                    Start This Season
+                  </p>
+                </div>
+                <h3 className="text-xl font-display font-bold text-white mb-2">
+                  Book First Treatment
+                </h3>
+                <p className="text-sm text-white/60 mb-4">
+                  {mosquitoTickBillingPlan.monthsRemaining === 1
+                    ? "1 charge remaining this season. Treatment scheduled this week."
+                    : `${mosquitoTickBillingPlan.monthsRemaining} charges remaining this season. Treatment scheduled this week.`}
+                </p>
+                <span className="inline-flex items-center gap-2 text-sm font-bold text-green-400">
+                  Continue <ArrowRight size={14} />
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMosquitoTickIntent("reserve")}
+                className="text-left rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-white/25 hover:bg-white/10 transition-colors"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15">
+                    <Snowflake size={18} className="text-blue-300" />
+                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
+                    Off-Season Hold
+                  </p>
+                </div>
+                <h3 className="text-xl font-display font-bold text-white mb-2">
+                  Reserve for April 1
+                </h3>
+                <p className="text-sm text-white/60 mb-4">
+                  Lock in today&apos;s pricing. We&apos;ll call you in late March to confirm your first visit, then billing starts April 1.
+                </p>
+                <span className="inline-flex items-center gap-2 text-sm font-bold text-white/70">
+                  Continue <ArrowRight size={14} />
+                </span>
+              </button>
+            </div>
+
+            <p className="text-xs text-white/40 mt-6">
+              Not sure?{" "}
+              <Link href={mosquitoTickHelpHref} className="text-white/70 hover:text-white underline underline-offset-2">
+                Get help choosing
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      ) : isQuoteOnlyPlan ? (
+        <div className="glass-card rounded-3xl border border-amber-500/25 bg-amber-500/5 p-8 md:p-10">
+          <div className="max-w-3xl">
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-300 mb-5">
+              Custom Quote Needed
+            </p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              Let’s price your home with a tailored quote.
+            </h2>
+            <p className="text-white/65 text-lg leading-relaxed mb-6">
+              Homes over 4,000 sqft vary too much in layout, pest pressure, and treatment scope to price instantly online.
+              Send us a quick request and our team will quote the right plan for your property.
+            </p>
+            <div className="rounded-2xl border border-white/10 bg-background/30 p-5 mb-6">
+              <p className="text-sm font-semibold text-white/80 mb-1">Selected plan</p>
+              <p className="text-xl font-display font-bold text-white">{planTitle}</p>
+              <p className="text-sm text-white/55 mt-2">{getPropertySizeConfig(propertySize).sqftRangeLabel}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href={quoteHref}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+              >
+                Request Custom Quote
+              </Link>
+              <a
+                href="tel:6312031000"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Call (631) 203-1000
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : (
       <div className="flex flex-col-reverse lg:flex-row gap-12">
         <form onSubmit={handleCheckout} className={`flex-1 space-y-8 ${loading ? "opacity-60 pointer-events-none" : "transition-opacity duration-300"}`} noValidate>
 
@@ -528,25 +939,46 @@ function BookingContent() {
           </div>
 
           <div className="glass-card p-8 rounded-3xl">
-            <h2 className="text-2xl font-bold text-white mb-6">Schedule Service</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              {mosquitoTickIsReservation ? "Reservation Details" : "Schedule Service"}
+            </h2>
 
-            <div className="space-y-4 mb-8">
-              <label htmlFor="book-date" className="text-sm font-semibold text-white/80 flex items-center gap-2">
-                <Calendar size={16} className="text-green-400" /> Desired Date
-              </label>
-              <input
-                id="book-date"
-                name="date"
-                type="date"
-                required
-                className="w-full bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-4 py-3 md:px-6 md:py-5 text-white text-base md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
-                style={{ colorScheme: "dark" }}
-                min={new Date().toISOString().split('T')[0]}
-                value={form.date}
-                onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-              />
-            </div>
+            {mosquitoTickIsReservation ? (
+              <div className="mb-6 p-5 rounded-2xl bg-blue-500/5 border border-blue-500/25">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 flex-shrink-0">
+                    <Snowflake size={18} className="text-blue-300" />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold mb-1">Service begins April 1</p>
+                    <p className="text-white/60 text-sm leading-relaxed">
+                      We&apos;ll call you in late March to schedule your first visit.
+                      Monthly billing starts April 1 and pauses automatically after October.
+                      No charge today &mdash; we just save your card on file to lock in pricing.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 mb-8">
+                <label htmlFor="book-date" className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                  <Calendar size={16} className="text-green-400" /> Desired Date
+                </label>
+                <input
+                  id="book-date"
+                  name="date"
+                  type="date"
+                  required
+                  className="w-full bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-4 py-3 md:px-6 md:py-5 text-white text-base md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
+                  style={{ colorScheme: "dark" }}
+                  min={new Date().toISOString().split('T')[0]}
+                  value={form.date}
+                  onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                />
+              </div>
+            )}
 
+            {!mosquitoTickIsReservation && (
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-white/80 flex items-center gap-2 mb-4">
                 <Clock size={16} className="text-green-400" /> Arrival Window
@@ -623,6 +1055,7 @@ function BookingContent() {
                 </p>
               </div>
             </fieldset>
+            )}
           </div>
 
           {error && (
@@ -641,7 +1074,11 @@ function BookingContent() {
               className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
               {loading ? <Loader2 size={20} className="animate-spin" /> : <CreditCard size={20} />}
-              {loading ? "Connecting to Secure Checkout..." : "Proceed to Checkout"}
+              {loading
+                ? "Connecting to Secure Checkout..."
+                : mosquitoTickIsReservation
+                  ? "Reserve My Spot"
+                  : "Proceed to Checkout"}
             </button>
             <p className="text-center text-white/40 text-xs mt-4 flex items-center justify-center gap-2">
               Safe, secure 256-bit SSL encrypted checkout hosted by Stripe.
@@ -653,19 +1090,80 @@ function BookingContent() {
           <div className="glass-card p-8 rounded-3xl sticky top-32">
             <h2 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">Order Summary</h2>
 
-            {isOneTime ? (
+            {promoCode && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2.5">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-green-300">Promo Applied</p>
+                  <p className="text-sm font-display font-bold text-white">{promoCode}</p>
+                </div>
+                <p className="text-xs text-green-200/80 text-right leading-tight max-w-[120px]">
+                  Discount shown at checkout
+                </p>
+              </div>
+            )}
+
+            {isMosquitoTick && mosquitoTickPackage && mosquitoTickBillingPlan ? (
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-white font-medium">{planTitle}</p>
-                    <p className="text-white/50 text-sm">One-time service</p>
+                    <p className="text-white/50 text-sm">
+                      {mosquitoTickIsReservation
+                        ? `Reservation — ${mosquitoTickBillingPlan.seasonYear} season`
+                        : "Seasonal monthly subscription"}
+                    </p>
+                  </div>
+                  <p className="text-white/40 text-sm">{mosquitoTickPackage.shortLabel}</p>
+                </div>
+
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="text-white/80 font-semibold text-sm">Monthly Price</p>
+                    <p className="text-white/40 text-xs">During active months only</p>
+                  </div>
+                  <p className="text-white font-bold">${mosquitoTickMonthlyPrice.toFixed(2)}</p>
+                </div>
+
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="text-white/60 text-sm">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
+                  </div>
+                  <p className="text-white/60">${mosquitoTickMonthlyTax.toFixed(2)}</p>
+                </div>
+
+                <div className="flex justify-between items-center py-3 border-t border-white/10">
+                  <p className="text-white font-semibold">Monthly Total</p>
+                  <p className="text-white font-display font-bold text-lg">${mosquitoTickMonthlyTotal.toFixed(2)}</p>
+                </div>
+
+                <div className="mt-4 p-3 rounded-xl bg-green-500/5 border border-green-500/20">
+                  <p className="text-green-300/80 text-xs leading-relaxed">
+                    {mosquitoTickIsReservation
+                      ? `No charge today. Billing starts April 1, ${mosquitoTickBillingPlan.seasonYear} and runs monthly through October ${mosquitoTickBillingPlan.seasonYear} (7 charges). Cancel anytime.`
+                      : `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Billing pauses automatically after October 31. No initial fee. Cancel anytime.`}
+                  </p>
+                </div>
+              </>
+            ) : isOneTime ? (
+              <>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-white font-medium">{planTitle}</p>
+                    <p className="text-white/50 text-sm">{isSpecialty ? "Specialty one-time service" : "One-time service"}</p>
                   </div>
                   <p className="text-white font-bold">${initialFee.toFixed(2)}</p>
                 </div>
 
+                {specialtySummary && (
+                  <div className="mb-4 rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35 mb-1">Selected scope</p>
+                    <p className="text-sm text-white/75">{specialtySummary}</p>
+                  </div>
+                )}
+
                 <div className="mb-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
                   <p className="text-blue-300/80 text-xs leading-relaxed">
-                    No subscription required. This is a single visit — you will only be charged once.
+                    No subscription required. This is a single purchase charged once at checkout.
                   </p>
                 </div>
               </>
@@ -674,9 +1172,11 @@ function BookingContent() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-white font-medium">{planTitle}</p>
-                    <p className="text-white/50 text-sm">Billed {billing}</p>
+                    <p className="text-white/50 text-sm">
+                      {isYearly ? "Annual prepay - one-time charge" : "Monthly subscription"}
+                    </p>
                   </div>
-                  <p className="text-white/40 text-sm">Monthly</p>
+                  <p className="text-white/40 text-sm">{getPropertySizeConfig(propertySize).label} home</p>
                 </div>
 
                 {isYearly ? (
@@ -710,24 +1210,57 @@ function BookingContent() {
                 <div className="mb-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
                   <p className="text-amber-300/80 text-xs leading-relaxed">
                     {isYearly && !isOneTime
-                      ? "All plan benefits unlock immediately. You are fully paid for the next 12 months!"
-                      : "All plan benefits unlock immediately once your initial service fee is processed. Your monthly subscription will begin the following month."}
+                      ? "This is a one-time annual payment charged today, so Affirm and other pay-over-time options can recognize it as a purchase."
+                  : "All plan benefits unlock immediately once today’s charge is processed. Your next recurring payment will be due next month."}
                   </p>
                 </div>
               </>
             )}
 
-            <div className="flex justify-between items-start mb-6 text-sm">
-              <div>
-                <p className="text-white/60">NY Sales Tax <span className="text-white/30">(8.625%)</span></p>
-              </div>
-              <p className="text-white/60">${taxAmount.toFixed(2)}</p>
-            </div>
+            {!isMosquitoTick && (
+              <>
+                <div className="flex justify-between items-start mb-6 text-sm">
+                  <div>
+                    <p className="text-white/60">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
+                  </div>
+                  <p className="text-white/60">${taxAmount.toFixed(2)}</p>
+                </div>
 
-            <div className="flex justify-between items-center py-4 border-t border-white/10">
-              <p className="text-white font-bold text-lg">Total Due Today</p>
-              <p className="text-green-400 font-display font-bold text-2xl">${totalDue.toFixed(2)}</p>
-            </div>
+                <div className="flex justify-between items-center py-4 border-t border-white/10">
+                  <p className="text-white font-bold text-lg">Total Due Today</p>
+                  <p className="text-green-400 font-display font-bold text-2xl">${totalDue.toFixed(2)}</p>
+                </div>
+              </>
+            )}
+
+            {isMosquitoTick && mosquitoTickBillingPlan && !mosquitoTickIsReservation && (
+              <div className="flex justify-between items-center py-4 border-t border-white/10 mt-2">
+                <div>
+                  <p className="text-white font-bold text-lg">Total Due Today</p>
+                  <p className="text-white/50 text-xs">First monthly charge</p>
+                </div>
+                <p className="text-green-400 font-display font-bold text-2xl">${mosquitoTickMonthlyTotal.toFixed(2)}</p>
+              </div>
+            )}
+
+            {isMosquitoTick && mosquitoTickIsReservation && (
+              <div className="flex justify-between items-center py-4 border-t border-white/10 mt-2">
+                <div>
+                  <p className="text-white font-bold text-lg">Total Due Today</p>
+                  <p className="text-white/50 text-xs">No charge until April 1</p>
+                </div>
+                <p className="text-green-400 font-display font-bold text-2xl">$0.00</p>
+              </div>
+            )}
+
+            {isMosquitoTick && mosquitoTickBillingPlan && (
+              <div className="mt-4 flex justify-between items-center text-sm">
+                <p className="text-white/50">Estimated season total</p>
+                <p className="text-white/70 font-semibold">
+                  ${mosquitoTickSeasonTotal.toFixed(2)}
+                </p>
+              </div>
+            )}
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
               <div className="flex items-center gap-2 opacity-60">
@@ -742,6 +1275,7 @@ function BookingContent() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

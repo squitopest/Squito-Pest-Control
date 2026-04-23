@@ -13,8 +13,8 @@ const services = [
     icon: Bug,
     name: "Mosquito & Tick Control",
     tagline: "Reclaim your yard all season long",
-    description: "Barrier treatments applied every 21 days keep mosquitoes and ticks off your property. Long Island's tick pressure is serious — our treatments target harborage zones where they breed.",
-    href: "/residential",
+    description: "Monthly barrier treatments April through October that target the zones where mosquitoes breed and ticks hide. Built into our Ultimate Fortress plan for season-long Long Island coverage.",
+    href: "/services/mosquito-tick",
     badge: "Most Popular",
   },
   {
@@ -22,7 +22,7 @@ const services = [
     name: "Termite Defense",
     tagline: "Structural protection you can count on",
     description: "Termites cause $5B in damage each year nationwide. Our perimeter treatments and monitoring stations stop colonies before they reach your structure.",
-    href: "/residential",
+    href: "/services/specialty/termite-inspection",
     badge: null,
   },
   {
@@ -38,7 +38,7 @@ const services = [
     name: "Bed Bug Treatment",
     tagline: "Heat and chemical solutions that work",
     description: "Bed bugs are notoriously hard to eliminate. We use a combination of heat treatment and EPA-registered products to reach every hiding spot in a single visit.",
-    href: "/residential",
+    href: "/services/specialty/bed-bug-treatment",
     badge: null,
   },
   {
@@ -145,6 +145,37 @@ export default function ServicesPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+
+        <div className="mb-20 animate-fade-in-up" style={{ animationDelay: "0.18s" }}>
+          <div className="glass-card rounded-3xl border border-white/10 p-10 md:p-12 flex flex-col lg:flex-row lg:items-center gap-8">
+            <div className="flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-3">
+                Specialty Catalog
+              </p>
+              <h2 className="text-4xl font-display font-bold text-white mb-4 tracking-tight">
+                Configure one-time specialty services online.
+              </h2>
+              <p className="text-white/65 text-lg leading-relaxed max-w-2xl">
+                Bed bugs, flea programs, termite services, bait stations, event mosquito sprays, carpenter bees,
+                stinging insect nests, and more now have their own live pricing and checkout flow.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/services/specialty"
+                className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4 justify-center"
+              >
+                Browse Specialty Services <ArrowRight size={18} />
+              </Link>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl border border-white/20 text-white font-semibold text-lg hover:border-green-500/50 hover:bg-green-500/10 transition-all"
+              >
+                Need a Quote Instead?
+              </Link>
+            </div>
           </div>
         </div>
 

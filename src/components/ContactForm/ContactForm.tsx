@@ -2,8 +2,14 @@
 
 import { useId, useState, useRef, useEffect, useCallback } from "react";
 import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2, ChevronDown, X, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function ContactForm() {
+  const searchParams = useSearchParams();
+  const prefilledType = searchParams.get("type");
+  const prefilledService = searchParams.get("service");
+  const prefilledMessage = searchParams.get("message");
+  const isQuoteFlow = (prefilledService || "").toLowerCase().includes("quote");
   const [submitted, setSubmitted] = useState(false);
   const [type, setType] = useState<"residential" | "commercial">("residential");
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -58,6 +64,22 @@ export default function ContactForm() {
       }, 50);
     }
   }, [submitted]);
+
+  useEffect(() => {
+    if (prefilledType === "residential" || prefilledType === "commercial") {
+      setType(prefilledType);
+    }
+
+    if (prefilledService || prefilledMessage) {
+      setFormOpen(true);
+      setForm((prev) => ({
+        ...prev,
+        service: prefilledService || prev.service,
+        message: prefilledMessage || prev.message,
+      }));
+    }
+  }, [prefilledMessage, prefilledService, prefilledType]);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -177,7 +199,7 @@ export default function ContactForm() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, type }),
       });
 
       if (!response.ok) {
@@ -292,8 +314,12 @@ export default function ContactForm() {
                   </div>
                   <div className="flex-1">
                     <div className="text-[10px] uppercase tracking-widest text-green-400 font-semibold mb-2">Free · No Obligation</div>
-                    <div className="text-2xl md:text-3xl font-display font-bold text-white mb-1">Start My Free Inspection</div>
-                    <div className="text-white/60 text-sm">Click to open the form — takes under a minute.</div>
+                    <div className="text-2xl md:text-3xl font-display font-bold text-white mb-1">
+                      {isQuoteFlow ? "Start My Free Quote" : "Start My Free Inspection"}
+                    </div>
+                    <div className="text-white/60 text-sm">
+                      {isQuoteFlow ? "Click to request a tailored quote for your property." : "Click to open the form — takes under a minute."}
+                    </div>
                   </div>
                   <div className="shrink-0 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 group-hover:text-green-400 group-hover:border-green-500/50 group-hover:bg-green-500/10 transition-all">
                     <ChevronDown size={20} />
@@ -309,7 +335,7 @@ export default function ContactForm() {
               >
                 <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-white/5">
                   <h3 className="text-lg md:text-xl font-display font-bold text-white">
-                    Tell us about your pest issue
+                    {isQuoteFlow ? "Tell us about your property" : "Tell us about your pest issue"}
                   </h3>
                   <button
                     type="button"
@@ -553,8 +579,8 @@ export default function ContactForm() {
                      </span>
                      <span className="relative z-10 flex flex-col items-start leading-none text-left">
                        <span className="text-[9px] uppercase tracking-widest text-green-400/70 font-semibold mb-0.5">100% Free</span>
-                       <span className="text-lg font-display font-bold text-white tracking-wide">
-                         {loading ? "Sending..." : "Request Free Inspection"}
+                        <span className="text-lg font-display font-bold text-white tracking-wide">
+                         {loading ? "Sending..." : isQuoteFlow ? "Request Free Quote" : "Request Free Inspection"}
                        </span>
                      </span>
                    </span>

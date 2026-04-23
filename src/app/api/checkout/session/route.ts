@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { validateEnv } from "@/lib/validateEnv";
 import { createServiceClient } from "@/lib/supabase";
 import { rateLimit, getClientIp } from "@/lib/rateLimit";
-import { getOneTimeService, getSubscriptionPlan } from "@/data/plans";
+import { formatSelectedPlanName, getOneTimeService, getSubscriptionPlan, resolvePropertySize } from "@/data/plans";
 
 type BookingSummary = {
   planTitle: string;
@@ -30,14 +30,21 @@ async function loadBookingSummary(bookingId: string): Promise<BookingSummary | n
     const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("bookings")
-      .select("full_name, service_date, service_time, city, zip_code, plan_id")
+      .select("full_name, service_date, service_time, city, zip_code, plan_id, property_size, service_type, service_summary, service_id")
       .eq("id", bookingId)
       .single();
 
     if (error || !data) return null;
 
     return {
-      planTitle: buildPlanTitle(data.plan_id),
+      planTitle:
+        data.service_type === "mosquito_tick"
+          ? data.service_summary ?? "Mosquito & Tick Package"
+          : data.service_type === "specialty"
+          ? data.service_summary ?? data.service_id ?? "Specialty Service"
+          : data.property_size
+            ? formatSelectedPlanName(data.plan_id, resolvePropertySize(data.property_size))
+            : buildPlanTitle(data.plan_id),
       fullName: data.full_name ?? null,
       serviceDate: data.service_date ?? null,
       serviceTime: data.service_time ?? null,
@@ -101,7 +108,11 @@ export async function GET(req: Request) {
     validateEnv(["STRIPE_SECRET_KEY"]);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    const verified = session.status === "complete" && session.payment_status === "paid";
+    // "no_payment_required" covers mosquito-tick reservations — a subscription
+    // with trial_end set, where Stripe saves the card but doesn't charge today.
+    const verified =
+      session.status === "complete" &&
+      (session.payment_status === "paid" || session.payment_status === "no_payment_required");
     const bookingId = (session.metadata?.bookingId || "").trim();
 
     let booking: BookingSummary | null = null;

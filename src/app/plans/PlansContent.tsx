@@ -13,7 +13,6 @@ import {
   ArrowRight,
   ChevronDown,
   Bug,
-  Home,
   Leaf,
   Clock,
   BadgeCheck,
@@ -26,14 +25,24 @@ import {
 } from "lucide-react";
 import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
+import {
+  DEFAULT_PROPERTY_SIZE,
+  buildQuoteRequestHref,
+  getPropertySizeConfig,
+  getSubscriptionPricing,
+  type PropertySize,
+} from "@/data/plans";
+import { getSpecialtyService } from "@/data/specialtyServices";
+import PropertySizeSelector from "@/components/Plans/PropertySizeSelector";
+
+const termiteInspectionService = getSpecialtyService("termite-inspection")!;
+const stingingInsectService = getSpecialtyService("stinging-insect-treatment")!;
+const eventMosquitoService = getSpecialtyService("event-mosquito-spray")!;
 
 const plans = [
   {
-    name: "Essential Defense",
-    tagline: "Great for first-time customers & smaller homes.",
-    price: { monthly: 49.99, yearly: 39.99 },
-    initialFee: 199.99,
     id: "essential-defense",
+    tagline: "Great for first-time customers & smaller homes.",
     icon: Shield,
     accentColor: "zinc",
     borderClass: "border-zinc-700 hover:border-zinc-500",
@@ -63,11 +72,8 @@ const plans = [
     pestsIncluded: ["Ants", "Spiders", "Stink bugs", "Earwigs", "Centipedes", "Beetles", "Wasps (exterior nests)", "Crickets", "Silverfish"],
   },
   {
-    name: "Premium Shield",
-    tagline: "Our most popular plan — full protection, inside and out.",
-    price: { monthly: 89.99, yearly: 71.99 },
-    initialFee: 299.99,
     id: "premium-shield",
+    tagline: "Our most popular plan — full protection, inside and out.",
     icon: Star,
     accentColor: "green",
     borderClass: "border-green-500",
@@ -97,11 +103,8 @@ const plans = [
     pestsIncluded: ["Everything in Essential", "Cockroaches", "Mice & Rats", "Termite inspection", "Fleas (interior)", "Bed bugs (initial check)", "Carpenter ants", "Hornets & yellow jackets"],
   },
   {
-    name: "Ultimate Fortress",
-    tagline: "Total domination — yard, interior, and everything in between.",
-    price: { monthly: 129.99, yearly: 103.99 },
-    initialFee: 399.99,
     id: "ultimate-fortress",
+    tagline: "Total domination — yard, interior, and everything in between.",
     icon: Zap,
     accentColor: "amber",
     borderClass: "border-amber-500/70 hover:border-amber-400",
@@ -130,7 +133,7 @@ const plans = [
     bestFor: ["Large properties & estates", "Families with young children or pets", "Homeowners near wooded or marshy areas", "Anyone wanting total peace of mind"],
     pestsIncluded: ["Everything in Premium Shield", "Mosquitoes (monthly spray)", "Ticks (monthly spray)", "Fleas (outdoor seasonal)", "Termites (monitoring)", "Bed bugs (full alert service)"],
   },
-];
+ ] as const;
 
 const faqs = [
   {
@@ -161,58 +164,34 @@ const faqs = [
 
 const oneTimeServices = [
   {
-    name: "Termite Inspection",
-    price: 149,
+    ...termiteInspectionService,
     label: "flat rate",
-    image: "/termite-inspection.webp",
-    id: "termite-inspection",
     icon: FlaskConical,
-    desc: "Full property inspection for termite activity, damage, and risk areas.",
-    includes: [
-      "Complete interior & exterior inspection",
-      "Digital inspection report with photos",
-      "Damage & risk area assessment",
-      "Treatment recommendations if needed",
-      "Certificate of inspection provided",
-      "NPMA-33 for real estate transactions.",
-    ],
+    price: termiteInspectionService.pricing.model === "flat" ? termiteInspectionService.pricing.price : 0,
+    desc: termiteInspectionService.description,
+    includes: termiteInspectionService.highlights,
     theme: "border-zinc-700 bg-card/40 hover:border-zinc-500",
     accentColor: "text-zinc-300",
     gradient: "conic-gradient(from var(--angle, 0deg), #52525b, #3f3f46, #27272a, #71717a, #52525b)",
   },
   {
-    name: "Wasp Nest Removal",
-    price: 249,
+    ...stingingInsectService,
     label: "starting at",
-    image: "/hornet-nest.webp",
-    id: "wasp-removal",
     icon: Bug,
-    desc: "Safe, same-day removal of active wasp, hornet, and yellow jacket nests.",
-    includes: [
-      "On-site nest identification & assessment",
-      "Safe chemical-free or treated removal",
-      "Entry point sealing recommendations",
-      "30-day guarantee — if they return, we do too",
-    ],
+    price: stingingInsectService.pricing.model === "toggle" ? stingingInsectService.pricing.basePrice : 0,
+    desc: stingingInsectService.description,
+    includes: stingingInsectService.highlights,
     theme: "border-amber-500/50 bg-amber-500/5 hover:border-amber-400",
     accentColor: "text-amber-400",
     gradient: "conic-gradient(from var(--angle, 0deg), #f59e0b, #d97706, #b45309, #fbbf24, #f59e0b)",
   },
   {
-    name: "Mosquito Event Spray",
-    price: 199,
+    ...eventMosquitoService,
     label: "starting at",
-    image: "/backyard-bbq.webp",
-    id: "mosquito-event-spray",
     icon: Droplets,
-    desc: "One-time yard barrier spray — ideal before outdoor events, BBQs, or parties.",
-    includes: [
-      "Full perimeter & yard spray treatment",
-      "Effective within 30 minutes of application",
-      "Results last up to 3 weeks",
-      "Safe for pets & children after 45-min dry time",
-      "Available same-day for bookings before 1 PM",
-    ],
+    price: 199,
+    desc: eventMosquitoService.description,
+    includes: eventMosquitoService.highlights,
     theme: "border-blue-500/40 bg-blue-500/5 hover:border-blue-400/60",
     accentColor: "text-blue-400",
     gradient: "conic-gradient(from var(--angle, 0deg), #3b82f6, #2563eb, #1d4ed8, #60a5fa, #3b82f6)",
@@ -222,7 +201,13 @@ const oneTimeServices = [
 function PlansContentInner() {
   const searchParams = useSearchParams();
   const town = searchParams.get("town");
+  const initialSize = searchParams.get("size");
   const [billing, setBilling] = useState<"monthly" | "yearly" | "onetime">("monthly");
+  const [propertySize, setPropertySize] = useState<PropertySize>(
+    initialSize === "small" || initialSize === "medium" || initialSize === "large" || initialSize === "xl"
+      ? initialSize
+      : DEFAULT_PROPERTY_SIZE
+  );
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const [showContactForm, setShowContactForm] = useState(false);
@@ -344,6 +329,12 @@ function PlansContentInner() {
             }
           </p>
 
+          {billing !== "onetime" && (
+            <div className="w-full max-w-5xl mx-auto mb-8">
+              <PropertySizeSelector value={propertySize} onChange={setPropertySize} />
+            </div>
+          )}
+
           {/* Billing toggle */}
           <div className="flex flex-col sm:flex-row p-1.5 gap-1 bg-card/80 border border-border rounded-3xl sm:rounded-full backdrop-blur-md w-full max-w-sm sm:max-w-max mx-auto mb-12">
             <button
@@ -369,8 +360,8 @@ function PlansContentInner() {
               className={`w-full sm:w-auto justify-center px-6 py-3 sm:py-2 rounded-2xl sm:rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${billing === "onetime" ? "bg-white/10 text-white shadow" : "text-white/60 hover:text-white"}`}
               onClick={() => setBilling("onetime")}
             >
-              One-Time
-              <span className="bg-blue-500/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">No Sub</span>
+              Specialty
+              <span className="bg-blue-500/80 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">One-Time</span>
             </button>
           </div>
         </div>
@@ -382,9 +373,18 @@ function PlansContentInner() {
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {plans.map((plan) => {
+              const pricing = getSubscriptionPricing(plan.id, propertySize);
+              if (!pricing) return null;
+
               const Icon = plan.icon;
               const isGreen = plan.accentColor === "green";
               const isAmber = plan.accentColor === "amber";
+              const quoteHref = buildQuoteRequestHref({
+                planId: plan.id,
+                size: propertySize,
+                billing,
+                source: "plans page",
+              });
               return (
                 <div
                   key={plan.id}
@@ -404,39 +404,57 @@ function PlansContentInner() {
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${plan.iconBg} border ${isGreen ? "border-green-500/30 text-green-400" : isAmber ? "border-amber-500/30 text-amber-400" : "border-white/10 text-white"}`}>
                       <Icon size={26} />
                     </div>
-                    <h2 className="text-2xl font-display font-bold text-white mb-1">{plan.name}</h2>
+                    <h2 className="text-2xl font-display font-bold text-white mb-1">{pricing.plan.shortName}</h2>
                     <p className="text-white/50 text-sm mb-6">{plan.tagline}</p>
 
                     {/* Price */}
-                    <div className="flex items-end gap-1 mb-1">
-                      <span className="text-5xl font-display font-bold text-white">
-                        ${billing === "yearly" ? (plan.price.yearly * 12).toFixed(2) : plan.price.monthly}
-                      </span>
-                      <span className="text-white/40 mb-2">{billing === "yearly" ? "/yr" : "/mo"}</span>
-                    </div>
-                    {billing === "yearly" ? (
-                      <p className="text-sm text-green-400 font-medium mb-3">Save ${(plan.price.monthly * 12 - plan.price.yearly * 12).toFixed(2)} vs monthly</p>
+                    {pricing.quoteOnly ? (
+                      <>
+                        <div className="mb-2">
+                          <span className="text-4xl font-display font-bold text-white">Custom quote</span>
+                        </div>
+                        <p className="text-sm text-amber-300 font-medium mb-6">
+                          Larger homes above 4,000 sqft need a fast review before we price them accurately.
+                        </p>
+                      </>
                     ) : (
-                      <p className="text-sm text-transparent select-none mb-3">&nbsp;</p>
-                    )}
-                    {billing === "yearly" ? (
-                      <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
-                        <span><span className="line-through opacity-60 mr-1">${plan.initialFee.toFixed(2)}</span> Initial fee waived!</span>
-                      </div>
-                    ) : (
-                      <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
-                        <span>+ ${plan.initialFee.toFixed(2)} one-time initial service fee</span>
-                      </div>
+                      <>
+                        <div className="flex items-end gap-1 mb-1">
+                          <span className="text-5xl font-display font-bold text-white">
+                            ${billing === "yearly" ? pricing.yearlyTotal.toFixed(2) : pricing.monthlyPrice.toFixed(2)}
+                          </span>
+                          <span className="text-white/40 mb-2">{billing === "yearly" ? "/yr" : "/mo"}</span>
+                        </div>
+                        {billing === "yearly" ? (
+                          <p className="text-sm text-green-400 font-medium mb-3">
+                            Save ${pricing.annualSavings.toFixed(2)} vs monthly
+                          </p>
+                        ) : (
+                          <p className="text-sm text-transparent select-none mb-3">&nbsp;</p>
+                        )}
+                        {billing === "yearly" ? (
+                          <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
+                            <span>
+                              <span className="line-through opacity-60 mr-1">${pricing.initialFee.toFixed(2)}</span>
+                              One-time annual payment today. Initial fee waived!
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
+                            <span>+ ${pricing.initialFee.toFixed(2)} one-time initial service fee</span>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {/* Quick Stats */}
                     <div className="grid grid-cols-2 gap-3 mb-8 p-4 rounded-2xl bg-white/3 border border-white/5">
                       {[
-                        { icon: Clock, label: "Treatments", val: plan.treatment },
-                        { icon: Home, label: "Coverage", val: plan.coverage },
-                        { icon: Bug, label: "Pests", val: plan.pests },
-                        { icon: BadgeCheck, label: "Response", val: plan.responseTime },
-                      ].map(({ icon: StatIcon, label, val }) => (
+                        { label: "Treatments", val: plan.treatment },
+                        { label: "Coverage", val: plan.coverage },
+                        { label: "Pests", val: plan.pests },
+                        { label: "Response", val: plan.responseTime },
+                      ].map(({ label, val }) => (
                         <div key={label} className="flex flex-col gap-0.5">
                           <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">{label}</span>
                           <span className="text-xs font-semibold text-white/80">{val}</span>
@@ -446,7 +464,11 @@ function PlansContentInner() {
 
                     {/* CTA */}
                     <Link
-                      href={`/book?plan=${plan.id}&billing=${billing}`}
+                      href={
+                        pricing.quoteOnly
+                          ? quoteHref
+                          : `/book?plan=${plan.id}&billing=${billing}&size=${propertySize}`
+                      }
                       className={`flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-display font-bold text-base mb-8 transition-all duration-300 group ${
                         isGreen
                           ? "bg-green-500 hover:bg-green-400 text-white hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
@@ -455,7 +477,7 @@ function PlansContentInner() {
                           : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
                       }`}
                     >
-                      {plan.cta}
+                      {pricing.quoteOnly ? "Request Custom Quote" : plan.cta}
                       <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
 
@@ -481,13 +503,25 @@ function PlansContentInner() {
       </section>
       )}
 
-      {/* ── One-Time Service Cards ── */}
+      {/* ── Specialty Service Cards ── */}
       {billing === "onetime" && (
       <section className="pb-24">
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-blue-300 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-5">
+              <Bug size={14} />
+              Specialty Services
+            </div>
+            <h2 className="text-4xl font-display font-bold text-white mb-4">
+              One-time treatments for specific pest issues.
+            </h2>
+            <p className="text-white/55 text-lg leading-relaxed">
+              Use these as quick entry points into the specialty catalog for targeted service pages, live pricing, and one-time checkout.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-10">
             {oneTimeServices.map((svc) => {
-              const Icon = svc.icon;
               return (
                 <div key={svc.id} className={`rounded-3xl border overflow-hidden backdrop-blur-xl transition-all duration-300 ${svc.theme}`}>
                   {/* Hero Image */}
@@ -507,7 +541,7 @@ function PlansContentInner() {
                       <span className="text-5xl font-display font-bold text-white">${svc.price}</span>
                       <span className="text-white/40 mb-2 text-sm">{svc.label}</span>
                     </div>
-                    <p className="text-xs text-white/40 mt-1">No subscription required</p>
+                    <p className="text-xs text-white/40 mt-1">One-time service</p>
                   </div>
                   <div className="flex flex-col gap-4 mb-8">
                     {svc.includes.map((item, j) => (
@@ -518,16 +552,26 @@ function PlansContentInner() {
                     ))}
                   </div>
                   <Link
-                    href={`/book?plan=${svc.id}&billing=onetime`}
+                    href={`/services/specialty/${svc.slug}`}
                     className={`group flex items-center justify-center gap-2 w-full py-4 rounded-2xl border font-display font-bold text-base transition-all duration-300 hover:bg-white/5 ${svc.accentColor}`}
                   >
-                    Book Now
+                    View Service
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          <div className="flex justify-center">
+            <Link
+              href="/services/specialty"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 font-display font-bold text-white transition-colors hover:bg-white/10"
+            >
+              Browse All Specialty Services
+              <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
@@ -538,11 +582,16 @@ function PlansContentInner() {
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-display font-bold text-white mb-4">Plan Deep Dive</h2>
-            <p className="text-white/50 text-lg">See exactly who each plan is built for and what pests it covers.</p>
+            <p className="text-white/50 text-lg">
+              See exactly who each plan is built for and what pests it covers for {getPropertySizeConfig(propertySize).label.toLowerCase()} homes.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((plan) => {
+              const pricing = getSubscriptionPricing(plan.id, propertySize);
+              if (!pricing) return null;
+
               const Icon = plan.icon;
               const isGreen = plan.accentColor === "green";
               const isAmber = plan.accentColor === "amber";
@@ -555,7 +604,7 @@ function PlansContentInner() {
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accentBg} border`}>
                       <Icon size={20} className={accentText} />
                     </div>
-                    <h3 className="font-display font-bold text-white text-lg">{plan.name}</h3>
+                    <h3 className="font-display font-bold text-white text-lg">{pricing.plan.shortName}</h3>
                   </div>
 
                   <div>
@@ -582,10 +631,19 @@ function PlansContentInner() {
                   </div>
 
                   <Link
-                    href={`/book?plan=${plan.id}&billing=monthly`}
+                    href={
+                      pricing.quoteOnly
+                        ? buildQuoteRequestHref({
+                            planId: plan.id,
+                            size: propertySize,
+                            billing: "monthly",
+                            source: "plans page deep dive",
+                          })
+                        : `/book?plan=${plan.id}&billing=monthly&size=${propertySize}`
+                    }
                     className={`mt-auto flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all group border ${accentBg} ${accentText} hover:opacity-80`}
                   >
-                    Book This Plan <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    {pricing.quoteOnly ? "Request Quote" : "Book This Plan"} <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               );

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Mail } from "lucide-react";
 import ContactForm from "@/components/ContactForm/ContactForm";
 import { createPageMetadata } from "@/lib/site";
@@ -26,7 +27,9 @@ export default function ContactPage() {
       
       {/* Reusing the ContactForm component natively */}
       <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-        <ContactForm />
+        <Suspense fallback={<div className="py-16 text-center text-white/50">Loading contact form...</div>}>
+          <ContactForm />
+        </Suspense>
       </div>
     </main>
   );
