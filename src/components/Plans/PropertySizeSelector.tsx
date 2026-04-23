@@ -50,7 +50,7 @@ export default function PropertySizeSelector({
                   {option.label}
                 </span>
                 {option.quoteOnly && (
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-300">
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-700">
                     Quote
                   </span>
                 )}

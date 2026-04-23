@@ -51,6 +51,11 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Alias: `bg-surface` had been referenced across the codebase without
+        // a token backing it (silently rendered as transparent). Pointing
+        // `surface` at `--card` both fixes the latent bug and makes the
+        // class theme-aware without needing to migrate every callsite.
+        surface: "hsl(var(--card))",
       },
       borderRadius: {
         lg: "var(--radius)",

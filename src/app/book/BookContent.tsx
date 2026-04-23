@@ -870,7 +870,7 @@ function BookingContent() {
                     id={SUGGESTION_LIST_ID}
                     role="listbox"
                     aria-label="Matching addresses"
-                    className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                    className="absolute z-50 w-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                   >
                     {suggestions.map((suggestion, i) => {
                       const highlighted = i === highlightedIndex;
@@ -1093,10 +1093,10 @@ function BookingContent() {
             {promoCode && (
               <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2.5">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-green-300">Promo Applied</p>
-                  <p className="text-sm font-display font-bold text-white">{promoCode}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-green-700">Promo Applied</p>
+                  <p className="text-sm font-display font-bold text-foreground">{promoCode}</p>
                 </div>
-                <p className="text-xs text-green-200/80 text-right leading-tight max-w-[120px]">
+                <p className="text-xs text-green-700/80 text-right leading-tight max-w-[120px]">
                   Discount shown at checkout
                 </p>
               </div>

@@ -45,8 +45,8 @@ const plans = [
     tagline: "Great for first-time customers & smaller homes.",
     icon: Shield,
     accentColor: "zinc",
-    borderClass: "border-zinc-700 hover:border-zinc-500",
-    iconBg: "bg-zinc-800",
+    borderClass: "border-border hover:border-tint-25",
+    iconBg: "bg-tint-10",
     badgeClass: "",
     popular: false,
     cta: "Get Basic Shield",
@@ -170,7 +170,7 @@ const oneTimeServices = [
     price: termiteInspectionService.pricing.model === "flat" ? termiteInspectionService.pricing.price : 0,
     desc: termiteInspectionService.description,
     includes: termiteInspectionService.highlights,
-    theme: "border-zinc-700 bg-card/40 hover:border-zinc-500",
+    theme: "border-border bg-card/40 hover:border-tint-25",
     accentColor: "text-zinc-300",
     gradient: "conic-gradient(from var(--angle, 0deg), #52525b, #3f3f46, #27272a, #71717a, #52525b)",
   },
@@ -596,7 +596,7 @@ function PlansContentInner() {
               const isGreen = plan.accentColor === "green";
               const isAmber = plan.accentColor === "amber";
               const accentText = isGreen ? "text-green-400" : isAmber ? "text-amber-400" : "text-zinc-400";
-              const accentBg = isGreen ? "bg-green-500/10 border-green-500/20" : isAmber ? "bg-amber-500/10 border-amber-500/20" : "bg-zinc-800/50 border-zinc-700/20";
+              const accentBg = isGreen ? "bg-green-500/10 border-green-500/20" : isAmber ? "bg-amber-500/10 border-amber-500/20" : "bg-tint-5 border-tint-10";
 
               return (
                 <div key={plan.id} className="rounded-3xl bg-card/30 border border-white/8 p-8 flex flex-col gap-8">
