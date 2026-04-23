@@ -243,6 +243,12 @@ export async function POST(req: Request) {
               : booking.service_type === "mosquito_tick"
                 ? `Season-long mosquito & tick protection. No billing after October 31.`
                 : `Your payment has been received and your service is booked! Here are your details:`;
+            // NOTE: Customer confirmation emails intentionally stay on the dark
+            // brand card regardless of site theme. Transactional emails ship
+            // outside the site context (Gmail/Outlook/Apple Mail render them
+            // on their own backdrop), and the dark card keeps the brand mark
+            // readable in every client. If we later ship a dark-on-light
+            // logo asset we can revisit a light email template here.
             await resend.emails.send({
               from: "Squito Pest Control <noreply@squitopestcontrol.com>",
               to: [booking.email],
