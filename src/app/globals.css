@@ -3,11 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* ── Squito Brand Colors ───────────────────────────────────────────────
-       Background and surface colors are pure neutral near-black (no green tint).
-       Green is reserved exclusively for the brand accent — making it pop.
-    ─────────────────────────────────────────────────────────────────────── */
+  /* ── Dark Theme (default + explicit) ────────────────────────────────────
+     Background and surface colors are pure neutral near-black (no green tint).
+     Green is reserved exclusively for the brand accent — making it pop.
+  ──────────────────────────────────────────────────────────────────────── */
+  :root,
+  :root[data-theme="dark"] {
     --background: 0 0% 4%;           /* #0a0a0a — Porsche showroom black */
     --foreground: 0 0% 100%;
     --card: 0 0% 7%;                 /* #121212 — slightly lighter surface */
@@ -29,22 +30,108 @@
     --ring: 142 71% 45%;
     --radius: 0.5rem;
 
-    /* Squito Brand Accent Palette */
+    /* ── Semantic tokens (theme-aware) ─────────────────────────────────
+       --surface-tint: RGB triplet used for semi-transparent overlays
+       (what used to be "white/X" in components). On light theme this
+       becomes near-black so the same `bg-tint-10` class produces
+       equivalent visual weight in both themes.
+       --text-body/muted/subtle/ghost: RGB triplets for the text scale.
+       --card-shadow: only applied on light theme; dark cards stay flat.
+       --glow-*: ambient orb colors for the hero/sections.
+       --noise-opacity: tuned per theme so the grain reads correctly.
+    ──────────────────────────────────────────────────────────────────── */
+    --surface-tint: 255 255 255;
+    --text-body:   255 255 255;
+    --text-body-a: 0.75;
+    --text-muted-a: 0.55;
+    --text-subtle-a: 0.40;
+    --text-ghost-a: 0.25;
+    --card-shadow: 0 0 0 0 transparent;
+    --glow-green: 34 197 94;
+    --glow-teal: 52 211 153;
+    --noise-opacity: 0.035;
+    --noise-color: 255 255 255;      /* white noise grains on dark */
+  }
+
+  /* Squito Brand Accent Palette — identical in both themes */
+  :root {
     --color-green-400: #4ade80;
     --color-green-500: #22c55e;
     --color-green-600: #16a34a;
     --color-green-700: #15803d;
     --color-offwhite: #f5f5f0;       /* warm off-white for premium feel */
   }
+
+  /* ── Light Theme ───────────────────────────────────────────────────────
+     Warm off-white background (#faf8f3), pure white cards, neutral grays.
+     Green (#22c55e) stays identical — anchor color across themes.
+     Green-on-white body links nudged darker to meet WCAG AA contrast
+     (the primary brand green is still used for larger elements + buttons).
+  ──────────────────────────────────────────────────────────────────────── */
+  :root[data-theme="light"] {
+    --background: 40 30% 97%;        /* #faf8f3 — warm off-white */
+    --foreground: 0 0% 10%;          /* #1a1a1a — near-black body text */
+    --card: 0 0% 100%;               /* pure white surfaces */
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 142 71% 45%;          /* brand green, unchanged */
+    --primary-foreground: 0 0% 100%; /* white text on green CTA */
+    --secondary: 0 0% 96%;           /* #f5f5f5 — subtle gray surface */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 38%;    /* mid-gray secondary text */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;              /* #e5e5e5 — soft gray borders */
+    --input: 0 0% 96%;
+    --ring: 142 71% 45%;
+
+    --surface-tint: 10 10 10;        /* dark tint for "black/X" overlays */
+    --text-body:   0 0 0;
+    --text-body-a: 0.82;             /* slightly stronger on light bg */
+    --text-muted-a: 0.62;
+    --text-subtle-a: 0.46;
+    --text-ghost-a: 0.30;
+    --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04),
+                   0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --glow-green: 34 197 94;
+    --glow-teal: 16 185 129;
+    --noise-opacity: 0.025;
+    --noise-color: 0 0 0;            /* dark noise grains on light */
+  }
 }
 
 @layer base {
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
     overflow-x: hidden;
-    /* Subtle noise texture — adds grain to break up the flat dark background */
+    /* Subtle noise texture — adds grain to break up the flat background.
+       Both color and opacity are theme-aware via CSS vars. */
+    background-image:
+      radial-gradient(circle at top left,
+        rgb(var(--noise-color) / var(--noise-opacity)),
+        transparent 40%);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
     background-size: 200px 200px;
+    opacity: var(--noise-opacity);
+    mix-blend-mode: overlay;
+  }
+
+  :root[data-theme="light"] body::before {
+    /* Invert the noise SVG so the white-noise texture becomes dark
+       grains suitable for a light background. */
+    filter: invert(1);
   }
 
   html {
@@ -57,7 +144,8 @@
   select:focus-visible,
   textarea:focus-visible,
   [role="button"]:focus-visible {
-    @apply outline-none ring-2 ring-green-500 ring-offset-2 ring-offset-background;
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+    --tw-ring-offset-color: hsl(var(--background));
   }
 
   button:disabled,
@@ -89,48 +177,139 @@
 }
 
 .glass-card {
-  /* Reduced glass effect — more solid and grounded, less "AI floaty" */
+  /* Theme-aware: flat card on dark, subtle drop shadow on light for elevation. */
   @apply bg-card border border-border;
+  box-shadow: var(--card-shadow);
 }
 
-/* ─── Text opacity scale ─────────────────────────────────────────────────────
-   Use these classes consistently so every page reads at the same visual weight.
-   body copy      → text-body    (white/75)
-   secondary copy → text-muted   (white/55)
-   labels/captions→ text-subtle  (white/40)
-   disabled/faint → text-ghost   (white/25)
-──────────────────────────────────────────────────────────────────────────── */
-.text-body   { color: rgba(255,255,255,0.75); }
-.text-muted  { color: rgba(255,255,255,0.55); }
-.text-subtle { color: rgba(255,255,255,0.40); }
-.text-ghost  { color: rgba(255,255,255,0.25); }
+/* ─── Semantic text opacity scale ────────────────────────────────────────
+   Use these consistently across components. Resolves to white-on-dark
+   or near-black-on-light depending on data-theme. The numeric suffix
+   (body/muted/subtle/ghost) maps to opacity, not a fixed hex.
+──────────────────────────────────────────────────────────────────────── */
+.text-body   { color: rgb(var(--text-body) / var(--text-body-a)); }
+.text-muted  { color: rgb(var(--text-body) / var(--text-muted-a)); }
+.text-subtle { color: rgb(var(--text-body) / var(--text-subtle-a)); }
+.text-ghost  { color: rgb(var(--text-body) / var(--text-ghost-a)); }
 
-/* Reusable ambient glow orbs — drop inside any section for background depth */
+/* ─── Surface tint utilities ─────────────────────────────────────────────
+   Replaces hardcoded `bg-white/X`, `border-white/X`, `text-white/X` with
+   theme-aware equivalents. Use these for subtle overlays and dividers.
+──────────────────────────────────────────────────────────────────────── */
+.bg-tint-5   { background-color: rgb(var(--surface-tint) / 0.05); }
+.bg-tint-10  { background-color: rgb(var(--surface-tint) / 0.10); }
+.bg-tint-15  { background-color: rgb(var(--surface-tint) / 0.15); }
+.bg-tint-20  { background-color: rgb(var(--surface-tint) / 0.20); }
+.bg-tint-25  { background-color: rgb(var(--surface-tint) / 0.25); }
+
+.border-tint-5   { border-color: rgb(var(--surface-tint) / 0.05); }
+.border-tint-10  { border-color: rgb(var(--surface-tint) / 0.10); }
+.border-tint-15  { border-color: rgb(var(--surface-tint) / 0.15); }
+.border-tint-20  { border-color: rgb(var(--surface-tint) / 0.20); }
+.border-tint-25  { border-color: rgb(var(--surface-tint) / 0.25); }
+
+/* ─── Legacy hardcoded white → theme-aware overrides ──────────────────────
+   Progressive-migration safety net. When a component still uses Tailwind's
+   literal `text-white/X`, `bg-white/X`, or `border-white/X` classes and
+   `data-theme="light"` is active, these rules flip them to the
+   near-black equivalent so the component still reads correctly. Components
+   will be migrated to semantic `text-body` / `.bg-tint-X` tokens phase by
+   phase, but this keeps the whole site usable during the migration.
+────────────────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] .text-white { color: hsl(var(--foreground)); }
+
+:root[data-theme="light"] .text-white\/95 { color: rgb(var(--surface-tint) / 0.95); }
+:root[data-theme="light"] .text-white\/90 { color: rgb(var(--surface-tint) / 0.90); }
+:root[data-theme="light"] .text-white\/85 { color: rgb(var(--surface-tint) / 0.85); }
+:root[data-theme="light"] .text-white\/80 { color: rgb(var(--surface-tint) / 0.80); }
+:root[data-theme="light"] .text-white\/75 { color: rgb(var(--surface-tint) / 0.75); }
+:root[data-theme="light"] .text-white\/70 { color: rgb(var(--surface-tint) / 0.70); }
+:root[data-theme="light"] .text-white\/65 { color: rgb(var(--surface-tint) / 0.65); }
+:root[data-theme="light"] .text-white\/60 { color: rgb(var(--surface-tint) / 0.60); }
+:root[data-theme="light"] .text-white\/55 { color: rgb(var(--surface-tint) / 0.55); }
+:root[data-theme="light"] .text-white\/50 { color: rgb(var(--surface-tint) / 0.50); }
+:root[data-theme="light"] .text-white\/45 { color: rgb(var(--surface-tint) / 0.45); }
+:root[data-theme="light"] .text-white\/40 { color: rgb(var(--surface-tint) / 0.40); }
+:root[data-theme="light"] .text-white\/35 { color: rgb(var(--surface-tint) / 0.35); }
+:root[data-theme="light"] .text-white\/30 { color: rgb(var(--surface-tint) / 0.30); }
+:root[data-theme="light"] .text-white\/25 { color: rgb(var(--surface-tint) / 0.25); }
+:root[data-theme="light"] .text-white\/20 { color: rgb(var(--surface-tint) / 0.20); }
+:root[data-theme="light"] .text-white\/15 { color: rgb(var(--surface-tint) / 0.15); }
+:root[data-theme="light"] .text-white\/10 { color: rgb(var(--surface-tint) / 0.10); }
+:root[data-theme="light"] .text-white\/5  { color: rgb(var(--surface-tint) / 0.05); }
+
+:root[data-theme="light"] .bg-white\/95 { background-color: rgb(var(--surface-tint) / 0.95); }
+:root[data-theme="light"] .bg-white\/90 { background-color: rgb(var(--surface-tint) / 0.90); }
+:root[data-theme="light"] .bg-white\/85 { background-color: rgb(var(--surface-tint) / 0.85); }
+:root[data-theme="light"] .bg-white\/80 { background-color: rgb(var(--surface-tint) / 0.80); }
+:root[data-theme="light"] .bg-white\/75 { background-color: rgb(var(--surface-tint) / 0.75); }
+:root[data-theme="light"] .bg-white\/70 { background-color: rgb(var(--surface-tint) / 0.70); }
+:root[data-theme="light"] .bg-white\/65 { background-color: rgb(var(--surface-tint) / 0.65); }
+:root[data-theme="light"] .bg-white\/60 { background-color: rgb(var(--surface-tint) / 0.60); }
+:root[data-theme="light"] .bg-white\/55 { background-color: rgb(var(--surface-tint) / 0.55); }
+:root[data-theme="light"] .bg-white\/50 { background-color: rgb(var(--surface-tint) / 0.50); }
+:root[data-theme="light"] .bg-white\/45 { background-color: rgb(var(--surface-tint) / 0.45); }
+:root[data-theme="light"] .bg-white\/40 { background-color: rgb(var(--surface-tint) / 0.40); }
+:root[data-theme="light"] .bg-white\/35 { background-color: rgb(var(--surface-tint) / 0.35); }
+:root[data-theme="light"] .bg-white\/30 { background-color: rgb(var(--surface-tint) / 0.30); }
+:root[data-theme="light"] .bg-white\/25 { background-color: rgb(var(--surface-tint) / 0.25); }
+:root[data-theme="light"] .bg-white\/20 { background-color: rgb(var(--surface-tint) / 0.20); }
+:root[data-theme="light"] .bg-white\/15 { background-color: rgb(var(--surface-tint) / 0.15); }
+:root[data-theme="light"] .bg-white\/10 { background-color: rgb(var(--surface-tint) / 0.10); }
+:root[data-theme="light"] .bg-white\/5  { background-color: rgb(var(--surface-tint) / 0.05); }
+
+:root[data-theme="light"] .border-white\/50 { border-color: rgb(var(--surface-tint) / 0.50); }
+:root[data-theme="light"] .border-white\/40 { border-color: rgb(var(--surface-tint) / 0.40); }
+:root[data-theme="light"] .border-white\/30 { border-color: rgb(var(--surface-tint) / 0.30); }
+:root[data-theme="light"] .border-white\/25 { border-color: rgb(var(--surface-tint) / 0.25); }
+:root[data-theme="light"] .border-white\/20 { border-color: rgb(var(--surface-tint) / 0.20); }
+:root[data-theme="light"] .border-white\/15 { border-color: rgb(var(--surface-tint) / 0.15); }
+:root[data-theme="light"] .border-white\/10 { border-color: rgb(var(--surface-tint) / 0.10); }
+:root[data-theme="light"] .border-white\/5  { border-color: rgb(var(--surface-tint) / 0.05); }
+
+/* ─── Ambient glow orbs ─────────────────────────────────────────────────
+   Theme-aware: softer and less saturated on light to avoid looking
+   like a tinted overlay on a white background.
+──────────────────────────────────────────────────────────────────────── */
 .glow-orb {
   @apply absolute pointer-events-none rounded-full blur-[140px];
 }
 .glow-orb-green {
-  @apply glow-orb bg-green-500/[0.08];
+  @apply glow-orb;
+  background-color: rgb(var(--glow-green) / 0.08);
 }
 .glow-orb-teal {
-  @apply glow-orb bg-emerald-400/[0.05];
+  @apply glow-orb;
+  background-color: rgb(var(--glow-teal) / 0.05);
 }
 .glow-orb-accent {
-  @apply glow-orb bg-green-400/[0.06];
+  @apply glow-orb;
+  background-color: rgb(var(--glow-green) / 0.06);
 }
 
-/* Custom Scrollbar */
+:root[data-theme="light"] .glow-orb-green  { background-color: rgb(var(--glow-green) / 0.10); }
+:root[data-theme="light"] .glow-orb-teal   { background-color: rgb(var(--glow-teal) / 0.07); }
+:root[data-theme="light"] .glow-orb-accent { background-color: rgb(var(--glow-green) / 0.08); }
+
+/* Custom Scrollbar — theme-aware */
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  background-color: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
   @apply bg-green-700 rounded-full;
 }
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-green-600;
+}
+
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--surface-tint) / 0.25);
 }
 
 @keyframes scurryLeft {
