@@ -103,8 +103,13 @@ export default function Reviews() {
   const items = reducedMotion ? reviews : [...reviews, ...reviews, ...reviews];
 
   return (
-    <section className="py-24 bg-background overflow-hidden relative" id="reviews">
-      <div className="absolute inset-0 bg-[url('/reviews_bg.jpg')] bg-contain md:bg-cover bg-center bg-no-repeat opacity-40 pointer-events-none" />
+    <section className="py-24 overflow-hidden relative" id="reviews">
+      {/* Subtle gradient surface so the band reads distinct from the cream
+          page bg and white cards float instead of melting in. Dark-theme
+          reviews_bg photo is dimmed way down on light since it was tuned
+          for a black backdrop. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgb(var(--surface-tint)/0.035)] to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[url('/reviews_bg.jpg')] bg-contain md:bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none mix-blend-multiply" />
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl relative z-10">
         <div className="flex flex-col items-center justify-center text-center mb-16 px-4 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">

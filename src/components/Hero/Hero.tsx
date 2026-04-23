@@ -29,9 +29,10 @@ export default function Hero() {
       <div className="glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
       <div className="glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
-      {/* Background Video — a left-to-right gradient keeps copy-side readable
-          while the right half stays mostly unobstructed so the actual footage
-          is visible. A softer bottom fade blends into the next section. */}
+      {/* Background Video — minimal overlay. Just enough tint on the left edge
+          for headline/body readability and a short bottom fade so the hero
+          doesn't cut abruptly into the next section. The video itself stays
+          the star. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <video
           autoPlay
@@ -45,11 +46,12 @@ export default function Hero() {
         >
           <source src="/success_video.mp4" type="video/mp4" />
         </video>
-        {/* Reading-side tint: heavy on the left where the copy sits, quickly
-            clearing toward the right so the video is actually visible. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/55 to-background/15 z-10" />
-        {/* Bottom blend into the next section so the hero doesn't stop abruptly. */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
+        {/* Narrow reading-side tint only — left 40% gets a gentle cream wash
+            for copy legibility, right 60% shows the video cleanly. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/65 via-background/15 to-transparent z-10" />
+        {/* Tight bottom blend so only the final ~15% of the hero fades into
+            the page, leaving the middle of the video fully visible. */}
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-background z-10" />
       </div>
 
       {/* Content — full width, left-aligned */}
