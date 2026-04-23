@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState, useRef, useEffect } from "react";
-import { X, Send, Phone, Loader2 } from "lucide-react";
+import { X, Send, Phone, Loader2, Bug } from "lucide-react";
+import Image from "next/image";
 import { useChat } from "ai/react";
 import { type Message } from "ai";
 import { useModalDismiss } from "@/lib/useModalDismiss";
@@ -70,7 +71,7 @@ export default function ChatWidget() {
         {open ? (
           <X size={24} className="text-foreground/70" />
         ) : (
-          <span className="w-full h-full flex items-center justify-center text-primary-foreground font-display font-extrabold text-lg">S</span>
+          <Bug size={26} strokeWidth={2.25} className="text-primary-foreground" />
         )}
         {!open && <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-background rounded-full animate-pulse" />}
       </button>
@@ -86,8 +87,14 @@ export default function ChatWidget() {
           <div className="bg-card border-b border-border p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden border border-border">
-                  <span className="text-primary-foreground font-display font-extrabold text-base">S</span>
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden border border-border p-1.5">
+                  <Image
+                    src="/logo.png"
+                    alt="Squito"
+                    width={32}
+                    height={20}
+                    className="object-contain w-full h-auto"
+                  />
                 </div>
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card" />
               </div>

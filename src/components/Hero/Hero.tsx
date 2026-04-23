@@ -69,10 +69,15 @@ export default function Hero() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             poster="/hero-poster.jpg"
             aria-hidden="true"
             tabIndex={-1}
+            ref={(el) => {
+              // Dynamically-mounted <video> doesn't always auto-start after
+              // hydration (Safari in particular), so kick it off explicitly.
+              if (el && el.paused) el.play().catch(() => {});
+            }}
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           >
             <source src="/success_video.mp4" type="video/mp4" />

@@ -294,6 +294,35 @@
 :root[data-theme="light"] .placeholder\:text-white\/25::placeholder { color: rgb(var(--surface-tint) / 0.30); }
 :root[data-theme="light"] .placeholder\:text-white\/20::placeholder { color: rgb(var(--surface-tint) / 0.25); }
 
+/* ─── Photo overlay scope ───────────────────────────────────────────────
+   Sections that render white copy on top of a dark gradient over a
+   photo must preserve their dark-theme palette even when the site is
+   in light theme. Wrap the section in `.on-photo` and these overrides
+   restore the original white + brand-accent colors (one extra class on
+   the selector wins the specificity war against the safety net above).
+──────────────────────────────────────────────────────────────────────── */
+:root[data-theme="light"] .on-photo .text-white      { color: #fff; }
+:root[data-theme="light"] .on-photo .text-white\/95  { color: rgb(255 255 255 / 0.95); }
+:root[data-theme="light"] .on-photo .text-white\/90  { color: rgb(255 255 255 / 0.90); }
+:root[data-theme="light"] .on-photo .text-white\/85  { color: rgb(255 255 255 / 0.85); }
+:root[data-theme="light"] .on-photo .text-white\/80  { color: rgb(255 255 255 / 0.80); }
+:root[data-theme="light"] .on-photo .text-white\/75  { color: rgb(255 255 255 / 0.75); }
+:root[data-theme="light"] .on-photo .text-white\/70  { color: rgb(255 255 255 / 0.70); }
+:root[data-theme="light"] .on-photo .text-white\/65  { color: rgb(255 255 255 / 0.65); }
+:root[data-theme="light"] .on-photo .text-white\/60  { color: rgb(255 255 255 / 0.60); }
+:root[data-theme="light"] .on-photo .text-white\/55  { color: rgb(255 255 255 / 0.55); }
+:root[data-theme="light"] .on-photo .text-white\/50  { color: rgb(255 255 255 / 0.50); }
+:root[data-theme="light"] .on-photo .bg-white\/5     { background-color: rgb(255 255 255 / 0.05); }
+:root[data-theme="light"] .on-photo .bg-white\/10    { background-color: rgb(255 255 255 / 0.10); }
+:root[data-theme="light"] .on-photo .bg-white\/20    { background-color: rgb(255 255 255 / 0.20); }
+:root[data-theme="light"] .on-photo .border-white\/10 { border-color: rgb(255 255 255 / 0.10); }
+:root[data-theme="light"] .on-photo .border-white\/20 { border-color: rgb(255 255 255 / 0.20); }
+:root[data-theme="light"] .on-photo .text-emerald-300 { color: rgb(110 231 183); }
+:root[data-theme="light"] .on-photo .text-amber-200   { color: rgb(253 230 138); }
+:root[data-theme="light"] .on-photo .text-amber-300   { color: rgb(252 211 77); }
+:root[data-theme="light"] .on-photo .text-green-300   { color: rgb(134 239 172); }
+:root[data-theme="light"] .on-photo .text-green-400   { color: rgb(74 222 128); }
+
 /* ─── Contrast boost for light text variants on light bg ─────────────────
    Tailwind's `text-green-400` / `text-amber-300` etc. are designed for
    dark surfaces. On a white/off-white background they fail WCAG AA.

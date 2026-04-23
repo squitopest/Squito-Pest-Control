@@ -102,13 +102,15 @@ export default function MosquitoTickPage() {
 
       <div className="container mx-auto px-4 lg:px-8 max-w-6xl relative z-10">
         {/* 1. HERO */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-white/10 mb-10 min-h-[560px] md:min-h-[620px]">
+        <section className="on-photo relative overflow-hidden rounded-[2rem] border border-white/10 mb-10 min-h-[560px] md:min-h-[620px]">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url(/services/mosquito-tick-hero-backyard.webp)" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/20" />
+          {/* Dark readability gradient — lets the photo show through while
+              keeping white copy legible on the left. No cream wash. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
           <div className="relative z-10 p-8 md:p-12 lg:p-16">
             <div className="max-w-3xl">
@@ -278,13 +280,15 @@ export default function MosquitoTickPage() {
         </section>
 
         {/* 7. FINAL CTA */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-green-500/20 min-h-[480px] md:min-h-[540px] flex items-center">
+        <section className="on-photo relative overflow-hidden rounded-[2rem] border border-green-500/20 min-h-[480px] md:min-h-[540px] flex items-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url(/services/mosquito-tick-family-bbq.webp)" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/40" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.1),transparent_60%)]" />
+          {/* Dark readability gradient — no cream wash. Keeps white centered
+              headline crisp while the photo remains visible top to bottom. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-black/20" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.12),transparent_60%)]" />
 
           <div className="relative z-10 p-8 md:p-12 w-full">
             <div className="max-w-2xl mx-auto text-center">
