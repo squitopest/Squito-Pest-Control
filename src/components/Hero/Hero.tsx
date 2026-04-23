@@ -29,7 +29,9 @@ export default function Hero() {
       <div className="glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
       <div className="glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
-      {/* Background Video */}
+      {/* Background Video — overlays are --background-aware so they adapt
+          between themes. In light theme we stack a slightly stronger top
+          tint to keep dark text readable against the video brightness. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <video
           autoPlay
@@ -43,8 +45,8 @@ export default function Hero() {
         >
           <source src="/success_video.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-background/55 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/40 to-background z-10" />
+        <div className="absolute inset-0 bg-background/70 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background z-10" />
       </div>
 
       {/* Content — full width, left-aligned */}
@@ -68,25 +70,25 @@ export default function Hero() {
 
           {/* Headline — big and bold */}
           <h1 className="font-display font-bold text-5xl md:text-7xl lg:text-[6.5rem] leading-[1.0] tracking-tight">
-            <span className="block text-white">Smart. Safe.</span>
+            <span className="block text-foreground">Smart. Safe.</span>
             <span className="block gradient-text">Pest Control.</span>
           </h1>
 
           {/* Rotating subline */}
-          <div className="text-2xl md:text-3xl font-display font-semibold text-white/80 leading-snug">
+          <div className="text-2xl md:text-3xl font-display font-semibold text-body leading-snug">
             <span>Eliminating </span>
             <span
-              className={`text-green-400 transition-opacity duration-300 ${
+              className={`text-primary transition-opacity duration-300 ${
                 animating ? 'opacity-0' : 'opacity-100'
               }`}
             >
               {rotatingWords[wordIndex]}
             </span>
-            <span className="block text-white/60 text-xl md:text-2xl mt-1">on Long Island.</span>
+            <span className="block text-muted text-xl md:text-2xl mt-1">on Long Island.</span>
           </div>
 
           {/* Body copy */}
-          <p className="text-lg text-white/60 max-w-xl leading-relaxed">
+          <p className="text-lg text-muted max-w-xl leading-relaxed">
             10+ years in the field. NO contracts. NO gimmicks. Just local experts who show up and get it done.
           </p>
 
@@ -98,46 +100,46 @@ export default function Hero() {
                 const el = document.getElementById('library-pest-camera');
                 if (el) el.click();
               }}
-              className="group relative overflow-hidden inline-flex items-center justify-center px-10 py-4 rounded-full border border-green-500/40 bg-green-500/10 text-white font-bold text-base uppercase tracking-wider hover:bg-green-500/20 hover:border-green-500/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.2)] transition-all"
+              className="group relative overflow-hidden inline-flex items-center justify-center px-10 py-4 rounded-full border border-green-500/40 bg-green-500/10 text-foreground font-bold text-base uppercase tracking-wider hover:bg-green-500/20 hover:border-green-500/70 hover:shadow-[0_0_24px_rgba(34,197,94,0.2)] transition-all"
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/15 to-transparent group-hover:translate-x-full transition-transform duration-700" />
               <span className="relative z-10 flex items-center gap-2">
-                <Camera size={18} className="text-green-400 group-hover:scale-110 transition-transform" />
+                <Camera size={18} className="text-primary group-hover:scale-110 transition-transform" />
                 Pest Identifier
               </span>
             </button>
 
             <a
               href="tel:6312031000"
-              className="group relative inline-flex items-center justify-center gap-3 py-4 px-8 rounded-full bg-white/5 border border-white/10 overflow-hidden transition-all duration-300 hover:border-green-500/40 hover:bg-green-500/5"
+              className="group relative inline-flex items-center justify-center gap-3 py-4 px-8 rounded-full bg-tint-5 border border-tint-10 overflow-hidden transition-all duration-300 hover:border-green-500/40 hover:bg-green-500/5"
             >
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
               <div className="relative z-10 w-7 h-7 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center group-hover:bg-green-500 transition-colors duration-300">
-                <Phone size={14} className="text-green-400 group-hover:text-white transition-colors" />
+                <Phone size={14} className="text-primary group-hover:text-primary-foreground transition-colors" />
               </div>
               <div className="relative z-10 flex flex-col items-start leading-none">
-                <span className="text-[9px] uppercase tracking-widest text-green-500/70 font-semibold mb-0.5">Call Now</span>
-                <span className="text-base font-display font-bold text-white">(631) 203-1000</span>
+                <span className="text-[9px] uppercase tracking-widest text-green-600 font-semibold mb-0.5">Call Now</span>
+                <span className="text-base font-display font-bold text-foreground">(631) 203-1000</span>
               </div>
             </a>
           </div>
 
           {/* Rating badge — now a trust reinforcement alongside the badges
               below, after the visitor has read the pitch and seen the CTAs. */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full">
+          <div className="flex items-center gap-2 bg-tint-5 border border-tint-10 px-4 py-2 rounded-full">
             <div className="flex gap-0.5">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} size={13} fill="#fbbf24" color="#fbbf24" />
               ))}
             </div>
-            <span className="text-sm font-medium text-white/90">5-Star Rated · Nassau & Suffolk County</span>
+            <span className="text-sm font-medium text-body">5-Star Rated · Nassau &amp; Suffolk County</span>
           </div>
 
           {/* Trust badges */}
           <div className="flex flex-wrap items-center gap-6 pt-2">
             {["No contracts", "Same-day service", "Pet & family safe"].map((text) => (
-              <div key={text} className="flex items-center gap-2 text-sm font-medium text-white/70">
-                <CheckCircle size={15} className="text-green-500 shrink-0" />
+              <div key={text} className="flex items-center gap-2 text-sm font-medium text-muted">
+                <CheckCircle size={15} className="text-primary shrink-0" />
                 {text}
               </div>
             ))}

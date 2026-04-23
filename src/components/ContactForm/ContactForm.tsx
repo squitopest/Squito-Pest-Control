@@ -460,7 +460,7 @@ export default function ContactForm() {
                           id={suggestionListId}
                           role="listbox"
                           aria-label="Matching addresses"
-                          className="absolute z-50 w-full mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                          className="absolute z-50 w-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
                         >
                           {suggestions.map((suggestion, i) => {
                             const highlighted = i === highlightedIndex;

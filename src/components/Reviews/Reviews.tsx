@@ -112,14 +112,14 @@ export default function Reviews() {
             Customer Reviews
           </div>
 
-          <div className="flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-full flex-wrap justify-center">
+          <div className="flex items-center gap-4 bg-tint-5 border border-tint-10 px-6 py-3 rounded-full flex-wrap justify-center">
             <div className="flex gap-1 text-yellow-400">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} size={20} fill="currentColor" />
               ))}
             </div>
-            <span className="font-bold text-lg text-white">5 out of 5</span>
-            <span className="text-white/60">· 100+ reviews</span>
+            <span className="font-bold text-lg text-foreground">5 out of 5</span>
+            <span className="text-muted">· 100+ reviews</span>
           </div>
         </div>
       </div>
@@ -140,13 +140,13 @@ export default function Reviews() {
               target="_blank"
               rel="noopener noreferrer"
               key={i}
-              className="w-[260px] md:w-[320px] shrink-0 bg-black/20 backdrop-blur-sm border border-white/10 p-5 md:p-6 rounded-2xl flex flex-col hover:border-green-500/30 hover:bg-black/30 hover:shadow-lg transition-all group"
+              className="w-[260px] md:w-[320px] shrink-0 bg-card backdrop-blur-sm border border-border p-5 md:p-6 rounded-2xl flex flex-col hover:border-green-500/30 hover:shadow-lg transition-all group"
             >
               <Quote size={24} className="text-green-500/20 mb-3 group-hover:text-green-500/40 transition-colors" />
-              <p className="text-white/80 text-sm mb-5 flex-grow leading-relaxed italic">
-                "{r.text}"
+              <p className="text-body text-sm mb-5 flex-grow leading-relaxed italic">
+                &ldquo;{r.text}&rdquo;
               </p>
-              <div className="mt-auto border-t border-white/10 pt-4 flex flex-col">
+              <div className="mt-auto border-t border-border pt-4 flex flex-col">
                 <div className="flex gap-1 text-yellow-400 mb-3">
                   {[...Array(r.stars)].map((_, j) => (
                     <Star key={j} size={14} fill="currentColor" />
@@ -154,8 +154,8 @@ export default function Reviews() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="font-semibold text-white">{r.name}</span>
-                    <span className="text-xs text-white/50 flex items-center gap-1.5 mt-0.5">
+                    <span className="font-semibold text-foreground">{r.name}</span>
+                    <span className="text-xs text-subtle flex items-center gap-1.5 mt-0.5">
                       <svg viewBox="0 0 24 24" className="w-3 h-3 shrink-0">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -165,7 +165,7 @@ export default function Reviews() {
                       {r.location}
                     </span>
                   </div>
-                  <span className="text-xs text-white/40">{r.date}</span>
+                  <span className="text-xs text-subtle">{r.date}</span>
                 </div>
               </div>
             </a>
@@ -174,11 +174,11 @@ export default function Reviews() {
       </div>
 
       <div className="flex flex-col items-center text-center mt-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-        <p className="text-white text-xl md:text-2xl mb-8 font-display font-bold tracking-wide drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-pulse">
+        <p className="text-foreground text-xl md:text-2xl mb-8 font-display font-bold tracking-wide animate-pulse">
           Join hundreds of happy customers.
         </p>
-        <a 
-          href="#contact" 
+        <a
+          href="#contact"
           className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group"
         >
           <span className="relative z-10 flex items-center gap-2 shadow-sm">
