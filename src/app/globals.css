@@ -176,6 +176,10 @@
   @apply bg-clip-text text-transparent bg-gradient-to-br from-green-400 via-green-500 to-green-700;
 }
 
+.btn-primary {
+  @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold text-sm transition-all duration-200 hover:bg-green-600 hover:shadow-[0_6px_20px_-4px_rgba(34,197,94,0.45)] active:scale-[0.98];
+}
+
 .glass-card {
   /* Theme-aware: flat card on dark, subtle drop shadow on light for elevation. */
   @apply bg-card border border-border;
@@ -290,6 +294,18 @@
 :root[data-theme="light"] .glow-orb-green  { background-color: rgb(var(--glow-green) / 0.10); }
 :root[data-theme="light"] .glow-orb-teal   { background-color: rgb(var(--glow-teal) / 0.07); }
 :root[data-theme="light"] .glow-orb-accent { background-color: rgb(var(--glow-green) / 0.08); }
+
+/* ─── Logo swap ─────────────────────────────────────────────────────────
+   The default logo (/logo.png) is white-on-transparent — invisible on a
+   light navbar. Until a dark-on-light variant is supplied, we hide the
+   raster logo in light theme and show a CSS wordmark instead. Using
+   display-toggle (not opacity) so there's no ghost element intercepting
+   clicks.
+──────────────────────────────────────────────────────────────────────── */
+.logo-image    { display: block; }
+.logo-wordmark { display: none; }
+:root[data-theme="light"] .logo-image    { display: none; }
+:root[data-theme="light"] .logo-wordmark { display: inline-flex; }
 
 /* Custom Scrollbar — theme-aware */
 ::-webkit-scrollbar {

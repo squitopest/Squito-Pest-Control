@@ -67,7 +67,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="en" data-theme="light" className={`${inter.variable} ${outfit.variable}`}>
       <head>
         <link rel="preconnect" href="https://www.youtube-nocookie.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
