@@ -343,9 +343,18 @@
 /* ─── Ambient glow orbs ─────────────────────────────────────────────────
    Theme-aware: softer and less saturated on light to avoid looking
    like a tinted overlay on a white background.
+
+   Perf note: blur-[140px] on big elements is expensive to composite on
+   mobile Safari and Android Chrome (shows up as jank during scroll and
+   slow first paint). Hide orbs entirely on small screens and on devices
+   that request reduced motion — decoration only, no content loss.
 ──────────────────────────────────────────────────────────────────────── */
 .glow-orb {
   @apply absolute pointer-events-none rounded-full blur-[140px];
+}
+
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .glow-orb { display: none !important; }
 }
 .glow-orb-green {
   @apply glow-orb;

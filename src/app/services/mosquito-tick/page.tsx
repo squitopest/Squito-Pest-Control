@@ -105,7 +105,7 @@ export default function MosquitoTickPage() {
         <section className="relative overflow-hidden rounded-[2rem] border border-white/10 mb-10 min-h-[560px] md:min-h-[620px]">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url(/services/mosquito-tick-hero-backyard.png)" }}
+            style={{ backgroundImage: "url(/services/mosquito-tick-hero-backyard.webp)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/20" />
@@ -281,7 +281,7 @@ export default function MosquitoTickPage() {
         <section className="relative overflow-hidden rounded-[2rem] border border-green-500/20 min-h-[480px] md:min-h-[540px] flex items-center">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url(/services/mosquito-tick-family-bbq.png)" }}
+            style={{ backgroundImage: "url(/services/mosquito-tick-family-bbq.webp)" }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/40" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.1),transparent_60%)]" />

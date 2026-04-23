@@ -3,12 +3,18 @@
 import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle, Star, Phone, Camera } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const rotatingWords = ["Mosquitoes", "Termites", "Rodents", "Bed Bugs", "Cockroaches", "Spiders"];
 
 export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0);
   const [animating, setAnimating] = useState(false);
+  // Gate the background video on viewport size + reduced-motion preference.
+  // On phones we skip the video entirely (saves ~1.7MB + decoder/GPU load)
+  // and lean on the poster image instead. On desktop the video mounts after
+  // first paint so the LCP content isn't blocked by a video download.
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
 
   useEffect(() => {
     const wordInterval = setInterval(() => {
@@ -22,30 +28,56 @@ export default function Hero() {
     return () => clearInterval(wordInterval);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const evaluate = () => setShouldLoadVideo(desktop.matches && !reduced.matches);
+    evaluate();
+    desktop.addEventListener("change", evaluate);
+    reduced.addEventListener("change", evaluate);
+    return () => {
+      desktop.removeEventListener("change", evaluate);
+      reduced.removeEventListener("change", evaluate);
+    };
+  }, []);
+
   return (
     <section className="relative min-h-[90svh] lg:min-h-screen flex items-center pt-32 lg:pt-28 pb-16 overflow-hidden" id="hero">
 
-      {/* Ambient glow orbs */}
-      <div className="glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
-      <div className="glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
+      {/* Ambient glow orbs — desktop only. The 800/600px blur-[120px] orbs
+          cost real paint/composite time on mobile Safari and you can't see
+          them through the video anyway. */}
+      <div className="hidden md:block glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
+      <div className="hidden md:block glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
-      {/* Background Video — minimal overlay. Just enough tint on the left edge
-          for headline/body readability and a short bottom fade so the hero
-          doesn't cut abruptly into the next section. The video itself stays
-          the star. */}
+      {/* Hero backdrop. The poster image is always painted first (tiny, ~70KB
+          AVIF/WebP via next/image) so mobile gets instant LCP. On desktop we
+          mount the video on top once shouldLoadVideo flips true. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-          tabIndex={-1}
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        >
-          <source src="/success_video.mp4" type="video/mp4" />
-        </video>
+        <Image
+          src="/hero-poster.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {shouldLoadVideo && (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/hero-poster.jpg"
+            aria-hidden="true"
+            tabIndex={-1}
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          >
+            <source src="/success_video.mp4" type="video/mp4" />
+          </video>
+        )}
         {/* Left-side reading tint — stronger than before so dark letters
             read crisply on any video frame without needing to darken the
             whole video. Right ~50% still shows the video cleanly. */}
