@@ -30,7 +30,7 @@ export default function PestLibraryTeaser() {
   };
 
   return (
-    <section className="py-10 md:py-14 bg-card overflow-hidden" id="pest-library">
+    <section className="py-10 md:py-14 overflow-hidden" id="pest-library">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         {/* ── Header row ── */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
@@ -78,10 +78,10 @@ export default function PestLibraryTeaser() {
 
         {/* ── Carousel ── */}
         <div className="relative">
-          {/* Left fade */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none" />
-          {/* Right fade */}
-          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
+          {/* Edge fades — sourced from the page background (not card white) so
+              they blend seamlessly with the surrounding cream surface. */}
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
           <div
             ref={scrollRef}

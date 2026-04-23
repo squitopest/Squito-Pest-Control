@@ -69,7 +69,11 @@
      (the primary brand green is still used for larger elements + buttons).
   ──────────────────────────────────────────────────────────────────────── */
   :root[data-theme="light"] {
-    --background: 40 30% 97%;        /* #faf8f3 — warm off-white */
+    /* Warm beige page surface. Sits a clear step below pure-white cards so
+       sections like Reviews, Service Area, and the Pest Library row have
+       real lift. Previously `97%` — too close to card white, everything
+       read as one flat off-white plane. */
+    --background: 38 22% 92%;        /* #ece3d2 — warm sand/cream */
     --foreground: 0 0% 10%;          /* #1a1a1a — near-black body text */
     --card: 0 0% 100%;               /* pure white surfaces */
     --card-foreground: 0 0% 10%;
@@ -85,7 +89,7 @@
     --accent-foreground: 0 0% 10%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;              /* #e5e5e5 — soft gray borders */
+    --border: 38 14% 82%;            /* warm gray that reads against cream bg */
     --input: 0 0% 96%;
     --ring: 142 71% 45%;
 
@@ -95,11 +99,14 @@
     --text-muted-a: 0.62;
     --text-subtle-a: 0.46;
     --text-ghost-a: 0.30;
-    --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04),
-                   0 1px 2px -1px rgb(0 0 0 / 0.04);
+    /* Stronger card shadow so white cards float off the cream page surface
+       instead of vanishing into it. */
+    --card-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.06),
+                   0 2px 4px -2px rgb(0 0 0 / 0.04),
+                   0 0 0 1px rgb(0 0 0 / 0.02);
     --glow-green: 34 197 94;
     --glow-teal: 16 185 129;
-    --noise-opacity: 0.025;
+    --noise-opacity: 0.03;
     --noise-color: 0 0 0;            /* dark noise grains on light */
   }
 }

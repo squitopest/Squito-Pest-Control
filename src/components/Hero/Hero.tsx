@@ -29,9 +29,9 @@ export default function Hero() {
       <div className="glow-orb-green w-[800px] h-[800px] -top-60 -left-60 z-0 opacity-50" />
       <div className="glow-orb-teal w-[600px] h-[600px] bottom-0 right-0 translate-x-1/4 translate-y-1/4 z-0 opacity-40" />
 
-      {/* Background Video — overlays are --background-aware so they adapt
-          between themes. In light theme we stack a slightly stronger top
-          tint to keep dark text readable against the video brightness. */}
+      {/* Background Video — a left-to-right gradient keeps copy-side readable
+          while the right half stays mostly unobstructed so the actual footage
+          is visible. A softer bottom fade blends into the next section. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <video
           autoPlay
@@ -45,8 +45,11 @@ export default function Hero() {
         >
           <source src="/success_video.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-background/70 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background z-10" />
+        {/* Reading-side tint: heavy on the left where the copy sits, quickly
+            clearing toward the right so the video is actually visible. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/55 to-background/15 z-10" />
+        {/* Bottom blend into the next section so the hero doesn't stop abruptly. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
       </div>
 
       {/* Content — full width, left-aligned */}

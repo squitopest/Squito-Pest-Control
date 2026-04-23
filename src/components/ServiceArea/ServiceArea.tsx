@@ -137,7 +137,7 @@ export default function ServiceArea() {
   };
 
   return (
-    <section className="py-24 bg-card border-y border-border overflow-hidden" id="service-area">
+    <section className="py-24 border-y border-border overflow-hidden" id="service-area">
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-12 lg:gap-20">
           <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left z-10 w-full animate-fade-in-up">
