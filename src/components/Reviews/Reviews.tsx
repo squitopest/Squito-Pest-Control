@@ -129,12 +129,11 @@ export default function Reviews() {
         </div>
       </div>
 
-      {/* Full-bleed scroll track — lives outside the container so it touches both screen edges */}
+      {/* Full-bleed scroll track — lives outside the container so it touches
+          both screen edges. Edge fades were removed: cream gradients over
+          white review cards read as a white glow, and the overflow-hidden
+          already gives a clean clip at the viewport edge. */}
       <div className={`relative w-full mb-16 ${reducedMotion ? "overflow-x-auto" : "overflow-hidden"}`}>
-        {/* Fade edges */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 lg:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-
         <div
           className="flex gap-6 md:gap-8 w-max px-4 will-change-transform"
           ref={trackRef}
