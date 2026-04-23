@@ -159,7 +159,7 @@ function SuccessContent() {
           Payment <span className="gradient-text">Successful!</span>
         </h1>
 
-        <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.4)] animate-[pulse_3s_ease-in-out_infinite]">
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-4 animate-[pulse_3s_ease-in-out_infinite]">
           Welcome to the family! We look forward to keeping you pest-free.
         </h2>
 
