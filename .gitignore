@@ -42,3 +42,4 @@ supabase/.temp/
 # Local CLI binaries (Stripe CLI, etc.) — per-developer tooling, never shipped.
 /bin/
 *.exe
+data/ 

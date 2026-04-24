@@ -72,6 +72,13 @@ export async function POST(req: Request) {
     // before applying so bad/expired codes fall back to the manual entry field
     // rather than failing checkout.
     const promoInput = normalizeInput(body.promo, 40).toUpperCase();
+    // Optional cross-sell add-on from the 3-step booking wizard.
+    // When present, a second recurring line item is appended to the Stripe
+    // session so both subscriptions start from the same checkout.
+    const addOnRaw = body.addOn as { type?: string; sizeId?: string; discountPercent?: number } | undefined;
+    const addOnType = addOnRaw?.type === "mosquito-tick" || addOnRaw?.type === "general-pest" ? addOnRaw.type : null;
+    const addOnSizeId = normalizeInput(addOnRaw?.sizeId, 20);
+    const addOnDiscountPct = Math.max(0, Math.min(50, Number(addOnRaw?.discountPercent) || 0));
     const isSpecialtyCheckout = serviceType === "specialty";
     const isMosquitoTickCheckout = serviceType === "mosquito-tick";
     const mosquitoTickSizeRaw = normalizeInput(body.mosquitoTickSize ?? serviceId, 20);
@@ -316,7 +323,7 @@ export async function POST(req: Request) {
         price_data: {
           currency: "usd",
           product_data: {
-            name: `Squito Mosquito & Tick - ${mosquitoTickPackage.label}`,
+            name: `Squito Mosquito & Tick Package`,
             description: mosquitoTickBillingPlan.mode === "off-season-reservation"
               ? `Monthly seasonal subscription. Billing begins April 1, ${mosquitoTickBillingPlan.seasonYear}. Auto-cancels October 31, ${mosquitoTickBillingPlan.seasonYear}.`
               : `Monthly seasonal subscription. ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Auto-cancels October 31, ${mosquitoTickBillingPlan.seasonYear}.`,
@@ -432,6 +439,54 @@ export async function POST(req: Request) {
         },
         quantity: 1,
       });
+    }
+
+    // ─── Cross-sell add-on line item ──────────────────────────────────────
+    // If the wizard attached an add-on (mosquito-tick or general-pest),
+    // inject a second recurring line item into the session.
+    if (addOnType === "mosquito-tick" && isMosquitoTickYardSize(addOnSizeId)) {
+      const addOnPkg = getMosquitoTickPackage(addOnSizeId);
+      const addOnBilling = addOnPkg && !addOnPkg.quoteOnly ? getMosquitoTickBillingPlan(addOnPkg) : null;
+      if (addOnPkg && addOnBilling && addOnBilling.monthlyPrice > 0) {
+        checkoutMode = "subscription"; // ensure mode supports recurring
+        const fullCents = Math.round(addOnBilling.monthlyPrice * 100);
+        const addOnCents = addOnDiscountPct > 0
+          ? Math.round(fullCents * (1 - addOnDiscountPct / 100))
+          : fullCents;
+        const addOnTaxCents = Math.round(addOnCents * TAX_RATE);
+        const discLabel = addOnDiscountPct > 0 ? ` (${addOnDiscountPct}% bundle discount)` : "";
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Mosquito & Tick Protection${discLabel}`,
+              description: `Monthly seasonal subscription (Apr–Oct). Auto-cancels October 31.`,
+            },
+            unit_amount: addOnCents + addOnTaxCents,
+            recurring: { interval: "month" as const },
+          },
+          quantity: 1,
+        });
+      }
+    } else if (addOnType === "general-pest") {
+      const addOnBreakdown = getSubscriptionCheckoutBreakdown("essential-defense", propertySize, "monthly");
+      if (addOnBreakdown && !addOnBreakdown.quoteOnly) {
+        checkoutMode = "subscription";
+        const addOnMonthly = addOnBreakdown.monthlyPriceCents;
+        const addOnTax = Math.round(addOnMonthly * TAX_RATE);
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `General Pest Protection — Essential Defense (${addOnDiscountPct}% bundle discount)`,
+              description: `Year-round quarterly exterior treatments. Address: ${street}, ${city} ${zipCode}`,
+            },
+            unit_amount: addOnMonthly + addOnTax,
+            recurring: { interval: "month" as const },
+          },
+          quantity: 1,
+        });
+      }
     }
 
     // isTestDrive = true bypasses Stripe and sends users straight to the success page for free.

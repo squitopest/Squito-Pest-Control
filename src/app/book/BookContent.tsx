@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Calendar, Clock, MapPin, CreditCard, ShieldCheck, Navigation, Sun, Moon, Map, Loader2, Bug, CalendarClock, Snowflake, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/Footer/Footer";
 import {
@@ -81,6 +81,16 @@ function BookingContent() {
   const rawPromo = searchParams.get("promo") ?? "";
   const promoCode = rawPromo.trim().toUpperCase().slice(0, 40);
 
+  // Cross-sell add-on params (from the cross-sell modal)
+  const addOnType = searchParams.get("addOn");
+  const addOnSizeId = searchParams.get("addOnSize") ?? "";
+  const addOnDiscount = Number(searchParams.get("addOnDiscount")) || 0;
+
+  // Pre-filled address from M&T flow (passed as URL params)
+  const prefillStreet = searchParams.get("street") ?? "";
+  const prefillCity = searchParams.get("city") ?? "";
+  const prefillZip = searchParams.get("zip") ?? "";
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [restoredFromCancel, setRestoredFromCancel] = useState(false);
@@ -94,27 +104,44 @@ function BookingContent() {
   const streetInputRef = useRef<HTMLInputElement>(null);
   const autocompleteAbortRef = useRef<AbortController | null>(null);
 
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const initialForm: FormState = {
+    ...EMPTY_FORM,
+    ...(prefillStreet ? { street: prefillStreet } : {}),
+    ...(prefillCity ? { city: prefillCity } : {}),
+    ...(prefillZip ? { zipCode: prefillZip } : {}),
+  };
+  const [form, setForm] = useState<FormState>(initialForm);
   const [propertySize, setPropertySize] = useState<PropertySize>(requestedSize || DEFAULT_PROPERTY_SIZE);
 
   // Restore any in-progress form if the user was bounced back from Stripe
   // (or just bailed on the tab and came back). Reusing sessionStorage keeps the
   // data on-device and auto-clears when the tab closes.
+  const hasRestoredRef = useRef(false);
+  const hasPrefillAddress = Boolean(prefillStreet || prefillCity || prefillZip);
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       const raw = window.sessionStorage.getItem(FORM_STORAGE_KEY);
       if (!raw) return;
       const saved = JSON.parse(raw) as Partial<FormState>;
+      // If address was pre-filled from URL params (M&T flow), don't overwrite those fields
+      if (hasPrefillAddress) {
+        delete saved.street;
+        delete saved.city;
+        delete saved.zipCode;
+      }
       setForm((prev) => ({ ...prev, ...saved }));
       if (wasCancelled) setRestoredFromCancel(true);
     } catch {
       // ignore malformed storage
     }
-  }, [wasCancelled]);
+    hasRestoredRef.current = true;
+  }, [wasCancelled, hasPrefillAddress]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Skip the first render so we don't overwrite data saved from the M&T page
+    if (!hasRestoredRef.current) return;
     try {
       window.sessionStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(form));
     } catch {
@@ -512,6 +539,7 @@ function BookingContent() {
                   : "",
           billing: billing,
           propertySize,
+          addOn: addOnType ? { type: addOnType, sizeId: addOnSizeId, discountPercent: addOnDiscount } : undefined,
         }),
       });
 
@@ -539,10 +567,7 @@ function BookingContent() {
           aria-live="polite"
           className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-fade-in-up"
         >
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full border-2 border-green-500/30 border-t-green-500 animate-spin" />
-            <CreditCard size={22} className="absolute inset-0 m-auto text-green-400" />
-          </div>
+          <div className="w-16 h-16 rounded-full border-2 border-green-500/30 border-t-green-500 animate-spin" />
           <p className="text-white font-display font-bold text-lg">Redirecting to secure checkout&hellip;</p>
           <p className="text-white/50 text-sm">Please don&apos;t close this tab.</p>
         </div>
@@ -562,18 +587,16 @@ function BookingContent() {
       {isMosquitoTick && mosquitoTickPackage && !mosquitoTickIsQuoteOnly && mosquitoTickBillingPlan && (
         <div className="mb-10 glass-card p-6 md:p-8 rounded-3xl border border-green-500/20">
           <div className="flex items-start gap-4">
-            <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-green-500/15 border border-green-500/30 flex-shrink-0">
-              <Bug size={22} className="text-green-300" />
-            </div>
+
             <div className="flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-1">
                 Mosquito &amp; Tick Package
               </p>
               <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
-                {mosquitoTickPackage.label}
+                Mosquito &amp; Tick Package
               </h2>
               <p className="text-white/60 text-sm mt-1">
-                {mosquitoTickPackage.sqftRangeLabel}
+                Season-long outdoor protection
               </p>
             </div>
             <Link
@@ -591,7 +614,7 @@ function BookingContent() {
           role="status"
           className="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm flex items-start gap-3"
         >
-          <ShieldCheck size={18} className="text-amber-300 flex-shrink-0 mt-0.5" />
+
           <div>
             <p className="font-semibold">Checkout was cancelled — no charge was made.</p>
             <p className="text-amber-200/80">We saved your details below so you can finish booking when you&apos;re ready.</p>
@@ -673,7 +696,7 @@ function BookingContent() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/20">
-                    <CalendarClock size={18} className="text-green-300" />
+
                   </div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-green-300">
                     Start This Season
@@ -688,7 +711,7 @@ function BookingContent() {
                     : `${mosquitoTickBillingPlan.monthsRemaining} charges remaining this season. Treatment scheduled this week.`}
                 </p>
                 <span className="inline-flex items-center gap-2 text-sm font-bold text-green-400">
-                  Continue <ArrowRight size={14} />
+                  Continue
                 </span>
               </button>
 
@@ -699,7 +722,7 @@ function BookingContent() {
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15">
-                    <Snowflake size={18} className="text-blue-300" />
+
                   </div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300">
                     Off-Season Hold
@@ -712,7 +735,7 @@ function BookingContent() {
                   Lock in today&apos;s pricing. We&apos;ll call you in late March to confirm your first visit, then billing starts April 1.
                 </p>
                 <span className="inline-flex items-center gap-2 text-sm font-bold text-white/70">
-                  Continue <ArrowRight size={14} />
+                  Continue
                 </span>
               </button>
             </div>
@@ -826,7 +849,7 @@ function BookingContent() {
                 disabled={locating}
                 className="flex items-center gap-2 text-sm font-bold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/30 px-4 py-2 rounded-lg transition-colors"
               >
-                <Navigation size={14} className={locating ? "animate-spin" : ""} />
+
                 {locating ? "Detecting..." : "Use Current Location"}
               </button>
             </div>
@@ -834,7 +857,7 @@ function BookingContent() {
             <div className="space-y-4">
               <div className="space-y-2 relative" ref={suggestionsRef}>
                 <label htmlFor="book-street" className="text-sm font-semibold text-white/80 flex items-center gap-2">
-                  <MapPin size={16} className="text-green-400" /> Street Address
+                  Street Address
                 </label>
                 <input
                   ref={streetInputRef}
@@ -889,7 +912,7 @@ function BookingContent() {
                             highlighted ? "bg-white/10" : "hover:bg-white/5"
                           }`}
                         >
-                          <Map size={16} className="text-white/40 flex-shrink-0" aria-hidden="true" />
+
                           <div>
                             <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
                             <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
@@ -947,7 +970,7 @@ function BookingContent() {
               <div className="mb-6 p-5 rounded-2xl bg-blue-500/5 border border-blue-500/25">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 flex-shrink-0">
-                    <Snowflake size={18} className="text-blue-300" />
+
                   </div>
                   <div>
                     <p className="text-white font-semibold mb-1">Service begins April 1</p>
@@ -962,7 +985,7 @@ function BookingContent() {
             ) : (
               <div className="space-y-4 mb-8">
                 <label htmlFor="book-date" className="text-sm font-semibold text-white/80 flex items-center gap-2">
-                  <Calendar size={16} className="text-green-400" /> Desired Date
+                  Desired Date
                 </label>
                 <input
                   id="book-date"
@@ -981,7 +1004,7 @@ function BookingContent() {
             {!mosquitoTickIsReservation && (
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-white/80 flex items-center gap-2 mb-4">
-                <Clock size={16} className="text-green-400" /> Arrival Window
+                Arrival Window
               </legend>
               <div className="grid grid-cols-3 gap-4" role="radiogroup" aria-label="Arrival window">
                 <button
@@ -995,7 +1018,7 @@ function BookingContent() {
                       : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Sun size={24} aria-hidden="true" className={form.time === "AM" ? "text-blue-400 animate-pulse" : ""} />
+
                   <span className="font-bold">Morning</span>
                   <span className="text-xs opacity-70">8:00 AM - 12:00 PM</span>
                 </button>
@@ -1011,7 +1034,7 @@ function BookingContent() {
                       : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Moon size={24} aria-hidden="true" className={form.time === "PM" ? "text-amber-400 animate-pulse" : ""} />
+
                   <span className="font-bold">Afternoon</span>
                   <span className="text-xs opacity-70">12:00 PM - 4:00 PM</span>
                 </button>
@@ -1051,7 +1074,7 @@ function BookingContent() {
 
               <div className="mt-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 animate-pulse">
                 <p className="text-center font-semibold text-green-400 text-sm flex items-center justify-center gap-2 tracking-wide">
-                  <ShieldCheck size={16} /> A team member will reach out to confirm a time with you!
+                  A team member will reach out to confirm a time with you!
                 </p>
               </div>
             </fieldset>
@@ -1073,7 +1096,7 @@ function BookingContent() {
               disabled={loading}
               className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
-              {loading ? <Loader2 size={20} className="animate-spin" /> : <CreditCard size={20} />}
+              {loading ? <Loader2 size={20} className="animate-spin" /> : null}
               {loading
                 ? "Connecting to Secure Checkout..."
                 : mosquitoTickIsReservation
@@ -1113,7 +1136,7 @@ function BookingContent() {
                         : "Seasonal monthly subscription"}
                     </p>
                   </div>
-                  <p className="text-white/40 text-sm">{mosquitoTickPackage.shortLabel}</p>
+                  <p className="text-white/40 text-sm">Seasonal protection</p>
                 </div>
 
                 <div className="flex justify-between items-start mb-3">
@@ -1264,11 +1287,11 @@ function BookingContent() {
 
             <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
               <div className="flex items-center gap-2 opacity-60">
-                <ShieldCheck size={16} className="text-white" />
+
                 <span className="text-xs text-white">Guaranteed Long Term Protection</span>
               </div>
               <div className="flex items-center gap-2 opacity-60">
-                <Navigation size={16} className="text-white" />
+
                 <span className="text-xs text-white">Powered by Google Maps</span>
               </div>
             </div>

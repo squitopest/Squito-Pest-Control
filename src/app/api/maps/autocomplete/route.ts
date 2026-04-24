@@ -35,13 +35,16 @@ export async function GET(request: Request) {
       body: JSON.stringify({
         input,
         includedRegionCodes: ["us"],
-        locationBias: {
-          circle: {
-            center: {
-              latitude: 40.789142,
-              longitude: -73.13496,
+        locationRestriction: {
+          rectangle: {
+            low: {
+              latitude: 40.52,
+              longitude: -73.78,
             },
-            radius: 50000,
+            high: {
+              latitude: 41.02,
+              longitude: -71.85,
+            },
           },
         },
       }),

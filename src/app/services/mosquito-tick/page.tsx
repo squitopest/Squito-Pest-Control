@@ -2,14 +2,11 @@ import { Suspense } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  Bug,
   CalendarClock,
   CheckCircle2,
   HelpCircle,
-  Leaf,
   MapPin,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { createPageMetadata } from "@/lib/site";
 import MosquitoTickPackageSelector from "@/components/MosquitoTick/MosquitoTickPackageSelector";
@@ -48,17 +45,14 @@ const whatsIncluded = [
 
 const whyItMatters = [
   {
-    icon: MapPin,
     title: "Long Island is tick country",
     body: "Suffolk and Nassau counties sit inside one of the highest Lyme-disease pressure zones in the Northeast. Ticks thrive in wooded edges, tall grass, and leaf piles — exactly the places kids and pets spend their summer.",
   },
   {
-    icon: Bug,
     title: "Mosquitoes aren't just annoying",
     body: "Local populations can carry West Nile and EEE. A new generation can hatch from small amounts of standing water every 7–10 days, so consistent treatment matters.",
   },
   {
-    icon: CalendarClock,
     title: "Protection takes a whole season",
     body: "One visit isn't enough. Mosquitoes and ticks rebound quickly, which is why effective control means consistent monthly treatments during the active season.",
   },
@@ -107,8 +101,6 @@ export default function MosquitoTickPage() {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url(/services/mosquito-tick-hero-backyard.webp)" }}
           />
-          {/* Dark readability gradient — lets the photo show through while
-              keeping white copy legible on the left. No cream wash. */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
@@ -132,35 +124,46 @@ export default function MosquitoTickPage() {
               </div>
 
               <h1 className="text-5xl md:text-6xl font-display font-bold text-white tracking-tight mb-5">
-                Mosquito & Tick Packages
+                Mosquito &amp; Tick Packages
                 <br />
                 <span className="gradient-text">Built for Long Island</span>
               </h1>
               <p className="text-xl text-white/70 leading-relaxed mb-8 max-w-2xl">
-                Monthly barrier treatments across your yard from April through October. Clear pricing by yard
-                size, no initial fees, and you&apos;re only billed during active months.
+                Monthly barrier treatments across your yard from April through October. Clear pricing,
+                no initial fees, and you&apos;re only billed during active months.
               </p>
 
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="#packages"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-green-500 px-6 py-4 text-base font-display font-bold text-white transition-colors hover:bg-green-400"
-                >
-                  See Packages
-                  <ArrowRight size={18} />
-                </Link>
-                <Link
-                  href="#how-it-works"
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-base font-display font-bold text-white/85 transition-colors hover:border-green-500/40 hover:bg-white/10 hover:text-white"
-                >
-                  How It Works
-                </Link>
-              </div>
+              <Link
+                href="#packages"
+                className="inline-flex items-center gap-2 rounded-2xl bg-green-500 px-6 py-4 text-base font-display font-bold text-white transition-colors hover:bg-green-400"
+              >
+                Get Started
+                <ArrowRight size={18} />
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* 2. SEASONAL NOTICE */}
+        {/* 2. PACKAGE SELECTOR — 3-step flow */}
+        <section id="packages" className="mb-12 scroll-mt-24">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-3">
+              3 Easy Steps
+            </p>
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight mb-4">
+              Get your personalized quote
+            </h2>
+            <p className="text-white/55 leading-relaxed text-lg">
+              Enter your address. See your quote. Book your first treatment.
+            </p>
+          </div>
+
+          <Suspense fallback={<div className="glass-card rounded-3xl border border-white/10 p-6 md:p-8 min-h-[400px]" />}>
+            <MosquitoTickPackageSelector />
+          </Suspense>
+        </section>
+
+        {/* 3. SEASONAL NOTICE — moved below selector */}
         <section className="glass-card rounded-3xl border border-amber-500/25 bg-amber-500/5 p-6 md:p-8 mb-10">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10">
@@ -180,26 +183,6 @@ export default function MosquitoTickPage() {
               </p>
             </div>
           </div>
-        </section>
-
-        {/* 3. PACKAGE SELECTOR (moved up from position 6) */}
-        <section id="packages" className="mb-12 scroll-mt-24">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-3">
-              Simple Pricing by Yard Size
-            </p>
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight mb-4">
-              Pick a package and book
-            </h2>
-            <p className="text-white/65 leading-relaxed text-lg">
-              No initial fees. No off-season billing. Cancel anytime. Select your yard size and the first
-              treatment is just a few steps away.
-            </p>
-          </div>
-
-          <Suspense fallback={<div className="glass-card rounded-3xl border border-white/10 p-6 md:p-8 min-h-[400px]" />}>
-            <MosquitoTickPackageSelector />
-          </Suspense>
         </section>
 
         {/* 4. WHAT'S INCLUDED */}
@@ -222,7 +205,7 @@ export default function MosquitoTickPage() {
             ))}
           </ul>
           <div className="mt-6 inline-flex items-center gap-2 text-sm text-white/55">
-            <Leaf size={15} className="text-green-300" />
+            <ShieldCheck size={15} className="text-green-300" />
             Pollinator-conscious and family-safe applications
           </div>
         </section>
@@ -261,21 +244,15 @@ export default function MosquitoTickPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {whyItMatters.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="glass-card rounded-3xl border border-white/10 p-6 md:p-7"
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-green-500/30 bg-green-500/10">
-                    <Icon size={18} className="text-green-300" />
-                  </div>
-                  <h3 className="font-display text-xl font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-white/65 leading-relaxed">{item.body}</p>
-                </div>
-              );
-            })}
+            {whyItMatters.map((item) => (
+              <div
+                key={item.title}
+                className="glass-card rounded-3xl border border-white/10 p-6 md:p-7"
+              >
+                <h3 className="font-display text-xl font-bold text-white mb-3">{item.title}</h3>
+                <p className="text-white/65 leading-relaxed">{item.body}</p>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -293,7 +270,7 @@ export default function MosquitoTickPage() {
           <div className="relative z-10 p-8 md:p-12 w-full">
             <div className="max-w-2xl mx-auto text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-4 py-1.5 text-sm font-semibold uppercase tracking-wider text-green-400 mb-6">
-                <Sparkles size={14} />
+                <ShieldCheck size={14} />
                 The Outcome
               </div>
               <h2 className="text-3xl md:text-5xl font-display font-bold text-white tracking-tight mb-4">

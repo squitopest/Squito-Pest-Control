@@ -267,6 +267,17 @@ export function formatSelectedPlanName(planId: string, size?: PropertySize | nul
   return `${plan.shortName} - ${getPropertySizeConfig(resolvedSize).label}`;
 }
 
+/**
+ * Maps a raw square-footage number (from a property data API like RentCast)
+ * to the correct PropertySize tier for pricing.
+ */
+export function resolvePropertySizeFromSqft(sqft: number): PropertySize {
+  if (sqft <= 1500) return "small";
+  if (sqft <= 2500) return "medium";
+  if (sqft <= 4000) return "large";
+  return "xl";
+}
+
 export function buildQuoteRequestHref({
   planId,
   size,

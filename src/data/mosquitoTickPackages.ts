@@ -81,8 +81,8 @@ export function calculateMosquitoTickSeasonTotal(pkg: MosquitoTickPackage): numb
   return Math.round(pkg.monthlyPrice * MOSQUITO_TICK_ACTIVE_MONTHS * 100) / 100;
 }
 
-export function formatMosquitoTickPackageName(pkg: MosquitoTickPackage): string {
-  return `Mosquito & Tick — ${pkg.label}`;
+export function formatMosquitoTickPackageName(_pkg: MosquitoTickPackage): string {
+  return `Mosquito & Tick Package`;
 }
 
 export function buildMosquitoTickBookHref(sizeId: string, promo?: string | null): string {
@@ -137,6 +137,34 @@ export function buildMosquitoTickHelpHref(source?: string | null): string {
   params.set("message", details.join(" "));
 
   return `/contact?${params.toString()}`;
+}
+
+/**
+ * Maps a General Pest PropertySize tier to a Mosquito & Tick yard size.
+ * Used for cross-sell so we can show a default yard size pricing match.
+ */
+export function mapPropertySizeToYardSize(
+  size: "small" | "medium" | "large" | "xl"
+): MosquitoTickYardSizeId {
+  const mapping: Record<string, MosquitoTickYardSizeId> = {
+    small: "small",
+    medium: "medium",
+    large: "large",
+    xl: "xl",
+  };
+  return mapping[size] ?? "small";
+}
+
+/**
+ * Maps a raw lot size in acres (from RentCast) to a Mosquito & Tick yard size.
+ */
+export function resolveYardSizeFromLotAcres(
+  acres: number
+): MosquitoTickYardSizeId {
+  if (acres <= 0.25) return "small";
+  if (acres <= 0.5) return "medium";
+  if (acres <= 1) return "large";
+  return "xl";
 }
 
 // ─── Active-season billing plan helpers ────────────────────────────────────────
