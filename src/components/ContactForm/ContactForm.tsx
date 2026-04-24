@@ -584,10 +584,6 @@ export default function ContactForm() {
                        </span>
                      </span>
                    </span>
-                   <style>{`
-                     @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-                     @keyframes spin-border { to { --angle: 360deg; } }
-                   `}</style>
                  </button>
                  
                  {error && (

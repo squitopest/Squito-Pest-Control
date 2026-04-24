@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -47,6 +47,28 @@ export const metadata: Metadata = {
     images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
+};
+
+/**
+ * Viewport configuration — exported separately per Next.js 16 convention.
+ * `viewportFit: "cover"` enables edge-to-edge rendering on notched iPhones
+ * (iPhone X+, Dynamic Island). Without it, the browser inserts black bars
+ * around the safe area and `env(safe-area-inset-*)` returns 0.
+ * `themeColor` tints Safari's address bar to match the page.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#ece3d2" },
+  ],
 };
 
 export default function RootLayout({
@@ -69,6 +91,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light" className={`${inter.variable} ${outfit.variable}`}>
       <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
         <link rel="preconnect" href="https://www.youtube-nocookie.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

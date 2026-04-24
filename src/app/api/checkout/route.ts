@@ -110,6 +110,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Reject past dates — iOS Safari lets users pick any date in the native
+    // picker even with min set. The client validates too, but this is the
+    // server-side safety net.
+    if (!isReservationSignup && date) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(date + "T00:00:00");
+      if (selectedDate < today) {
+        return NextResponse.json(
+          { error: "The selected date has already passed. Please choose today or a future date." },
+          { status: 400 }
+        );
+      }
+    }
+
     const digitsOnlyPhone = phone.replace(/\D/g, "");
     const isSupportedPlan =
       isMosquitoTickCheckout
@@ -403,22 +418,24 @@ export async function POST(req: Request) {
         quantity: 1,
       });
     } else {
+      // Monthly subscription plan.
+      // The Initial Fee covers the first visit + first month of service.
+      // We split it into a one-time setup differential + the recurring monthly
+      // so Stripe can start the subscription immediately.
+      // Math: (initialFee − monthlyFee) + monthlyFee = initialFee total today.
       checkoutMode = "subscription";
       const monthlyFee = subscriptionBreakdown!.monthlyPriceCents;
-
-      // The Initial Fee covers the first visit flush-out. We split it into:
-      // a one-time differential charge today + the first recurring monthly charge today.
       const initialFeeDifferential = initialFee - monthlyFee;
 
       const setupTax = Math.round(initialFeeDifferential * TAX_RATE);
-      const monthlyTax = subscriptionBreakdown!.taxCents - setupTax;
+      const monthlyTax = Math.round(monthlyFee * TAX_RATE);
 
       if (initialFeeDifferential > 0) {
         lineItems.push({
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Initial Fee - ${planName}`,
+              name: `Initial Service Fee - ${planName}`,
               description: `One-time initial service flush-out. Appointment: ${date} at ${time}`,
             },
             unit_amount: initialFeeDifferential + setupTax,
@@ -432,7 +449,7 @@ export async function POST(req: Request) {
           currency: "usd",
           product_data: {
             name: `Monthly Subscription - ${planName}`,
-            description: `Starting seamlessly today. Address: ${street}, ${city} ${zipCode}`,
+            description: `Recurring monthly service. Address: ${street}, ${city} ${zipCode}`,
           },
           unit_amount: monthlyFee + monthlyTax,
           recurring: { interval: 'month' as const },

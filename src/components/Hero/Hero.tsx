@@ -34,8 +34,13 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
+    // Desktop gets full 1080p for crisp quality on large screens (~3–4 MB).
+    // Mobile (≤ 767px) gets a 720p re-encode for bandwidth savings (~1.2 MB).
+    // With preload="metadata" the browser fetches only headers on mount,
+    // then streams the video on autoplay — so the 1080p file does NOT
+    // increase initial page-load weight.
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    setVideoSrc(isMobile ? "/success_video_mobile.mp4" : "/success_video.mp4");
+    setVideoSrc(isMobile ? "/hero_720p_mobile.mp4" : "/hero_1080p.mp4");
   }, []);
 
   // Some browsers (iOS Safari in particular) are finicky about the
@@ -67,11 +72,11 @@ export default function Hero() {
 
       {/* Hero backdrop. Poster image paints first for instant LCP, video
           layers on top with native autoplay once the client picks the right
-          source. Mobile gets a ~700KB 540p re-encode, desktop (≥768px) gets
-          the full 720p master. The video element is only rendered after
-          `videoSrc` resolves (after mount), so we never download the wrong
-          file on either form factor. `motion-reduce:hidden` respects the
-          OS "Reduce Motion" setting and falls back to the poster. */}
+          source. Mobile gets a ~1.2MB 720p re-encode, desktop (≥768px) gets
+          the full 1080p master (~3–4MB, streamed). The video element is only
+          rendered after `videoSrc` resolves (after mount), so we never
+          download the wrong file on either form factor. `motion-reduce:hidden`
+          respects the OS "Reduce Motion" setting and falls back to the poster. */}
       <div className="absolute inset-0 z-0" aria-hidden="true">
         <Image
           src="/hero-poster.jpg"
@@ -90,7 +95,7 @@ export default function Hero() {
             muted
             loop
             playsInline
-            preload="auto"
+            preload="metadata"
             poster="/hero-poster.jpg"
             aria-hidden="true"
             tabIndex={-1}

@@ -98,6 +98,35 @@ export default function CheckoutStep({
     breakdown && !breakdown.quoteOnly ? breakdown.totalDueToday : 0;
   const taxRateLabel = `${(TAX_RATE * 100).toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}%`;
 
+  // Combined total including add-on first month (what Stripe actually charges today)
+  const addOnFirstMonth = hasMTAddOn
+    ? mtDiscountedPrice
+    : hasGPCAddOn && gpcAddOnBreakdown && !gpcAddOnBreakdown.quoteOnly
+    ? gpcAddOnBreakdown.monthlyPrice
+    : 0;
+  const addOnFirstMonthTax =
+    Math.round(addOnFirstMonth * TAX_RATE * 100) / 100;
+  const combinedTax = mainTax + addOnFirstMonthTax;
+  const combinedTotal = mainTotal + addOnFirstMonth + addOnFirstMonthTax;
+
+  /** Today in YYYY-MM-DD using local time (not UTC) so the cutoff
+   *  matches the user's actual calendar day regardless of timezone. */
+  const getLocalToday = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  };
+
+  /** iOS Safari's native date picker (scroll wheels) ignores the HTML
+   *  `min` attribute entirely, so we must validate in JS. */
+  const handleDateChange = (value: string) => {
+    if (value < getLocalToday()) {
+      setError("Please select today or a future date.");
+      return;
+    }
+    setError(null);
+    setDate(value);
+  };
+
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -115,6 +144,10 @@ export default function CheckoutStep({
     }
     if (!date || !time) {
       setError("Please select both an appointment date and time window.");
+      return;
+    }
+    if (date < getLocalToday()) {
+      setError("The selected date has already passed. Please choose today or a future date.");
       return;
     }
 
@@ -311,11 +344,11 @@ export default function CheckoutStep({
                 id="checkout-date"
                 type="date"
                 required
-                className="w-full bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-4 py-3 md:px-6 md:py-5 text-white text-base md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
+                className="w-full max-w-full box-border bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-3 py-3 md:px-6 md:py-5 text-white text-sm md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg appearance-none"
                 style={{ colorScheme: "dark" }}
-                min={new Date().toISOString().split("T")[0]}
+                min={getLocalToday()}
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => handleDateChange(e.target.value)}
               />
             </div>
 
@@ -323,24 +356,24 @@ export default function CheckoutStep({
               <legend className="text-sm font-semibold text-white/80 flex items-center gap-2 mb-4">
                 Arrival Window
               </legend>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-2 md:gap-4">
                 {[
                   {
                     id: "AM",
                     label: "Morning",
-                    sub: "8:00 AM – 12:00 PM",
+                    sub: "8 AM – 12 PM",
                     active: "bg-blue-500/20 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]",
                   },
                   {
                     id: "PM",
                     label: "Afternoon",
-                    sub: "12:00 PM – 4:00 PM",
+                    sub: "12 – 4 PM",
                     active: "bg-amber-500/20 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]",
                   },
                   {
                     id: "EVE",
                     label: "Evening",
-                    sub: "4:00 PM – 8:00 PM",
+                    sub: "4 – 8 PM",
                     active: "bg-violet-500/20 border-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.3)]",
                   },
                 ].map((slot) => {
@@ -352,14 +385,14 @@ export default function CheckoutStep({
                       role="radio"
                       aria-checked={selected}
                       onClick={() => setTime(slot.id)}
-                      className={`flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all ${
+                      className={`flex flex-col items-center justify-center gap-1 md:gap-2 px-1 py-3 md:py-4 rounded-xl border transition-all min-w-0 overflow-hidden ${
                         selected
                           ? `${slot.active} text-white`
                           : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
                       }`}
                     >
-                      <span className="font-bold">{slot.label}</span>
-                      <span className="text-xs opacity-70">{slot.sub}</span>
+                      <span className="font-bold text-[13px] md:text-base truncate w-full text-center">{slot.label}</span>
+                      <span className="text-[10px] md:text-xs opacity-70 truncate w-full text-center">{slot.sub}</span>
                     </button>
                   );
                 })}
@@ -452,19 +485,31 @@ export default function CheckoutStep({
             ) : (
               breakdown &&
               !breakdown.quoteOnly && (
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="text-amber-400 font-semibold text-sm">
-                      Initial Service Fee
-                    </p>
-                    <p className="text-white/40 text-xs">
-                      One-time, charged today
+                <>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-amber-400 font-semibold text-sm">
+                        Initial Service Fee
+                      </p>
+                      <p className="text-white/40 text-xs">
+                        Includes first month of service
+                      </p>
+                    </div>
+                    <p className="text-amber-400 font-bold">
+                      ${mainInitialFee.toFixed(2)}
                     </p>
                   </div>
-                  <p className="text-amber-400 font-bold">
-                    ${mainInitialFee.toFixed(2)}
-                  </p>
-                </div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-white/50 font-medium text-sm">
+                        Then monthly
+                      </p>
+                    </div>
+                    <p className="text-white/50 text-sm">
+                      ${breakdown.monthlyPrice.toFixed(2)}/mo
+                    </p>
+                  </div>
+                </>
               )
             )}
 
@@ -567,20 +612,20 @@ export default function CheckoutStep({
                   <span className="text-white/30">({taxRateLabel})</span>
                 </p>
               </div>
-              <p className="text-white/60">${mainTax.toFixed(2)}</p>
+              <p className="text-white/60">${combinedTax.toFixed(2)}</p>
             </div>
 
             <div className="flex justify-between items-center py-4 border-t border-white/10">
               <p className="text-white font-bold text-lg">Total Due Today</p>
               <p className="text-green-400 font-display font-bold text-2xl">
-                ${mainTotal.toFixed(2)}
+                ${combinedTotal.toFixed(2)}
               </p>
             </div>
 
             {hasMTAddOn && (
               <p className="text-xs text-emerald-300/60 mt-2 leading-relaxed">
-                Mosquito & Tick is billed as a separate monthly subscription
-                starting today (April–October only). Cancel anytime.
+                Mosquito &amp; Tick first month included above. Continues as a
+                separate monthly subscription (April–October). Cancel anytime.
               </p>
             )}
 

@@ -112,6 +112,35 @@
 }
 
 @layer base {
+  /* ── iOS Safari Fixes ────────────────────────────────────────────────────
+     These rules target long-standing iOS Safari behavioral quirks that
+     make touch interactions feel unpolished or broken.
+  ──────────────────────────────────────────────────────────────────────── */
+
+  html {
+    /* Remove the ugly gray rectangle iOS shows on tap */
+    -webkit-tap-highlight-color: transparent;
+    /* Prevent iOS from inflating text sizes after orientation changes */
+    -webkit-text-size-adjust: 100%;
+    /* Account for notch / Dynamic Island / home indicator bar.
+       Requires viewport-fit=cover in the meta tag (set in layout.tsx). */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Remove 300ms tap delay on all interactive elements.
+     `manipulation` tells iOS we don't use double-tap-to-zoom, so taps
+     fire immediately. Huge UX improvement on every button and link. */
+  a, button, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+  }
+
+  /* iOS Safari auto-zooms the viewport whenever an input with font-size
+     < 16px gets focus. This is by far the #1 iPhone UX complaint on web
+     forms. Setting min 16px on all inputs prevents it. */
+  input, select, textarea {
+    font-size: max(16px, 1em);
+  }
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
     overflow-x: hidden;
@@ -477,3 +506,18 @@
 .animate-particle-burst {
   animation: particleBurst 0.6s ease-out forwards;
 }
+
+/* ─── Animated rotating gradient border ────────────────────────────────────
+   Used by the ContactForm submit button. Moved from inline <style> to
+   globals.css so the browser doesn't recalc styles on every render.
+──────────────────────────────────────────────────────────────────────────── */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border {
+  to { --angle: 360deg; }
+}
+

@@ -53,13 +53,15 @@ export default function Reviews() {
   const trackRef = useRef<HTMLDivElement>(null);
   const posRef = useRef(0);
   const frameRef = useRef<number>(0);
+  const sectionRef = useRef<HTMLElement>(null);
   // Respect OS-level motion preference. Driven by useSyncExternalStore so we
   // don't need to setState from inside the effect below.
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
+    const section = sectionRef.current;
+    if (!track || !section) return;
 
     if (reducedMotion) {
       // Stop the rAF-driven translate and let the user scroll the row manually.
@@ -72,9 +74,13 @@ export default function Reviews() {
     posRef.current = oneSetWidth;
 
     let isPaused = false;
+    let isVisible = false;
+    let isPageVisible = true;
     const SPEED = 0.5;
 
     const animate = () => {
+      if (!isVisible || !isPageVisible) return; // Don't schedule if off-screen or tab hidden
+
       if (!isPaused) {
         posRef.current -= SPEED;
         if (posRef.current <= 0) {
@@ -85,7 +91,27 @@ export default function Reviews() {
       frameRef.current = requestAnimationFrame(animate);
     };
 
-    frameRef.current = requestAnimationFrame(animate);
+    // Only animate when visible in viewport
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+        if (isVisible && isPageVisible) {
+          cancelAnimationFrame(frameRef.current);
+          frameRef.current = requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(section);
+
+    // Pause when tab is hidden
+    const onVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible && isVisible) {
+        frameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     const handleEnter = () => { isPaused = true; };
     const handleLeave = () => { isPaused = false; };
@@ -95,6 +121,8 @@ export default function Reviews() {
 
     return () => {
       cancelAnimationFrame(frameRef.current);
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       track.removeEventListener("mouseenter", handleEnter);
       track.removeEventListener("mouseleave", handleLeave);
     };
@@ -103,7 +131,7 @@ export default function Reviews() {
   const items = reducedMotion ? reviews : [...reviews, ...reviews, ...reviews];
 
   return (
-    <section className="py-24 overflow-hidden relative" id="reviews">
+    <section ref={sectionRef} className="py-24 overflow-hidden relative" id="reviews">
       {/* Subtle gradient surface so the band reads distinct from the cream
           page bg and white cards float instead of melting in. Dark-theme
           reviews_bg photo is dimmed way down on light since it was tuned

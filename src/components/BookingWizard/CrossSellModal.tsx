@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X, Shield, Check, ArrowRight, Sparkles, Clock, ChevronDown } from "lucide-react";
@@ -171,6 +171,41 @@ export default function CrossSellModal({
   onAccept,
   onDecline,
 }: CrossSellModalProps) {
+  // Lock body scroll when the modal is open.
+  // iOS Safari needs the scroll position saved/restored because setting
+  // body { position: fixed } resets scrollTop to 0.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollY = window.scrollY;
+    const body = document.body;
+    const html = document.documentElement;
+
+    // Save current overflow states
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyPosition = body.style.position;
+    const prevBodyTop = body.style.top;
+    const prevBodyWidth = body.style.width;
+    const prevHtmlOverflow = html.style.overflow;
+
+    // Lock scroll — position: fixed prevents iOS Safari from scroll-
+    // bouncing behind the modal.
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    html.style.overflow = "hidden";
+
+    return () => {
+      body.style.overflow = prevBodyOverflow;
+      body.style.position = prevBodyPosition;
+      body.style.top = prevBodyTop;
+      body.style.width = prevBodyWidth;
+      html.style.overflow = prevHtmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const isMosquitoTickCrossSell = type === "mosquito-tick";
@@ -218,13 +253,16 @@ export default function CrossSellModal({
             onClick={onDecline}
           />
 
-          {/* Modal */}
+          {/* Modal — max-h + overflow-y-auto so it scrolls on small
+               screens instead of freezing. -webkit-overflow-scrolling for
+               smooth iOS momentum. */}
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", damping: 22, stiffness: 280 }}
-            className="relative w-full max-w-lg rounded-3xl border border-white/15 bg-card/95 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-hidden"
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-card/95 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)]"
+            style={{ WebkitOverflowScrolling: "touch" }}
           >
             {/* Close button */}
             <button

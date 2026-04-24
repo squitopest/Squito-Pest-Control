@@ -62,7 +62,8 @@ export default function ChatWidget() {
     <>
       <button
         type="button"
-        className={`fixed bottom-6 right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-card hover:bg-card border border-border scale-90' : 'bg-primary hover:scale-110'}`}
+        className={`fixed right-6 z-[9900] w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.4)] ${open ? 'bg-card hover:bg-card border border-border scale-90' : 'bg-primary hover:scale-110'}`}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom, 0px))" }}
         onClick={() => setOpen(!open)}
         aria-label={open ? "Close chat" : "Chat with Squito AI"}
         aria-expanded={open}
@@ -100,7 +101,8 @@ export default function ChatWidget() {
           role="dialog"
           aria-modal="false"
           aria-label="Squito AI chat"
-          className="fixed bottom-24 right-4 sm:right-6 w-[calc(100vw-32px)] sm:w-[380px] h-[550px] max-h-[calc(100vh-120px)] bg-background/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl z-[9900] flex flex-col overflow-hidden animate-fade-in-up"
+          className="fixed right-4 sm:right-6 w-[calc(100vw-32px)] sm:w-[380px] h-[550px] max-h-[calc(100dvh-120px)] bg-background/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl z-[9900] flex flex-col overflow-hidden animate-fade-in-up"
+          style={{ bottom: "calc(6rem + env(safe-area-inset-bottom, 0px))" }}
         >
           <div className="bg-card border-b border-border p-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">

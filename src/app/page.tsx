@@ -12,11 +12,13 @@ import ScrollReset from "@/components/ScrollReset";
 const PestLibrary = dynamic(() => import("@/components/PestLibrary/PestLibraryTeaser"));
 const ServiceArea = dynamic(() => import("@/components/ServiceArea/ServiceArea"));
 const ContactForm = dynamic(() => import("@/components/ContactForm/ContactForm"));
+const PromoPopup = dynamic(() => import("@/components/PromoPopup/PromoPopup"));
 
 export default function Home() {
   return (
     <main>
       <ScrollReset />
+      <PromoPopup />
       {/* Eager mount so Hero "Pest Identifier" finds #library-pest-camera before lazy sections load */}
       <PestIdentifyCapture />
       <Hero />

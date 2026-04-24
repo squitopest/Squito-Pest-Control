@@ -1,11 +1,211 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Phone, Search, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { filterTowns, isTownServiced, zipToTown, ALL_LONG_ISLAND_TOWNS } from "@/data/longIslandTowns";
 
+/* ─── Treatment Comparison Slider ─────────────────────────────────────────────
+   Interactive before/after slider showing the Squito difference.
+   Left = competitors (foundation only), Right = Squito (full perimeter).
+
+   Performance: all drag updates go straight to DOM refs (no React state,
+   no re-renders). Native event listeners for lowest-latency touch on iOS.
+────────────────────────────────────────────────────────────────────────────── */
+function ComparisonSlider() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const clipRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const labelLeftRef = useRef<HTMLDivElement>(null);
+  const labelRightRef = useRef<HTMLDivElement>(null);
+  const pillLeftRef = useRef<HTMLDivElement>(null);
+  const pillRightRef = useRef<HTMLDivElement>(null);
+  const posRef = useRef(50);
+
+  /** Push a percentage (0-100) straight to the DOM — no setState. */
+  const applyPosition = useCallback((pct: number) => {
+    posRef.current = pct;
+    if (clipRef.current) clipRef.current.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    if (lineRef.current) lineRef.current.style.left = `${pct}%`;
+    if (labelLeftRef.current) labelLeftRef.current.style.opacity = pct > 15 ? "1" : "0";
+    if (labelRightRef.current) labelRightRef.current.style.opacity = pct < 85 ? "1" : "0";
+    if (pillLeftRef.current) pillLeftRef.current.style.opacity = pct > 20 ? "1" : "0";
+    if (pillRightRef.current) pillRightRef.current.style.opacity = pct < 80 ? "1" : "0";
+  }, []);
+
+  /** Convert a clientX to a 0-100 percentage. */
+  const toPercent = useCallback((clientX: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return 50;
+    return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+  }, []);
+
+  // ── Drag logic: document listeners attached ONLY during active drag ──
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    // --- Mouse ---
+    const mouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      applyPosition(toPercent(e.clientX));
+    };
+    const mouseUp = () => {
+      document.removeEventListener("mousemove", mouseMove);
+      document.removeEventListener("mouseup", mouseUp);
+    };
+    const mouseDown = (e: MouseEvent) => {
+      e.preventDefault();
+      applyPosition(toPercent(e.clientX));
+      document.addEventListener("mousemove", mouseMove);
+      document.addEventListener("mouseup", mouseUp);
+    };
+
+    // --- Touch ---
+    const touchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      e.preventDefault(); // only blocks scroll while actively dragging slider
+      applyPosition(toPercent(e.touches[0].clientX));
+    };
+    const touchEnd = () => {
+      document.removeEventListener("touchmove", touchMove);
+      document.removeEventListener("touchend", touchEnd);
+      document.removeEventListener("touchcancel", touchEnd);
+    };
+    const touchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      applyPosition(toPercent(e.touches[0].clientX));
+      document.addEventListener("touchmove", touchMove, { passive: false });
+      document.addEventListener("touchend", touchEnd);
+      document.addEventListener("touchcancel", touchEnd);
+    };
+
+    el.addEventListener("mousedown", mouseDown);
+    el.addEventListener("touchstart", touchStart, { passive: true });
+
+    return () => {
+      el.removeEventListener("mousedown", mouseDown);
+      el.removeEventListener("touchstart", touchStart);
+      // Safety cleanup in case component unmounts mid-drag
+      document.removeEventListener("mousemove", mouseMove);
+      document.removeEventListener("mouseup", mouseUp);
+      document.removeEventListener("touchmove", touchMove);
+      document.removeEventListener("touchend", touchEnd);
+      document.removeEventListener("touchcancel", touchEnd);
+    };
+  }, [applyPosition, toPercent]);
+
+  // Subtle auto-slide hint on mount
+  useEffect(() => {
+    let frame: number;
+    let start = 0;
+    const duration = 1200;
+    const animate = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const ease = Math.sin(progress * Math.PI);
+      applyPosition(50 - ease * 15);
+      if (progress < 1) frame = requestAnimationFrame(animate);
+    };
+    const timeout = setTimeout(() => {
+      frame = requestAnimationFrame(animate);
+    }, 800);
+    return () => {
+      clearTimeout(timeout);
+      cancelAnimationFrame(frame);
+    };
+  }, [applyPosition]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden select-none"
+      style={{ touchAction: "pan-y", cursor: "none" }}
+      data-cursor-hide
+      role="slider"
+      aria-label="Drag to compare pest control coverage"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={50}
+    >
+      {/* Squito side — full image, always visible behind */}
+      <Image
+        src="/compare-squito.png"
+        alt="Squito Pest Control — full perimeter coverage including foundation, windows, eaves, and yard"
+        fill
+        sizes="(max-width: 1024px) 100vw, 512px"
+        className="object-cover"
+        priority
+      />
+
+      {/* Others side — clipped by slider position */}
+      <div
+        ref={clipRef}
+        className="absolute inset-0"
+        style={{ clipPath: "inset(0 50% 0 0)" }}
+      >
+        <Image
+          src="/compare-others.png"
+          alt="Traditional pest control — foundation only treatment"
+          fill
+          sizes="(max-width: 1024px) 100vw, 512px"
+          className="object-cover"
+        />
+      </div>
+
+      {/* Slider line + handle — GPU-accelerated via will-change */}
+      <div
+        ref={lineRef}
+        className="absolute top-0 bottom-0 w-[3px] bg-white/90 shadow-[0_0_12px_rgba(255,255,255,0.5)] z-20 pointer-events-none"
+        style={{ left: "50%", transform: "translateX(-50%)", willChange: "left" }}
+      >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow-[0_2px_20px_rgba(0,0,0,0.35)] flex items-center justify-center pointer-events-none">
+          <svg width="22" height="22" viewBox="0 0 20 20" fill="none">
+            <path d="M7 4L3 10L7 16" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M13 4L17 10L13 16" stroke="#555" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Labels */}
+      <div
+        ref={labelLeftRef}
+        className="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-opacity duration-200"
+        style={{ backgroundColor: "rgba(239,68,68,0.85)", color: "white" }}
+      >
+        Others
+      </div>
+      <div
+        ref={labelRightRef}
+        className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-opacity duration-200"
+        style={{ backgroundColor: "rgba(34,197,94,0.9)", color: "white" }}
+      >
+        Squito
+      </div>
+
+      {/* Bottom legend pills */}
+      <div
+        ref={pillLeftRef}
+        className="absolute bottom-3 left-3 z-10 transition-opacity duration-200"
+      >
+        <span className="bg-black/60 backdrop-blur-sm text-white/80 text-[10px] px-2 py-0.5 rounded-full font-medium">
+          Foundation only
+        </span>
+      </div>
+      <div
+        ref={pillRightRef}
+        className="absolute bottom-3 right-3 z-10 transition-opacity duration-200"
+      >
+        <span className="bg-green-600/80 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded-full font-medium">
+          Foundation + Windows + Eaves + Yard
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main ServiceArea Section ────────────────────────────────────────────── */
 export default function ServiceArea() {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -258,94 +458,32 @@ export default function ServiceArea() {
             </div>
           </div>
 
+          {/* ── Right column: Before/After Comparison Slider ── */}
           <div className="flex-1 w-full flex justify-center lg:justify-end animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <div className="glass-card p-2 md:p-4 rounded-3xl w-full max-w-lg border border-green-500/20 overflow-hidden relative group">
               <div className="absolute inset-0 bg-green-500/5 blur-3xl rounded-full" />
 
               <div className="flex items-center gap-3 px-4 py-3 border-b border-border relative z-10">
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse" />
-                <span className="font-semibold text-sm text-body">Long Island Coverage Area</span>
+                <span className="font-semibold text-sm text-body">The Squito Difference</span>
               </div>
 
-              <div className="aspect-[4/3] rounded-2xl m-2 md:m-4 relative overflow-hidden border border-border group-hover:border-green-500/30 transition-colors">
-                <Image
-                  src="/long_island_map.webp"
-                  alt="Long Island Service Area Map"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 512px"
-                  className="object-cover transition-all duration-500 scale-[1.05] translate-x-2"
-                />
-
-                {/* SVG scan line clipped to Long Island shape */}
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  viewBox="0 0 100 75"
-                  preserveAspectRatio="none"
-                >
-                  <defs>
-                    <clipPath id="li-clip">
-                      <polygon points="
-                        4,45   6,43   9,40   12,38
-                        16,36  20,35  24,34  28,33
-                        33,32  38,31  44,31  50,31
-                        56,30  61,29  65,27  68,24
-                        72,21  76,19  80,18  84,18
-                        88,19  92,20  95,21  97,23
-                        95,26  90,28  85,30  80,32
-                        75,34  70,36  65,39  60,41
-                        55,43  50,45  44,47  38,47
-                        32,47  26,47  20,47  14,47
-                        9,47   5,48   4,50   3,48
-                        3,45
-                      " />
-                    </clipPath>
-                    <linearGradient id="scan-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%"   stopColor="rgba(34,197,94,0)" />
-                      <stop offset="25%"  stopColor="rgba(34,197,94,0.2)" />
-                      <stop offset="50%"  stopColor="rgba(34,197,94,1)" />
-                      <stop offset="75%"  stopColor="rgba(34,197,94,0.2)" />
-                      <stop offset="100%" stopColor="rgba(34,197,94,0)" />
-                    </linearGradient>
-                    <filter id="glow2" x="-400%" y="-100%" width="900%" height="300%">
-                      <feGaussianBlur stdDeviation="1.2" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-
-                  <g clipPath="url(#li-clip)">
-                    <rect x="0" y="0" width="1.2" height="75"
-                      fill="url(#scan-grad)"
-                      filter="url(#glow2)"
-                    >
-                      <animate
-                        attributeName="x"
-                        values="4;95;4"
-                        dur="3.5s"
-                        repeatCount="indefinite"
-                        calcMode="spline"
-                        keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"
-                      />
-                    </rect>
-                  </g>
-                </svg>
+              <div className="m-2 md:m-4 relative z-10">
+                <ComparisonSlider />
               </div>
-              
+
               <div className="grid grid-cols-3 divide-x divide-border relative z-10 border-t border-border pt-4 pb-2">
                 <div className="flex flex-col items-center px-2">
-                  <span className="font-display font-bold text-xl text-foreground">230+</span>
-                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">ZIP Codes</span>
+                  <span className="font-display font-bold text-xl text-foreground">6+</span>
+                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">Treatment Zones</span>
                 </div>
                 <div className="flex flex-col items-center px-2">
-                  <span className="font-display font-bold text-xl text-foreground">2</span>
-                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">Counties</span>
+                  <span className="font-display font-bold text-xl text-foreground">360°</span>
+                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">Perimeter</span>
                 </div>
                 <div className="flex flex-col items-center px-2">
-                  <span className="font-display font-bold text-xl text-foreground">&lt;1hr</span>
-                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">Response Time</span>
+                  <span className="font-display font-bold text-xl text-foreground">100%</span>
+                  <span className="text-[10px] uppercase tracking-wider text-green-600 font-semibold text-center mt-1">Satisfaction</span>
                 </div>
               </div>
             </div>
