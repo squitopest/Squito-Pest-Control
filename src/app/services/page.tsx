@@ -73,8 +73,9 @@ export default function ServicesPage() {
             <ShieldCheck size={14} />
             Our Services
           </div>
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-6 tracking-tight">
-            Comprehensive <br />
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-display font-bold text-white mb-6 tracking-tight">
+            Comprehensive{" "}
+            <br className="hidden sm:block" />
             <span className="gradient-text">Pest Protection</span>
           </h1>
           <p className="text-xl text-white/70 leading-relaxed">

@@ -8,6 +8,7 @@ import PlanStep from "./PlanStep";
 import CrossSellModal from "./CrossSellModal";
 import CheckoutStep from "./CheckoutStep";
 import type { PropertySize } from "@/data/plans";
+import { useEffect } from "react";
 
 type AddOn = {
   type: "mosquito-tick" | "general-pest";
@@ -25,7 +26,11 @@ type AddressData = {
   lotSizeAcres: number | null;
 };
 
-export default function BookingWizard() {
+type BookingWizardProps = {
+  onStepChange?: (step: number) => void;
+};
+
+export default function BookingWizard({ onStepChange }: BookingWizardProps) {
   const [step, setStep] = useState(1);
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -35,12 +40,16 @@ export default function BookingWizard() {
   const [addOn, setAddOn] = useState<AddOn>(null);
   const [showCrossSell, setShowCrossSell] = useState(false);
 
+  // Notify parent whenever the step changes and scroll to top
+  useEffect(() => {
+    onStepChange?.(step);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [step, onStepChange]);
+
   // Step 1 → Step 2
   const handleAddressComplete = useCallback((data: AddressData) => {
     setAddressData(data);
     setStep(2);
-    // Smooth scroll to top
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Step 2 → Cross-sell → Step 3
@@ -53,7 +62,6 @@ export default function BookingWizard() {
       if (planId === "ultimate-fortress") {
         setAddOn(null);
         setStep(3);
-        window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
 
@@ -68,7 +76,6 @@ export default function BookingWizard() {
       setAddOn(addon);
       setShowCrossSell(false);
       setStep(3);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     []
   );
@@ -77,7 +84,6 @@ export default function BookingWizard() {
     setAddOn(null);
     setShowCrossSell(false);
     setStep(3);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleRemoveAddOn = useCallback(() => {
@@ -86,12 +92,10 @@ export default function BookingWizard() {
 
   const handleBackToStep1 = useCallback(() => {
     setStep(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleBackToStep2 = useCallback(() => {
     setStep(2);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const resolvedPropertySize = addressData?.propertySize ?? "small";

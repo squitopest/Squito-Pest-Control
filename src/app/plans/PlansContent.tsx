@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { motion } from "framer-motion";
+import { Suspense, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Check,
   Shield,
@@ -86,6 +86,11 @@ function PlansContentInner() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [formStatus, setFormStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const propertySize: PropertySize = DEFAULT_PROPERTY_SIZE;
+  const [wizardStep, setWizardStep] = useState(1);
+
+  const handleStepChange = useCallback((step: number) => {
+    setWizardStep(step);
+  }, []);
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,44 +134,62 @@ function PlansContentInner() {
     <main className="min-h-screen bg-background">
 
       {/* ── Hero ── */}
-      <section className="relative pt-40 pb-12 overflow-hidden">
+      <section
+        className="relative overflow-hidden transition-all duration-500 ease-in-out"
+        style={{
+          paddingTop: wizardStep === 1 ? '10rem' : '6rem',
+          paddingBottom: wizardStep === 1 ? '3rem' : '0rem',
+        }}
+      >
         <div className="absolute inset-0 bg-gradient-to-b from-green-500/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="container mx-auto px-4 lg:px-8 max-w-5xl text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-8">
-            <Shield size={14} /> Protection Plans
-          </div>
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight leading-[1.05]">
-            Get protected in{" "}
-            <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
-              {["3", "easy", "steps."].map((word, i) => (
-                <motion.span
-                  key={word}
-                  initial={{ opacity: 0, y: 32 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.55,
-                    delay: 0.3 + i * 0.12,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                  className="inline-block"
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </span>
-          </h1>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed">
-            Enter your address, pick the plan that fits, and you're covered.
-            Every plan includes free re-service, no contracts, and the Squito guarantee.
-          </p>
+          <AnimatePresence initial={false}>
+            {wizardStep === 1 && (
+              <motion.div
+                key="hero-content"
+                initial={{ opacity: 0, y: -40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -60 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-8">
+                  <Shield size={14} /> Protection Plans
+                </div>
+                <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight leading-[1.05]">
+                  Get protected in{" "}
+                  <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                    {["3", "easy", "steps."].map((word, i) => (
+                      <motion.span
+                        key={word}
+                        initial={{ opacity: 0, y: 32 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                          duration: 0.55,
+                          delay: 0.3 + i * 0.12,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className="inline-block"
+                      >
+                        {word}
+                      </motion.span>
+                    ))}
+                  </span>
+                </h1>
+                <p className="text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed">
+                  Enter your address, pick the plan that fits, and you&apos;re covered.
+                  Every plan includes free re-service, no contracts, and the Squito guarantee.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
       {/* ── 3-Step Booking Wizard ── */}
-      <section className="pb-24">
+      <section className={wizardStep === 1 ? "pb-24" : "pb-24 pt-0"}>
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-          <BookingWizard />
+          <BookingWizard onStepChange={handleStepChange} />
         </div>
       </section>
 

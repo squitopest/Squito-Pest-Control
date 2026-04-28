@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X, Shield, Check, ArrowRight, Sparkles, Clock, ChevronDown } from "lucide-react";
@@ -163,6 +163,118 @@ function MtPestPreview() {
   );
 }
 
+/* ─── Full-screen canvas confetti explosion ─────────────────────────────── */
+const CONFETTI_COLORS = [
+  "#34d399", "#10b981", "#059669", // greens
+  "#fbbf24", "#f59e0b",            // gold
+  "#6ee7b7", "#a7f3d0",            // light green
+  "#ffffff",                        // white
+];
+
+function ConfettiCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Size canvas to viewport
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    type Particle = {
+      x: number; y: number;
+      vx: number; vy: number;
+      w: number; h: number;
+      color: string;
+      rotation: number; spin: number;
+      life: number; decay: number;
+      shape: "rect" | "circle" | "strip";
+    };
+
+    const particles: Particle[] = [];
+    const count = 120;
+
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 4 + Math.random() * 12;
+      particles.push({
+        x: W / 2,
+        y: H / 2,
+        vx: Math.cos(angle) * speed * (0.6 + Math.random() * 0.8),
+        vy: Math.sin(angle) * speed * (0.6 + Math.random() * 0.8) - 4,
+        w: 4 + Math.random() * 8,
+        h: 3 + Math.random() * 6,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        rotation: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 15,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.012,
+        shape: (["rect", "circle", "strip"] as const)[Math.floor(Math.random() * 3)],
+      });
+    }
+
+    let raf: number;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+      let alive = 0;
+
+      for (const p of particles) {
+        if (p.life <= 0) continue;
+        alive++;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.18; // gravity
+        p.vx *= 0.99;
+        p.rotation += p.spin;
+        p.life -= p.decay;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+
+        if (p.shape === "rect") {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        } else if (p.shape === "circle") {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.w / 2, -1, p.w, 2);
+        }
+        ctx.restore();
+      }
+
+      if (alive > 0) {
+        raf = requestAnimationFrame(draw);
+      }
+    };
+
+    raf = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none z-[1]"
+      aria-hidden="true"
+    />
+  );
+}
+
 export default function CrossSellModal({
   isOpen,
   type,
@@ -171,6 +283,9 @@ export default function CrossSellModal({
   onAccept,
   onDecline,
 }: CrossSellModalProps) {
+  const [celebrating, setCelebrating] = useState(false);
+  const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Lock body scroll when the modal is open.
   // iOS Safari needs the scroll position saved/restored because setting
   // body { position: fixed } resets scrollTop to 0.
@@ -205,6 +320,28 @@ export default function CrossSellModal({
       window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
+
+  // Reset celebration state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setCelebrating(false);
+      if (celebrateTimerRef.current) {
+        clearTimeout(celebrateTimerRef.current);
+        celebrateTimerRef.current = null;
+      }
+    }
+  }, [isOpen]);
+
+  // Celebration handler: show animation, then fire onAccept after delay
+  const handleAcceptWithCelebration = useCallback(
+    (payload: { type: CrossSellType; sizeId: string; discountPercent: number }) => {
+      setCelebrating(true);
+      celebrateTimerRef.current = setTimeout(() => {
+        onAccept(payload);
+      }, 1800);
+    },
+    [onAccept]
+  );
 
   if (!isOpen) return null;
 
@@ -250,19 +387,92 @@ export default function CrossSellModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 bg-black/75 backdrop-blur-md"
-            onClick={onDecline}
+            onClick={celebrating ? undefined : onDecline}
           />
+
+          {/* ── Celebration overlay ── */}
+          <AnimatePresence>
+            {celebrating && (
+              <motion.div
+                key="celebration"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[110] flex flex-col items-center justify-center"
+              >
+                {/* Pulsing green glow */}
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [0, 2.5, 3], opacity: [0, 0.25, 0] }}
+                  transition={{ duration: 1.6, ease: "easeOut" }}
+                  className="absolute w-64 h-64 rounded-full bg-emerald-500"
+                  style={{ filter: "blur(60px)" }}
+                />
+
+                {/* Shield icon with checkmark */}
+                <motion.div
+                  initial={{ scale: 0, rotateY: 180 }}
+                  animate={{ scale: 1, rotateY: 0 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 180,
+                    damping: 14,
+                    delay: 0.1,
+                  }}
+                  className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-[0_0_60px_rgba(16,185,129,0.5)] mb-6"
+                  style={{ perspective: 600 }}
+                >
+                  <motion.div
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.4, ease: "easeOut" }}
+                  >
+                    <Check size={48} className="text-white" strokeWidth={3} />
+                  </motion.div>
+                </motion.div>
+
+                {/* Text */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  className="text-2xl md:text-3xl font-display font-bold text-white text-center mb-2"
+                >
+                  Bundle Locked In!
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.7 }}
+                  className="text-emerald-300/80 text-sm font-medium text-center"
+                >
+                  Your 10% discount has been applied
+                </motion.p>
+
+                {/* Full-screen confetti explosion */}
+                <ConfettiCanvas />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Modal — max-h + overflow-y-auto so it scrolls on small
                screens instead of freezing. -webkit-overflow-scrolling for
                smooth iOS momentum. */}
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={
+              celebrating
+                ? { opacity: 0, scale: 0.7, y: -40, rotateX: 15 }
+                : { opacity: 1, scale: 1, y: 0, rotateX: 0 }
+            }
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: "spring", damping: 22, stiffness: 280 }}
+            transition={
+              celebrating
+                ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
+                : { type: "spring", damping: 22, stiffness: 280 }
+            }
             className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto overscroll-contain rounded-3xl border border-white/15 bg-card/95 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.5)]"
-            style={{ WebkitOverflowScrolling: "touch" }}
+            style={{ WebkitOverflowScrolling: "touch", perspective: 800 }}
           >
             {/* Close button */}
             <button
@@ -523,8 +733,9 @@ export default function CrossSellModal({
               >
                 <button
                   type="button"
+                  disabled={celebrating}
                   onClick={() =>
-                    onAccept({
+                    handleAcceptWithCelebration({
                       type,
                       sizeId: isMosquitoTickCrossSell
                         ? autoYardSize
@@ -532,7 +743,7 @@ export default function CrossSellModal({
                       discountPercent: BUNDLE_DISCOUNT_PERCENT,
                     })
                   }
-                  className={`w-full py-4.5 rounded-2xl font-display font-bold text-lg flex items-center justify-center gap-2.5 transition-all duration-300 group relative overflow-hidden ${
+                  className={`w-full py-4.5 rounded-2xl font-display font-bold text-lg flex items-center justify-center gap-2.5 transition-all duration-300 group relative overflow-hidden disabled:opacity-70 ${
                     isMosquitoTickCrossSell
                       ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)]"
                       : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.5)]"

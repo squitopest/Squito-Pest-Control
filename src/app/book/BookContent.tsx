@@ -86,6 +86,23 @@ function BookingContent() {
   const addOnSizeId = searchParams.get("addOnSize") ?? "";
   const addOnDiscount = Number(searchParams.get("addOnDiscount")) || 0;
 
+  // Compute GP add-on pricing for order summary display
+  const hasGpAddOn = addOnType === "general-pest";
+  const gpAddOnBreakdown = hasGpAddOn
+    ? getSubscriptionCheckoutBreakdown("essential-defense", resolvePropertySize(searchParams.get("size")), "monthly")
+    : null;
+  const gpAddOnMonthlyPrice = gpAddOnBreakdown && !gpAddOnBreakdown.quoteOnly
+    ? gpAddOnBreakdown.monthlyPrice
+    : 0;
+  const gpAddOnDiscountedPrice = addOnDiscount > 0
+    ? Math.round(gpAddOnMonthlyPrice * (1 - addOnDiscount / 100) * 100) / 100
+    : gpAddOnMonthlyPrice;
+  const gpAddOnTax = Math.round(gpAddOnDiscountedPrice * TAX_RATE * 100) / 100;
+  const gpAddOnMonthlyTotal = Math.round((gpAddOnDiscountedPrice + gpAddOnTax) * 100) / 100;
+  const gpAddOnInitialFee = gpAddOnBreakdown && !gpAddOnBreakdown.quoteOnly
+    ? gpAddOnBreakdown.initialFee
+    : 0;
+
   // Pre-filled address from M&T flow (passed as URL params)
   const prefillStreet = searchParams.get("street") ?? "";
   const prefillCity = searchParams.get("city") ?? "";
@@ -590,14 +607,21 @@ function BookingContent() {
 
             <div className="flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-1">
-                Mosquito &amp; Tick Package
+                {hasGpAddOn ? "Mosquito & Tick + General Pest Bundle" : "Mosquito & Tick Package"}
               </p>
               <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
-                Mosquito &amp; Tick Package
+                {hasGpAddOn ? "Protection Bundle" : "Mosquito & Tick Package"}
               </h2>
               <p className="text-white/60 text-sm mt-1">
-                Season-long outdoor protection
+                {hasGpAddOn
+                  ? "Season-long outdoor + year-round pest protection"
+                  : "Season-long outdoor protection"}
               </p>
+              {hasGpAddOn && (
+                <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold text-emerald-300">
+                  {addOnDiscount}% Bundle Discount Applied
+                </span>
+              )}
             </div>
             <Link
               href={mosquitoTickHelpHref}
@@ -1154,16 +1178,61 @@ function BookingContent() {
                   <p className="text-white/60">${mosquitoTickMonthlyTax.toFixed(2)}</p>
                 </div>
 
+                {/* ── GP Add-On Bundle ── */}
+                {hasGpAddOn && gpAddOnDiscountedPrice > 0 && (
+                  <>
+                    <div className="my-4 border-t border-white/10" />
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-[10px] font-bold uppercase tracking-[0.18em] text-green-300">
+                        Bundle Added
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-white font-medium text-sm">General Pest — Essential Defense</p>
+                        <p className="text-white/50 text-xs">Year-round monthly subscription</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-white/80 font-semibold text-sm">Monthly Price</p>
+                        <p className="text-white/40 text-xs">{addOnDiscount}% bundle discount applied</p>
+                      </div>
+                      <div className="text-right">
+                        {addOnDiscount > 0 && (
+                          <p className="text-white/30 text-xs line-through">${gpAddOnMonthlyPrice.toFixed(2)}</p>
+                        )}
+                        <p className="text-green-400 font-bold">${gpAddOnDiscountedPrice.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="text-white/60 text-sm">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
+                      <p className="text-white/60">${gpAddOnTax.toFixed(2)}</p>
+                    </div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="text-emerald-400 font-semibold text-sm">Initial Service Fee Waived</p>
+                        <p className="text-emerald-400/70 text-xs">Saved ${gpAddOnInitialFee.toFixed(2)} by bundling</p>
+                      </div>
+                      <p className="text-emerald-400 font-bold line-through opacity-50">${gpAddOnInitialFee.toFixed(2)}</p>
+                    </div>
+                  </>
+                )}
+
                 <div className="flex justify-between items-center py-3 border-t border-white/10">
-                  <p className="text-white font-semibold">Monthly Total</p>
-                  <p className="text-white font-display font-bold text-lg">${mosquitoTickMonthlyTotal.toFixed(2)}</p>
+                  <p className="text-white font-semibold">{hasGpAddOn ? "Combined Monthly Total" : "Monthly Total"}</p>
+                  <p className="text-white font-display font-bold text-lg">
+                    ${(mosquitoTickMonthlyTotal + (hasGpAddOn ? gpAddOnMonthlyTotal : 0)).toFixed(2)}
+                  </p>
                 </div>
 
                 <div className="mt-4 p-3 rounded-xl bg-green-500/5 border border-green-500/20">
                   <p className="text-green-300/80 text-xs leading-relaxed">
                     {mosquitoTickIsReservation
                       ? `No charge today. Billing starts April 1, ${mosquitoTickBillingPlan.seasonYear} and runs monthly through October ${mosquitoTickBillingPlan.seasonYear} (7 charges). Cancel anytime.`
-                      : `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Billing pauses automatically after October 31. No initial fee. Cancel anytime.`}
+                      : hasGpAddOn
+                        ? `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. M&T billing pauses after October 31. GP continues year-round. No initial fee for either — bundle perk. Cancel anytime.`
+                        : `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Billing pauses automatically after October 31. No initial fee. Cancel anytime.`}
                   </p>
                 </div>
               </>
@@ -1260,9 +1329,13 @@ function BookingContent() {
               <div className="flex justify-between items-center py-4 border-t border-white/10 mt-2">
                 <div>
                   <p className="text-white font-bold text-lg">Total Due Today</p>
-                  <p className="text-white/50 text-xs">First monthly charge</p>
+                  <p className="text-white/50 text-xs">
+                    {hasGpAddOn ? "First monthly charge (both services)" : "First monthly charge"}
+                  </p>
                 </div>
-                <p className="text-green-400 font-display font-bold text-2xl">${mosquitoTickMonthlyTotal.toFixed(2)}</p>
+                <p className="text-green-400 font-display font-bold text-2xl">
+                  ${(mosquitoTickMonthlyTotal + (hasGpAddOn ? gpAddOnMonthlyTotal : 0)).toFixed(2)}
+                </p>
               </div>
             )}
 

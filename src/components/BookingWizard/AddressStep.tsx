@@ -509,7 +509,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
               </div>
               <div>
                 <p className="text-white font-medium text-sm">Matching your home...</p>
-                <p className="text-white/40 text-xs mt-0.5">Checking Suffolk County records</p>
+                <p className="text-white/40 text-xs mt-0.5">Checking Long Island property records</p>
               </div>
             </motion.div>
           )}
