@@ -42,4 +42,18 @@ supabase/.temp/
 # Local CLI binaries (Stripe CLI, etc.) — per-developer tooling, never shipped.
 /bin/
 *.exe
-data/ 
+data/
+
+# Audit cleanup — dev-only artifacts that don't belong in the repo
+screenshots/
+linear-design/
+success_video.mp4
+screenshot-pages.js
+setup-blog.mjs
+create-blog-table.mjs
+check-tables.mjs
+check.mjs
+scripts/audit*.mjs
+scripts/peek-csv.mjs
+scripts/check-properties.mjs
+scripts/fix-mt.mjs
