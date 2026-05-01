@@ -5,6 +5,7 @@ import { CheckCircle2, ShieldCheck, Clock, MapPin, Truck, Check, AlertTriangle, 
 import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 type VerificationState = "loading" | "verified" | "unverified";
 
@@ -97,6 +98,17 @@ function SuccessContent() {
       }
     }
   }, [status]);
+
+  // Fire Meta Pixel Purchase event when a verified booking is loaded.
+  useEffect(() => {
+    if (status === "verified" && booking) {
+      trackMetaEvent("Purchase", {
+        value: booking.amountTotalCents != null ? booking.amountTotalCents / 100 : 0,
+        currency: (booking.currency || "USD").toUpperCase(),
+        content_name: booking.planTitle,
+      });
+    }
+  }, [status, booking]);
 
   if (status === "loading") {
     return (

@@ -6,6 +6,7 @@ import CustomCursor from "@/components/CustomCursor/CustomCursor";
 import Navbar from "@/components/Navbar/Navbar";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
 import ChatWidgetLoader from "@/components/ChatWidget/ChatWidgetLoader";
+import MetaPixel from "@/components/MetaPixel/MetaPixel";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const inter = Inter({
@@ -105,6 +106,7 @@ export default function RootLayout({
         </ErrorBoundary>
         <ChatWidgetLoader />
         <Analytics />
+        <MetaPixel />
       </body>
     </html>
   );

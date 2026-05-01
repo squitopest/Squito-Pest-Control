@@ -3,6 +3,7 @@
 import { useId, useState, useRef, useEffect, useCallback } from "react";
 import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2, ChevronDown, X, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 export default function ContactForm() {
   const searchParams = useSearchParams();
@@ -207,6 +208,10 @@ export default function ContactForm() {
       }
 
       setSubmitted(true);
+      trackMetaEvent("Lead", {
+        content_name: form.service,
+        content_category: type,
+      });
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An error occurred. Please try again or call us directly.");
