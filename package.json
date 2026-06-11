@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "qa:reviews": "node scripts/qa-reviews.mjs",
+    "qa:get-started": "node scripts/qa-get-started.mjs",
+    "qa:checkout": "node scripts/qa-checkout.mjs",
+    "qa:homepage": "node scripts/qa-homepage.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.28",
@@ -21,10 +25,8 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.4.0",
     "framer-motion": "^11.2.10",
-    "lottie-react": "^2.4.1",
     "lucide-react": "^0.378.0",
     "next": "^16.2.2",
-    "playwright": "^1.59.1",
     "react": "^18",
     "react-dom": "^18",
     "resend": "^6.10.0",
@@ -41,6 +43,7 @@
     "dotenv-cli": "^11.0.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.2",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.19",
     "typescript": "^5"

@@ -219,10 +219,10 @@ export default function CheckoutStep({
           className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
         >
           <div className="w-16 h-16 rounded-full border-2 border-green-500/30 border-t-green-500 animate-spin" />
-          <p className="text-white font-display font-bold text-lg">
+          <p className="text-foreground font-display font-bold text-lg">
             Redirecting to secure checkout&hellip;
           </p>
-          <p className="text-white/50 text-sm">
+          <p className="text-muted text-sm">
             Please don&apos;t close this tab.
           </p>
         </div>
@@ -232,11 +232,11 @@ export default function CheckoutStep({
         <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-5">
           Step 3
         </div>
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
+        <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
           Book & pay
         </h2>
-        <p className="text-white/55 text-lg">
-          Almost done — fill in your contact info and pick a time.
+        <p className="text-muted text-lg">
+          Almost done. Fill in your contact info and pick a time.
         </p>
       </div>
 
@@ -249,14 +249,14 @@ export default function CheckoutStep({
         >
           {/* Contact Info */}
           <div className="glass-card p-8 rounded-3xl">
-            <h3 className="text-2xl font-bold text-white mb-6">
+            <h3 className="text-2xl font-bold text-foreground mb-6">
               Contact Information
             </h3>
             <div className="space-y-6">
               <div className="space-y-2">
                 <label
                   htmlFor="checkout-name"
-                  className="text-sm font-semibold text-white/80"
+                  className="text-sm font-semibold text-muted"
                 >
                   Full Name
                 </label>
@@ -266,7 +266,7 @@ export default function CheckoutStep({
                   required
                   autoComplete="name"
                   placeholder="John Doe"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                 />
@@ -274,7 +274,7 @@ export default function CheckoutStep({
               <div className="space-y-2">
                 <label
                   htmlFor="checkout-email"
-                  className="text-sm font-semibold text-white/80"
+                  className="text-sm font-semibold text-muted"
                 >
                   Email Address
                 </label>
@@ -285,7 +285,7 @@ export default function CheckoutStep({
                   autoComplete="email"
                   inputMode="email"
                   placeholder="john@example.com"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -293,7 +293,7 @@ export default function CheckoutStep({
               <div className="space-y-2">
                 <label
                   htmlFor="checkout-phone"
-                  className="text-sm font-semibold text-white/80"
+                  className="text-sm font-semibold text-muted"
                 >
                   Phone Number
                 </label>
@@ -304,7 +304,7 @@ export default function CheckoutStep({
                   autoComplete="tel"
                   inputMode="tel"
                   placeholder="(555) 123-4567"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
@@ -314,14 +314,14 @@ export default function CheckoutStep({
 
           {/* Address display */}
           <div className="glass-card p-8 rounded-3xl">
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-bold text-foreground mb-4">
               Service Location
             </h3>
-            <div className="rounded-xl border border-white/10 bg-white/3 p-4 flex items-start gap-3">
+            <div className="rounded-xl border border-border bg-white/3 p-4 flex items-start gap-3">
 
               <div>
-                <p className="text-white font-medium">{street}</p>
-                <p className="text-white/50 text-sm">
+                <p className="text-foreground font-medium">{street}</p>
+                <p className="text-muted text-sm">
                   {city}, NY {zipCode}
                 </p>
               </div>
@@ -330,13 +330,13 @@ export default function CheckoutStep({
 
           {/* Schedule */}
           <div className="glass-card p-8 rounded-3xl">
-            <h3 className="text-2xl font-bold text-white mb-6">
+            <h3 className="text-2xl font-bold text-foreground mb-6">
               Schedule Service
             </h3>
             <div className="space-y-4 mb-8">
               <label
                 htmlFor="checkout-date"
-                className="text-sm font-semibold text-white/80 flex items-center gap-2"
+                className="text-sm font-semibold text-muted flex items-center gap-2"
               >
                 Desired Date
               </label>
@@ -344,7 +344,7 @@ export default function CheckoutStep({
                 id="checkout-date"
                 type="date"
                 required
-                className="w-full max-w-full box-border bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-3 py-3 md:px-6 md:py-5 text-white text-sm md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg appearance-none"
+                className="w-full max-w-full box-border bg-muted border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-3 py-3 md:px-6 md:py-5 text-foreground text-sm md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg appearance-none"
                 style={{ colorScheme: "dark" }}
                 min={getLocalToday()}
                 value={date}
@@ -353,7 +353,7 @@ export default function CheckoutStep({
             </div>
 
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-white/80 flex items-center gap-2 mb-4">
+              <legend className="text-sm font-semibold text-muted flex items-center gap-2 mb-4">
                 Arrival Window
               </legend>
               <div className="grid grid-cols-3 gap-2 md:gap-4">
@@ -387,8 +387,8 @@ export default function CheckoutStep({
                       onClick={() => setTime(slot.id)}
                       className={`flex flex-col items-center justify-center gap-1 md:gap-2 px-1 py-3 md:py-4 rounded-xl border transition-all min-w-0 overflow-hidden ${
                         selected
-                          ? `${slot.active} text-white`
-                          : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
+                          ? `${slot.active} text-foreground`
+                          : "bg-background/40 border-border text-muted hover:bg-muted/50 hover:text-foreground"
                       }`}
                     >
                       <span className="font-bold text-[13px] md:text-base truncate w-full text-center">{slot.label}</span>
@@ -418,7 +418,7 @@ export default function CheckoutStep({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
+              className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-foreground font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
               {loading ? (
                 <Loader2 size={20} className="animate-spin" />
@@ -427,7 +427,7 @@ export default function CheckoutStep({
                 ? "Connecting to Secure Checkout..."
                 : "Proceed to Checkout"}
             </button>
-            <p className="text-center text-white/40 text-xs mt-4 flex items-center justify-center gap-2">
+            <p className="text-center text-foreground/40 text-xs mt-4 flex items-center justify-center gap-2">
               Safe, secure 256-bit SSL encrypted checkout hosted by Stripe.
             </p>
           </div>
@@ -437,7 +437,7 @@ export default function CheckoutStep({
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-white/50 hover:text-white/80 font-semibold text-sm transition-colors group"
+              className="inline-flex items-center gap-2 text-muted hover:text-muted font-semibold text-sm transition-colors group"
             >
               <ArrowLeft
                 size={16}
@@ -451,21 +451,21 @@ export default function CheckoutStep({
         {/* Order Summary Sidebar */}
         <div className="w-full lg:w-96 flex-shrink-0">
           <div className="glass-card p-8 rounded-3xl sticky top-32">
-            <h3 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">
+            <h3 className="text-xl font-bold text-foreground mb-6 border-b border-border pb-4">
               Order Summary
             </h3>
 
             {/* Main plan */}
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-white font-medium">{planTitle}</p>
-                <p className="text-white/50 text-sm">
+                <p className="text-foreground font-medium">{planTitle}</p>
+                <p className="text-muted text-sm">
                   {isYearly
-                    ? "Annual prepay — one-time charge"
+                    ? "Annual prepay, one-time charge"
                     : "Monthly subscription"}
                 </p>
               </div>
-              <p className="text-white/40 text-sm">{sizeConfig.label}</p>
+              <p className="text-foreground/40 text-sm">{sizeConfig.label}</p>
             </div>
 
             {isYearly && breakdown && !breakdown.quoteOnly ? (
@@ -491,7 +491,7 @@ export default function CheckoutStep({
                       <p className="text-amber-400 font-semibold text-sm">
                         Initial Service Fee
                       </p>
-                      <p className="text-white/40 text-xs">
+                      <p className="text-foreground/40 text-xs">
                         Includes first month of service
                       </p>
                     </div>
@@ -501,11 +501,11 @@ export default function CheckoutStep({
                   </div>
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <p className="text-white/50 font-medium text-sm">
+                      <p className="text-muted font-medium text-sm">
                         Then monthly
                       </p>
                     </div>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-muted text-sm">
                       ${breakdown.monthlyPrice.toFixed(2)}/mo
                     </p>
                   </div>
@@ -519,7 +519,7 @@ export default function CheckoutStep({
                   <p className="text-emerald-400 font-semibold text-sm">
                     Annual Plan Prepayment
                   </p>
-                  <p className="text-white/40 text-xs">12 months upfront</p>
+                  <p className="text-foreground/40 text-xs">12 months upfront</p>
                 </div>
                 <p className="text-emerald-400 font-bold">
                   ${breakdown.yearlyTotal.toFixed(2)}
@@ -534,10 +534,10 @@ export default function CheckoutStep({
                   <div className="flex items-start gap-3">
 
                     <div>
-                      <p className="text-white font-medium text-sm">
+                      <p className="text-foreground font-medium text-sm">
                         Mosquito & Tick Protection
                       </p>
-                      <p className="text-white/40 text-xs mt-0.5">
+                      <p className="text-foreground/40 text-xs mt-0.5">
                         Separate seasonal subscription (Apr–Oct)
                       </p>
                     </div>
@@ -545,7 +545,7 @@ export default function CheckoutStep({
                   <div className="flex items-center gap-2">
                     <div className="text-right">
                       {mtDiscount > 0 && (
-                        <p className="text-white/30 text-xs line-through">
+                        <p className="text-muted/60 text-xs line-through">
                           ${mtMonthlyPrice.toFixed(2)}/mo
                         </p>
                       )}
@@ -556,7 +556,7 @@ export default function CheckoutStep({
                     <button
                       type="button"
                       onClick={onRemoveAddOn}
-                      className="w-5 h-5 rounded-full bg-white/5 hover:bg-red-500/20 flex items-center justify-center text-white/30 hover:text-red-400 transition-colors"
+                      className="w-5 h-5 rounded-full bg-muted/50 hover:bg-red-500/20 flex items-center justify-center text-muted/60 hover:text-red-400 transition-colors"
                     >
                       <X size={10} />
                     </button>
@@ -580,10 +580,10 @@ export default function CheckoutStep({
                   <div className="flex items-start gap-3">
 
                     <div>
-                      <p className="text-white font-medium text-sm">
+                      <p className="text-foreground font-medium text-sm">
                         Premium Shield (Add-On)
                       </p>
-                      <p className="text-white/40 text-xs mt-0.5">
+                      <p className="text-foreground/40 text-xs mt-0.5">
                         Year-round monthly subscription
                       </p>
                     </div>
@@ -595,7 +595,7 @@ export default function CheckoutStep({
                     <button
                       type="button"
                       onClick={onRemoveAddOn}
-                      className="w-5 h-5 rounded-full bg-white/5 hover:bg-red-500/20 flex items-center justify-center text-white/30 hover:text-red-400 transition-colors"
+                      className="w-5 h-5 rounded-full bg-muted/50 hover:bg-red-500/20 flex items-center justify-center text-muted/60 hover:text-red-400 transition-colors"
                     >
                       <X size={10} />
                     </button>
@@ -607,16 +607,16 @@ export default function CheckoutStep({
             {/* Tax + Total */}
             <div className="flex justify-between items-start mb-6 text-sm">
               <div>
-                <p className="text-white/60">
+                <p className="text-muted">
                   NY Sales Tax{" "}
-                  <span className="text-white/30">({taxRateLabel})</span>
+                  <span className="text-muted/60">({taxRateLabel})</span>
                 </p>
               </div>
-              <p className="text-white/60">${combinedTax.toFixed(2)}</p>
+              <p className="text-muted">${combinedTax.toFixed(2)}</p>
             </div>
 
-            <div className="flex justify-between items-center py-4 border-t border-white/10">
-              <p className="text-white font-bold text-lg">Total Due Today</p>
+            <div className="flex justify-between items-center py-4 border-t border-border">
+              <p className="text-foreground font-bold text-lg">Total Due Today</p>
               <p className="text-green-400 font-display font-bold text-2xl">
                 ${combinedTotal.toFixed(2)}
               </p>
@@ -629,16 +629,16 @@ export default function CheckoutStep({
               </p>
             )}
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
+            <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
               <div className="flex items-center gap-2 opacity-60">
 
-                <span className="text-xs text-white">
+                <span className="text-xs text-foreground">
                   Guaranteed Long Term Protection
                 </span>
               </div>
               <div className="flex items-center gap-2 opacity-60">
 
-                <span className="text-xs text-white">
+                <span className="text-xs text-foreground">
                   Powered by Google Maps
                 </span>
               </div>

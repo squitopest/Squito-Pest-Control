@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { CheckCircle2, ShieldCheck, Clock, MapPin, Truck, Check, AlertTriangle, Calendar, User } from "lucide-react";
-import Footer from "@/components/Footer/Footer";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { trackMetaEvent } from "@/lib/meta-pixel";
@@ -324,7 +323,6 @@ export default function SuccessPageContent() {
       >
         <SuccessContent />
       </Suspense>
-      <Footer />
     </main>
   );
 }

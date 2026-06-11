@@ -4,7 +4,6 @@ import { Suspense, useState, useEffect, useRef, useCallback, useMemo } from "rea
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import Footer from "@/components/Footer/Footer";
 import {
   DEFAULT_PROPERTY_SIZE,
   getOneTimeService,
@@ -110,7 +109,7 @@ function BookingContent() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [restoredFromCancel, setRestoredFromCancel] = useState(false);
+  const [restoredFromCancel, setRestoredFromCancel] = useState(wasCancelled);
 
   const [locating, setLocating] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -152,6 +151,7 @@ function BookingContent() {
     } catch {
       // ignore malformed storage
     }
+    if (wasCancelled) setRestoredFromCancel(true);
     hasRestoredRef.current = true;
   }, [wasCancelled, hasPrefillAddress]);
 
@@ -585,14 +585,14 @@ function BookingContent() {
           className="fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 animate-fade-in-up"
         >
           <div className="w-16 h-16 rounded-full border-2 border-green-500/30 border-t-green-500 animate-spin" />
-          <p className="text-white font-display font-bold text-lg">Redirecting to secure checkout&hellip;</p>
-          <p className="text-white/50 text-sm">Please don&apos;t close this tab.</p>
+          <p className="text-foreground font-display font-bold text-lg">Redirecting to secure checkout&hellip;</p>
+          <p className="text-muted text-sm">Please don&apos;t close this tab.</p>
         </div>
       )}
 
       <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">Secure Checkout</h1>
-        <p className="text-white/70 text-lg">Schedule your inspection and finalize your protection plan.</p>
+        <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">Secure Checkout</h1>
+        <p className="text-muted text-lg">Schedule your inspection and finalize your protection plan.</p>
       </div>
 
       {!isOneTime && !isMosquitoTick && (
@@ -609,10 +609,10 @@ function BookingContent() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-green-400 mb-1">
                 {hasGpAddOn ? "Mosquito & Tick + General Pest Bundle" : "Mosquito & Tick Package"}
               </p>
-              <h2 className="text-2xl md:text-3xl font-display font-bold text-white">
+              <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
                 {hasGpAddOn ? "Protection Bundle" : "Mosquito & Tick Package"}
               </h2>
-              <p className="text-white/60 text-sm mt-1">
+              <p className="text-muted text-sm mt-1">
                 {hasGpAddOn
                   ? "Season-long outdoor + year-round pest protection"
                   : "Season-long outdoor protection"}
@@ -625,7 +625,7 @@ function BookingContent() {
             </div>
             <Link
               href={mosquitoTickHelpHref}
-              className="hidden md:inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="hidden md:inline-flex items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2 text-xs font-semibold text-muted hover:text-foreground hover:bg-muted transition-colors"
             >
               Change yard size
             </Link>
@@ -640,7 +640,7 @@ function BookingContent() {
         >
 
           <div>
-            <p className="font-semibold">Checkout was cancelled — no charge was made.</p>
+            <p className="font-semibold">Checkout was cancelled. No charge was made.</p>
             <p className="text-amber-200/80">We saved your details below so you can finish booking when you&apos;re ready.</p>
           </div>
         </div>
@@ -648,22 +648,22 @@ function BookingContent() {
 
       {requestedServiceType === "specialty" && (!specialtyService || !specialtyQuote) ? (
         <div className="glass-card rounded-3xl border border-amber-500/25 bg-amber-500/5 p-8 md:p-10">
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
             We couldn&apos;t load that specialty service configuration.
           </h2>
-          <p className="text-white/65 text-lg leading-relaxed mb-6">
+          <p className="text-muted text-lg leading-relaxed mb-6">
             Head back to the specialty catalog, reselect the service options you want, and we&apos;ll bring you back here with the correct pricing.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/services/specialty"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-foreground transition-colors hover:bg-green-400"
             >
               Browse Specialty Services
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-muted/50 px-6 py-4 font-semibold text-foreground transition-colors hover:bg-muted"
             >
               Contact Us
             </Link>
@@ -675,23 +675,23 @@ function BookingContent() {
             <p className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-300 mb-5">
               Custom Quote Needed
             </p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
               Let&apos;s price your estate with a tailored quote.
             </h2>
-            <p className="text-white/65 text-lg leading-relaxed mb-6">
+            <p className="text-muted text-lg leading-relaxed mb-6">
               Yards larger than one acre take a little more coordination &mdash; equipment, timing, and coverage scale differently for bigger properties.
               Send us a quick request and we&apos;ll build a package that fits.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href={mosquitoTickQuoteHref}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-foreground transition-colors hover:bg-green-400"
               >
                 Request Custom Quote
               </Link>
               <a
                 href="tel:6312031000"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-muted/50 px-6 py-4 font-semibold text-foreground transition-colors hover:bg-muted"
               >
                 Call (631) 203-1000
               </a>
@@ -699,15 +699,15 @@ function BookingContent() {
           </div>
         </div>
       ) : mosquitoTickNeedsChoice && mosquitoTickPackage && mosquitoTickBillingPlan ? (
-        <div className="glass-card rounded-3xl border border-white/10 p-8 md:p-10">
+        <div className="glass-card rounded-3xl border border-border p-8 md:p-10">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-green-300 mb-5">
               Season Almost Over
             </p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
               The current mosquito &amp; tick season ends October 31.
             </h2>
-            <p className="text-white/65 text-lg leading-relaxed mb-8">
+            <p className="text-muted text-lg leading-relaxed mb-8">
               You can still book for what&apos;s left of this season &mdash; or reserve your spot for April 1 and skip the rush.
               Either way, there&apos;s no initial fee and you can cancel anytime.
             </p>
@@ -726,10 +726,10 @@ function BookingContent() {
                     Start This Season
                   </p>
                 </div>
-                <h3 className="text-xl font-display font-bold text-white mb-2">
+                <h3 className="text-xl font-display font-bold text-foreground mb-2">
                   Book First Treatment
                 </h3>
-                <p className="text-sm text-white/60 mb-4">
+                <p className="text-sm text-muted mb-4">
                   {mosquitoTickBillingPlan.monthsRemaining === 1
                     ? "1 charge remaining this season. Treatment scheduled this week."
                     : `${mosquitoTickBillingPlan.monthsRemaining} charges remaining this season. Treatment scheduled this week.`}
@@ -742,7 +742,7 @@ function BookingContent() {
               <button
                 type="button"
                 onClick={() => setMosquitoTickIntent("reserve")}
-                className="text-left rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-white/25 hover:bg-white/10 transition-colors"
+                className="text-left rounded-2xl border border-border bg-muted/50 p-6 hover:border-white/25 hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15">
@@ -752,21 +752,21 @@ function BookingContent() {
                     Off-Season Hold
                   </p>
                 </div>
-                <h3 className="text-xl font-display font-bold text-white mb-2">
+                <h3 className="text-xl font-display font-bold text-foreground mb-2">
                   Reserve for April 1
                 </h3>
-                <p className="text-sm text-white/60 mb-4">
+                <p className="text-sm text-muted mb-4">
                   Lock in today&apos;s pricing. We&apos;ll call you in late March to confirm your first visit, then billing starts April 1.
                 </p>
-                <span className="inline-flex items-center gap-2 text-sm font-bold text-white/70">
+                <span className="inline-flex items-center gap-2 text-sm font-bold text-muted">
                   Continue
                 </span>
               </button>
             </div>
 
-            <p className="text-xs text-white/40 mt-6">
+            <p className="text-xs text-foreground/40 mt-6">
               Not sure?{" "}
-              <Link href={mosquitoTickHelpHref} className="text-white/70 hover:text-white underline underline-offset-2">
+              <Link href={mosquitoTickHelpHref} className="text-muted hover:text-foreground underline underline-offset-2">
                 Get help choosing
               </Link>
               .
@@ -779,28 +779,28 @@ function BookingContent() {
             <p className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-300 mb-5">
               Custom Quote Needed
             </p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
               Let’s price your home with a tailored quote.
             </h2>
-            <p className="text-white/65 text-lg leading-relaxed mb-6">
+            <p className="text-muted text-lg leading-relaxed mb-6">
               Homes over 4,000 sqft vary too much in layout, pest pressure, and treatment scope to price instantly online.
               Send us a quick request and our team will quote the right plan for your property.
             </p>
-            <div className="rounded-2xl border border-white/10 bg-background/30 p-5 mb-6">
-              <p className="text-sm font-semibold text-white/80 mb-1">Selected plan</p>
-              <p className="text-xl font-display font-bold text-white">{planTitle}</p>
-              <p className="text-sm text-white/55 mt-2">{getPropertySizeConfig(propertySize).sqftRangeLabel}</p>
+            <div className="rounded-2xl border border-border bg-background/30 p-5 mb-6">
+              <p className="text-sm font-semibold text-muted mb-1">Selected plan</p>
+              <p className="text-xl font-display font-bold text-foreground">{planTitle}</p>
+              <p className="text-sm text-foreground/55 mt-2">{getPropertySizeConfig(propertySize).sqftRangeLabel}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href={quoteHref}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-white transition-colors hover:bg-green-400"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-green-500 px-6 py-4 font-bold text-foreground transition-colors hover:bg-green-400"
               >
                 Request Custom Quote
               </Link>
               <a
                 href="tel:6312031000"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-4 font-semibold text-white transition-colors hover:bg-white/10"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-muted/50 px-6 py-4 font-semibold text-foreground transition-colors hover:bg-muted"
               >
                 Call (631) 203-1000
               </a>
@@ -812,10 +812,10 @@ function BookingContent() {
         <form onSubmit={handleCheckout} className={`flex-1 space-y-8 ${loading ? "opacity-60 pointer-events-none" : "transition-opacity duration-300"}`} noValidate>
 
           <div className="glass-card p-8 rounded-3xl">
-            <h2 className="text-2xl font-bold text-white mb-6">Contact Information</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-6">Contact Information</h2>
             <div className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="book-fullName" className="text-sm font-semibold text-white/80">Full Name</label>
+                <label htmlFor="book-fullName" className="text-sm font-semibold text-muted">Full Name</label>
                 <input
                   id="book-fullName"
                   name="fullName"
@@ -824,14 +824,14 @@ function BookingContent() {
                   disabled={loading}
                   autoComplete="name"
                   placeholder="John Doe"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors disabled:opacity-50"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors disabled:opacity-50"
                   value={form.fullName}
                   onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))}
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="book-email" className="text-sm font-semibold text-white/80">Email Address (For Receipt)</label>
+                <label htmlFor="book-email" className="text-sm font-semibold text-muted">Email Address (For Receipt)</label>
                 <input
                   id="book-email"
                   name="email"
@@ -840,14 +840,14 @@ function BookingContent() {
                   autoComplete="email"
                   inputMode="email"
                   placeholder="john@example.com"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="book-phone" className="text-sm font-semibold text-white/80">Phone Number</label>
+                <label htmlFor="book-phone" className="text-sm font-semibold text-muted">Phone Number</label>
                 <input
                   id="book-phone"
                   name="phone"
@@ -856,7 +856,7 @@ function BookingContent() {
                   autoComplete="tel"
                   inputMode="tel"
                   placeholder="(555) 123-4567"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={form.phone}
                   onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                 />
@@ -866,7 +866,7 @@ function BookingContent() {
 
           <div className="glass-card p-8 rounded-3xl overflow-visible">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-white">Service Location</h2>
+              <h2 className="text-2xl font-bold text-foreground">Service Location</h2>
               <button
                 type="button"
                 onClick={handleDetectLocation}
@@ -880,7 +880,7 @@ function BookingContent() {
 
             <div className="space-y-4">
               <div className="space-y-2 relative" ref={suggestionsRef}>
-                <label htmlFor="book-street" className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                <label htmlFor="book-street" className="text-sm font-semibold text-muted flex items-center gap-2">
                   Street Address
                 </label>
                 <input
@@ -891,7 +891,7 @@ function BookingContent() {
                   required
                   autoComplete="street-address"
                   placeholder="123 Main St"
-                  className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                  className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                   value={form.street}
                   onChange={e => handleAddressChange(e.target.value)}
                   onKeyDown={handleAddressKeyDown}
@@ -907,7 +907,7 @@ function BookingContent() {
                   }
                 />
                 {autocompleteLoading && (
-                  <p className="mt-2 text-xs text-white/40 flex items-center gap-2">
+                  <p className="mt-2 text-xs text-foreground/40 flex items-center gap-2">
                     <Loader2 size={12} className="animate-spin" /> Looking up addresses…
                   </p>
                 )}
@@ -932,14 +932,14 @@ function BookingContent() {
                             e.preventDefault();
                             selectSuggestion(suggestion);
                           }}
-                          className={`px-4 py-3 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 ${
-                            highlighted ? "bg-white/10" : "hover:bg-white/5"
+                          className={`px-4 py-3 cursor-pointer border-b border-border last:border-0 transition-colors flex items-center gap-3 ${
+                            highlighted ? "bg-muted" : "hover:bg-muted/50"
                           }`}
                         >
 
                           <div>
-                            <p className="text-sm font-semibold text-white/90">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
-                            <p className="text-xs text-white/50">{suggestion.structured_formatting?.secondary_text || ""}</p>
+                            <p className="text-sm font-semibold text-foreground">{suggestion.structured_formatting?.main_text || suggestion.description}</p>
+                            <p className="text-xs text-muted">{suggestion.structured_formatting?.secondary_text || ""}</p>
                           </div>
                         </li>
                       );
@@ -950,7 +950,7 @@ function BookingContent() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="book-city" className="text-sm font-semibold text-white/80">City *</label>
+                  <label htmlFor="book-city" className="text-sm font-semibold text-muted">City *</label>
                   <input
                     id="book-city"
                     name="city"
@@ -958,14 +958,14 @@ function BookingContent() {
                     required
                     autoComplete="address-level2"
                     placeholder="Islandia"
-                    className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                    className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                     value={form.city}
                     onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="book-zip" className="text-sm font-semibold text-white/80">ZIP Code *</label>
+                  <label htmlFor="book-zip" className="text-sm font-semibold text-muted">ZIP Code *</label>
                   <input
                     id="book-zip"
                     name="zip"
@@ -976,7 +976,7 @@ function BookingContent() {
                     pattern="\d{5}"
                     maxLength={5}
                     placeholder="11501"
-                    className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                    className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                     value={form.zipCode}
                     onChange={e => setForm(f => ({ ...f, zipCode: e.target.value.replace(/\D/g, "").slice(0, 5) }))}
                   />
@@ -986,7 +986,7 @@ function BookingContent() {
           </div>
 
           <div className="glass-card p-8 rounded-3xl">
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-bold text-foreground mb-6">
               {mosquitoTickIsReservation ? "Reservation Details" : "Schedule Service"}
             </h2>
 
@@ -997,8 +997,8 @@ function BookingContent() {
 
                   </div>
                   <div>
-                    <p className="text-white font-semibold mb-1">Service begins April 1</p>
-                    <p className="text-white/60 text-sm leading-relaxed">
+                    <p className="text-foreground font-semibold mb-1">Service begins April 1</p>
+                    <p className="text-muted text-sm leading-relaxed">
                       We&apos;ll call you in late March to schedule your first visit.
                       Monthly billing starts April 1 and pauses automatically after October.
                       No charge today &mdash; we just save your card on file to lock in pricing.
@@ -1008,7 +1008,7 @@ function BookingContent() {
               </div>
             ) : (
               <div className="space-y-4 mb-8">
-                <label htmlFor="book-date" className="text-sm font-semibold text-white/80 flex items-center gap-2">
+                <label htmlFor="book-date" className="text-sm font-semibold text-muted flex items-center gap-2">
                   Desired Date
                 </label>
                 <input
@@ -1016,7 +1016,7 @@ function BookingContent() {
                   name="date"
                   type="date"
                   required
-                  className="w-full bg-white/10 border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-4 py-3 md:px-6 md:py-5 text-white text-base md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
+                  className="w-full bg-muted border-2 border-white/20 hover:border-green-500/50 focus:border-green-500 rounded-xl px-4 py-3 md:px-6 md:py-5 text-foreground text-base md:text-xl font-bold outline-none transition-colors cursor-pointer shadow-lg"
                   style={{ colorScheme: "dark" }}
                   min={new Date().toISOString().split('T')[0]}
                   value={form.date}
@@ -1027,7 +1027,7 @@ function BookingContent() {
 
             {!mosquitoTickIsReservation && (
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-white/80 flex items-center gap-2 mb-4">
+              <legend className="text-sm font-semibold text-muted flex items-center gap-2 mb-4">
                 Arrival Window
               </legend>
               <div className="grid grid-cols-3 gap-4" role="radiogroup" aria-label="Arrival window">
@@ -1038,8 +1038,8 @@ function BookingContent() {
                   onClick={() => setForm(f => ({ ...f, time: "AM" }))}
                   className={`flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all ${
                     form.time === "AM"
-                      ? "bg-blue-500/20 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                      : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
+                      ? "bg-blue-500/20 border-blue-500 text-foreground shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                      : "bg-background/40 border-border text-muted hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
 
@@ -1054,8 +1054,8 @@ function BookingContent() {
                   onClick={() => setForm(f => ({ ...f, time: "PM" }))}
                   className={`flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all ${
                     form.time === "PM"
-                      ? "bg-amber-500/20 border-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.3)]"
-                      : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
+                      ? "bg-amber-500/20 border-amber-500 text-foreground shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+                      : "bg-background/40 border-border text-muted hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
 
@@ -1070,8 +1070,8 @@ function BookingContent() {
                   onClick={() => setForm(f => ({ ...f, time: "EVE" }))}
                   className={`flex flex-col items-center justify-center gap-2 py-4 rounded-xl border transition-all ${
                     form.time === "EVE"
-                      ? "bg-violet-500/20 border-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]"
-                      : "bg-background/40 border-white/10 text-white/50 hover:bg-white/5 hover:text-white"
+                      ? "bg-violet-500/20 border-violet-500 text-foreground shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                      : "bg-background/40 border-border text-muted hover:bg-muted/50 hover:text-foreground"
                   }`}
                 >
                   <svg
@@ -1118,7 +1118,7 @@ function BookingContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
+              className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-600 transition-all text-foreground font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,197,94,0.4)]"
             >
               {loading ? <Loader2 size={20} className="animate-spin" /> : null}
               {loading
@@ -1127,7 +1127,7 @@ function BookingContent() {
                   ? "Reserve My Spot"
                   : "Proceed to Checkout"}
             </button>
-            <p className="text-center text-white/40 text-xs mt-4 flex items-center justify-center gap-2">
+            <p className="text-center text-foreground/40 text-xs mt-4 flex items-center justify-center gap-2">
               Safe, secure 256-bit SSL encrypted checkout hosted by Stripe.
             </p>
           </div>
@@ -1135,7 +1135,7 @@ function BookingContent() {
 
         <div className="w-full lg:w-96 flex-shrink-0">
           <div className="glass-card p-8 rounded-3xl sticky top-32">
-            <h2 className="text-xl font-bold text-white mb-6 border-b border-white/10 pb-4">Order Summary</h2>
+            <h2 className="text-xl font-bold text-foreground mb-6 border-b border-border pb-4">Order Summary</h2>
 
             {promoCode && (
               <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-green-500/30 bg-green-500/10 px-3 py-2.5">
@@ -1153,35 +1153,35 @@ function BookingContent() {
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="text-white font-medium">{planTitle}</p>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-foreground font-medium">{planTitle}</p>
+                    <p className="text-muted text-sm">
                       {mosquitoTickIsReservation
-                        ? `Reservation — ${mosquitoTickBillingPlan.seasonYear} season`
+                        ? `Reservation: ${mosquitoTickBillingPlan.seasonYear} season`
                         : "Seasonal monthly subscription"}
                     </p>
                   </div>
-                  <p className="text-white/40 text-sm">Seasonal protection</p>
+                  <p className="text-foreground/40 text-sm">Seasonal protection</p>
                 </div>
 
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="text-white/80 font-semibold text-sm">Monthly Price</p>
-                    <p className="text-white/40 text-xs">During active months only</p>
+                    <p className="text-muted font-semibold text-sm">Monthly Price</p>
+                    <p className="text-foreground/40 text-xs">During active months only</p>
                   </div>
-                  <p className="text-white font-bold">${mosquitoTickMonthlyPrice.toFixed(2)}</p>
+                  <p className="text-foreground font-bold">${mosquitoTickMonthlyPrice.toFixed(2)}</p>
                 </div>
 
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="text-white/60 text-sm">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
+                    <p className="text-muted text-sm">NY Sales Tax <span className="text-muted/60">({taxRateLabel})</span></p>
                   </div>
-                  <p className="text-white/60">${mosquitoTickMonthlyTax.toFixed(2)}</p>
+                  <p className="text-muted">${mosquitoTickMonthlyTax.toFixed(2)}</p>
                 </div>
 
                 {/* ── GP Add-On Bundle ── */}
                 {hasGpAddOn && gpAddOnDiscountedPrice > 0 && (
                   <>
-                    <div className="my-4 border-t border-white/10" />
+                    <div className="my-4 border-t border-border" />
                     <div className="flex items-center gap-2 mb-3">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/15 border border-green-500/30 text-[10px] font-bold uppercase tracking-[0.18em] text-green-300">
                         Bundle Added
@@ -1189,25 +1189,25 @@ function BookingContent() {
                     </div>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-white font-medium text-sm">General Pest — Essential Defense</p>
-                        <p className="text-white/50 text-xs">Year-round monthly subscription</p>
+                        <p className="text-foreground font-medium text-sm">General Pest, Essential Defense</p>
+                        <p className="text-muted text-xs">Year-round monthly subscription</p>
                       </div>
                     </div>
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <p className="text-white/80 font-semibold text-sm">Monthly Price</p>
-                        <p className="text-white/40 text-xs">{addOnDiscount}% bundle discount applied</p>
+                        <p className="text-muted font-semibold text-sm">Monthly Price</p>
+                        <p className="text-foreground/40 text-xs">{addOnDiscount}% bundle discount applied</p>
                       </div>
                       <div className="text-right">
                         {addOnDiscount > 0 && (
-                          <p className="text-white/30 text-xs line-through">${gpAddOnMonthlyPrice.toFixed(2)}</p>
+                          <p className="text-muted/60 text-xs line-through">${gpAddOnMonthlyPrice.toFixed(2)}</p>
                         )}
                         <p className="text-green-400 font-bold">${gpAddOnDiscountedPrice.toFixed(2)}</p>
                       </div>
                     </div>
                     <div className="flex justify-between items-start mb-2">
-                      <p className="text-white/60 text-sm">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
-                      <p className="text-white/60">${gpAddOnTax.toFixed(2)}</p>
+                      <p className="text-muted text-sm">NY Sales Tax <span className="text-muted/60">({taxRateLabel})</span></p>
+                      <p className="text-muted">${gpAddOnTax.toFixed(2)}</p>
                     </div>
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -1219,9 +1219,9 @@ function BookingContent() {
                   </>
                 )}
 
-                <div className="flex justify-between items-center py-3 border-t border-white/10">
-                  <p className="text-white font-semibold">{hasGpAddOn ? "Combined Monthly Total" : "Monthly Total"}</p>
-                  <p className="text-white font-display font-bold text-lg">
+                <div className="flex justify-between items-center py-3 border-t border-border">
+                  <p className="text-foreground font-semibold">{hasGpAddOn ? "Combined Monthly Total" : "Monthly Total"}</p>
+                  <p className="text-foreground font-display font-bold text-lg">
                     ${(mosquitoTickMonthlyTotal + (hasGpAddOn ? gpAddOnMonthlyTotal : 0)).toFixed(2)}
                   </p>
                 </div>
@@ -1231,7 +1231,7 @@ function BookingContent() {
                     {mosquitoTickIsReservation
                       ? `No charge today. Billing starts April 1, ${mosquitoTickBillingPlan.seasonYear} and runs monthly through October ${mosquitoTickBillingPlan.seasonYear} (7 charges). Cancel anytime.`
                       : hasGpAddOn
-                        ? `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. M&T billing pauses after October 31. GP continues year-round. No initial fee for either — bundle perk. Cancel anytime.`
+                        ? `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. M&T billing pauses after October 31. GP continues year-round. No initial fee for either (bundle perk). Cancel anytime.`
                         : `${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}. Billing pauses automatically after October 31. No initial fee. Cancel anytime.`}
                   </p>
                 </div>
@@ -1240,16 +1240,16 @@ function BookingContent() {
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="text-white font-medium">{planTitle}</p>
-                    <p className="text-white/50 text-sm">{isSpecialty ? "Specialty one-time service" : "One-time service"}</p>
+                    <p className="text-foreground font-medium">{planTitle}</p>
+                    <p className="text-muted text-sm">{isSpecialty ? "Specialty one-time service" : "One-time service"}</p>
                   </div>
-                  <p className="text-white font-bold">${initialFee.toFixed(2)}</p>
+                  <p className="text-foreground font-bold">${initialFee.toFixed(2)}</p>
                 </div>
 
                 {specialtySummary && (
-                  <div className="mb-4 rounded-xl border border-white/10 bg-white/5 p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/35 mb-1">Selected scope</p>
-                    <p className="text-sm text-white/75">{specialtySummary}</p>
+                  <div className="mb-4 rounded-xl border border-border bg-muted/50 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/35 mb-1">Selected scope</p>
+                    <p className="text-sm text-muted">{specialtySummary}</p>
                   </div>
                 )}
 
@@ -1263,12 +1263,12 @@ function BookingContent() {
               <>
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="text-white font-medium">{planTitle}</p>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-foreground font-medium">{planTitle}</p>
+                    <p className="text-muted text-sm">
                       {isYearly ? "Annual prepay - one-time charge" : "Monthly subscription"}
                     </p>
                   </div>
-                  <p className="text-white/40 text-sm">{getPropertySizeConfig(propertySize).label} home</p>
+                  <p className="text-foreground/40 text-sm">{getPropertySizeConfig(propertySize).label} home</p>
                 </div>
 
                 {isYearly ? (
@@ -1283,7 +1283,7 @@ function BookingContent() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="text-amber-400 font-semibold text-sm">Initial Service Fee</p>
-                      <p className="text-white/40 text-xs">One-time, charged today</p>
+                      <p className="text-foreground/40 text-xs">One-time, charged today</p>
                     </div>
                     <p className="text-amber-400 font-bold">${initialFee.toFixed(2)}</p>
                   </div>
@@ -1293,7 +1293,7 @@ function BookingContent() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="text-emerald-400 font-semibold text-sm">Annual Plan Prepayment</p>
-                      <p className="text-white/40 text-xs">12 months upfront</p>
+                      <p className="text-foreground/40 text-xs">12 months upfront</p>
                     </div>
                     <p className="text-emerald-400 font-bold">${yearlyAmount.toFixed(2)}</p>
                   </div>
@@ -1313,23 +1313,23 @@ function BookingContent() {
               <>
                 <div className="flex justify-between items-start mb-6 text-sm">
                   <div>
-                    <p className="text-white/60">NY Sales Tax <span className="text-white/30">({taxRateLabel})</span></p>
+                    <p className="text-muted">NY Sales Tax <span className="text-muted/60">({taxRateLabel})</span></p>
                   </div>
-                  <p className="text-white/60">${taxAmount.toFixed(2)}</p>
+                  <p className="text-muted">${taxAmount.toFixed(2)}</p>
                 </div>
 
-                <div className="flex justify-between items-center py-4 border-t border-white/10">
-                  <p className="text-white font-bold text-lg">Total Due Today</p>
+                <div className="flex justify-between items-center py-4 border-t border-border">
+                  <p className="text-foreground font-bold text-lg">Total Due Today</p>
                   <p className="text-green-400 font-display font-bold text-2xl">${totalDue.toFixed(2)}</p>
                 </div>
               </>
             )}
 
             {isMosquitoTick && mosquitoTickBillingPlan && !mosquitoTickIsReservation && (
-              <div className="flex justify-between items-center py-4 border-t border-white/10 mt-2">
+              <div className="flex justify-between items-center py-4 border-t border-border mt-2">
                 <div>
-                  <p className="text-white font-bold text-lg">Total Due Today</p>
-                  <p className="text-white/50 text-xs">
+                  <p className="text-foreground font-bold text-lg">Total Due Today</p>
+                  <p className="text-muted text-xs">
                     {hasGpAddOn ? "First monthly charge (both services)" : "First monthly charge"}
                   </p>
                 </div>
@@ -1340,10 +1340,10 @@ function BookingContent() {
             )}
 
             {isMosquitoTick && mosquitoTickIsReservation && (
-              <div className="flex justify-between items-center py-4 border-t border-white/10 mt-2">
+              <div className="flex justify-between items-center py-4 border-t border-border mt-2">
                 <div>
-                  <p className="text-white font-bold text-lg">Total Due Today</p>
-                  <p className="text-white/50 text-xs">No charge until April 1</p>
+                  <p className="text-foreground font-bold text-lg">Total Due Today</p>
+                  <p className="text-muted text-xs">No charge until April 1</p>
                 </div>
                 <p className="text-green-400 font-display font-bold text-2xl">$0.00</p>
               </div>
@@ -1351,21 +1351,21 @@ function BookingContent() {
 
             {isMosquitoTick && mosquitoTickBillingPlan && (
               <div className="mt-4 flex justify-between items-center text-sm">
-                <p className="text-white/50">Estimated season total</p>
-                <p className="text-white/70 font-semibold">
+                <p className="text-muted">Estimated season total</p>
+                <p className="text-muted font-semibold">
                   ${mosquitoTickSeasonTotal.toFixed(2)}
                 </p>
               </div>
             )}
 
-            <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-3">
+            <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
               <div className="flex items-center gap-2 opacity-60">
 
-                <span className="text-xs text-white">Guaranteed Long Term Protection</span>
+                <span className="text-xs text-foreground">Guaranteed Long Term Protection</span>
               </div>
               <div className="flex items-center gap-2 opacity-60">
 
-                <span className="text-xs text-white">Powered by Google Maps</span>
+                <span className="text-xs text-foreground">Powered by Google Maps</span>
               </div>
             </div>
           </div>
@@ -1379,10 +1379,9 @@ function BookingContent() {
 export default function BookContent() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
-      <Suspense fallback={<div className="flex-1 flex items-center justify-center"><p className="text-white/50">Loading Checkout...</p></div>}>
+      <Suspense fallback={<div className="flex-1 flex items-center justify-center"><p className="text-muted">Loading Checkout...</p></div>}>
         <BookingContent />
       </Suspense>
-      <Footer />
     </main>
   );
 }

@@ -52,7 +52,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-display font-bold text-white mb-3">3. Information Sharing</h2>
             <p>
-              We do not sell, rent, or trade your personal information to third parties. We may share limited data with trusted service providers who assist with payment processing (Stripe), email delivery, and website hosting — solely to operate our business.
+              We do not sell, rent, or trade your personal information to third parties. We may share limited data with trusted service providers who assist with payment processing (Stripe), email delivery, and website hosting, solely to operate our business.
             </p>
           </section>
 

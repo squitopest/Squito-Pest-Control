@@ -60,6 +60,14 @@
     --color-green-600: #16a34a;
     --color-green-700: #15803d;
     --color-offwhite: #f5f5f0;       /* warm off-white for premium feel */
+    /* Stitch-aligned layout rhythm (see docs/design/stitch-token-mapping.md) */
+    --gutter: 1.5rem;
+    --section-py-mobile: 4rem;
+    --section-py-desktop: 7.5rem;
+    --stack-sm: 0.5rem;
+    --stack-md: 1rem;
+    --stack-lg: 2rem;
+    --brand-green-dark: #006e2f;
   }
 
   /* ── Light Theme ───────────────────────────────────────────────────────
@@ -141,9 +149,16 @@
     font-size: max(16px, 1em);
   }
 
+  html {
+    overflow-x: clip;
+    width: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
-    overflow-x: hidden;
+    overflow-x: clip;
+    width: 100%;
+    max-width: 100%;
     /* Subtle noise texture — adds grain to break up the flat background.
        Both color and opacity are theme-aware via CSS vars. */
     background-image:
@@ -219,7 +234,30 @@
 }
 
 .btn-primary {
-  @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold text-sm transition-all duration-200 hover:bg-green-600 hover:shadow-[0_6px_20px_-4px_rgba(34,197,94,0.45)] active:scale-[0.98];
+  @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm uppercase tracking-wider transition-all duration-200 active:scale-[0.98];
+  background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px -4px rgb(34 197 94 / 0.45);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 24px -4px rgb(34 197 94 / 0.55);
+}
+
+.gradient-cta {
+  background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
+  @apply text-white font-bold uppercase tracking-wider;
+}
+
+.card-border {
+  @apply border border-border;
+}
+
+.section-py {
+  @apply py-section-py-mobile md:py-section-py-desktop;
+}
+
+.funnel-input {
+  @apply w-full bg-card border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20;
 }
 
 .glass-card {
@@ -461,56 +499,7 @@
   background-color: rgb(var(--surface-tint) / 0.25);
 }
 
-@keyframes scurryLeft {
-  0% { transform: rotate(0deg) translateY(0); }
-  100% { transform: rotate(15deg) translateY(-2px); }
-}
-
-@keyframes scurryRight {
-  0% { transform: rotate(0deg) translateY(0); }
-  100% { transform: rotate(-15deg) translateY(2px); }
-}
-
-@keyframes spiderSquish {
-  0%   { transform: scale(1, 1); }
-  15%  { transform: scale(1.6, 0.4) translateY(12px); opacity: 0.6; }
-  60%  { transform: scale(1.6, 0.4) translateY(12px); opacity: 0.6; }
-  100% { transform: scale(1, 1) translateY(0); opacity: 1; }
-}
-
-@keyframes particleBurst {
-  0% {
-    transform: rotate(var(--angle)) translateX(0px) scale(1);
-    opacity: 1;
-    background: #4ade80;
-  }
-  100% {
-    transform: rotate(var(--angle)) translateX(30px) scale(0);
-    opacity: 0;
-    background: #22c55e;
-  }
-}
-
-.animate-spider-scurry-left {
-  animation: scurryLeft 0.15s infinite alternate linear;
-}
-
-.animate-spider-scurry-right {
-  animation: scurryRight 0.15s infinite alternate linear;
-}
-
-.animate-spider-squish {
-  animation: spiderSquish 0.6s ease-out forwards;
-}
-
-.animate-particle-burst {
-  animation: particleBurst 0.6s ease-out forwards;
-}
-
-/* ─── Animated rotating gradient border ────────────────────────────────────
-   Used by the ContactForm submit button. Moved from inline <style> to
-   globals.css so the browser doesn't recalc styles on every render.
-──────────────────────────────────────────────────────────────────────────── */
+/* ─── Animated rotating gradient border (ContactForm submit) ─────────── */
 @property --angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -519,5 +508,69 @@
 
 @keyframes spin-border {
   to { --angle: 360deg; }
+}
+
+/* ─── Editorial bleed (desktop only) ────────────────────────────────────
+   Extends photography from a centered container to the viewport edge.
+   Parent sections should use overflow-hidden to clip rounded corners.
+──────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  @media (min-width: 1024px) {
+    .bleed-right {
+      width: 52vw;
+      max-width: none;
+      margin-right: calc(50% - 50vw);
+    }
+
+    .bleed-left {
+      width: min(52vw, 720px);
+      max-width: none;
+      margin-left: calc(50% - 50vw);
+    }
+
+    .bleed-accent-left {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 35vw;
+      max-width: none;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-mask-image: linear-gradient(to right, rgb(0 0 0 / 0.55) 25%, transparent 92%);
+      mask-image: linear-gradient(to right, rgb(0 0 0 / 0.55) 25%, transparent 92%);
+    }
+
+    .bleed-accent-right {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 35vw;
+      max-width: none;
+      pointer-events: none;
+      z-index: 0;
+      -webkit-mask-image: linear-gradient(to left, rgb(0 0 0 / 0.55) 25%, transparent 92%);
+      mask-image: linear-gradient(to left, rgb(0 0 0 / 0.55) 25%, transparent 92%);
+    }
+  }
+}
+
+/* Hide scrollbar while keeping scroll (carousels, chat chips) */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Respect reduced motion for entrance animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 

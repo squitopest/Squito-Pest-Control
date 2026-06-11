@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  ArrowLeft,
   Check,
   Shield,
   Star,
@@ -15,8 +17,8 @@ import {
   AlertTriangle,
   Loader2,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
-import Footer from "@/components/Footer/Footer";
 import {
   DEFAULT_PROPERTY_SIZE,
   getPropertySizeConfig,
@@ -24,6 +26,7 @@ import {
   type PropertySize,
 } from "@/data/plans";
 import BookingWizard from "@/components/BookingWizard/BookingWizard";
+import { BUNDLE_DISCOUNT_PERCENT } from "@/lib/bundleOffers";
 
 
 
@@ -58,7 +61,7 @@ const faqs = [
   },
   {
     q: "What happens if pests come back between visits?",
-    a: "We come back — for free. All plans include unlimited re-service calls if covered pests return between your scheduled treatments. Just call or submit a request online.",
+    a: "We come back for free. All plans include unlimited re-service calls if covered pests return between your scheduled treatments. Just call or submit a request online.",
   },
   {
     q: "Are your treatments safe for pets and children?",
@@ -70,7 +73,7 @@ const faqs = [
   },
   {
     q: "Do you service commercial properties?",
-    a: "Yes — all plans are available for both residential and light commercial properties. For larger commercial facilities, contact us for a custom quote.",
+    a: "Yes, all plans are available for both residential and light commercial properties. For larger commercial facilities, contact us for a custom quote.",
   },
   {
     q: "Can I switch plans after signing up?",
@@ -81,6 +84,9 @@ const faqs = [
 
 
 function PlansContentInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const bundleIntent = searchParams.get("intent") === "bundle";
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showContactForm, setShowContactForm] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -143,7 +149,7 @@ function PlansContentInner() {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-green-500/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="container mx-auto px-4 lg:px-8 max-w-5xl text-center relative z-10">
+        <div className="container mx-auto px-4 lg:px-8 max-w-5xl relative z-10">
           <AnimatePresence initial={false}>
             {wizardStep === 1 && (
               <motion.div
@@ -153,12 +159,18 @@ function PlansContentInner() {
                 exit={{ opacity: 0, y: -60 }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-8">
-                  <Shield size={14} /> Protection Plans
-                </div>
-                <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight leading-[1.05]">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-green-600 transition-colors mb-8"
+                >
+                  <ArrowLeft size={16} aria-hidden />
+                  Back
+                </button>
+                <div className="text-center">
+                <h1 className="text-5xl md:text-6xl font-display font-bold text-foreground mb-6 tracking-tight leading-[1.05]">
                   Get protected in{" "}
-                  <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">
+                  <span className="inline-flex flex-wrap justify-center gap-x-[0.25em] gradient-text">
                     {["3", "easy", "steps."].map((word, i) => (
                       <motion.span
                         key={word}
@@ -176,10 +188,17 @@ function PlansContentInner() {
                     ))}
                   </span>
                 </h1>
-                <p className="text-xl text-white/60 max-w-2xl mx-auto mb-12 leading-relaxed">
+                <p className="text-xl text-muted max-w-2xl mx-auto mb-6 leading-relaxed">
                   Enter your address, pick the plan that fits, and you&apos;re covered.
                   Every plan includes free re-service, no contracts, and the Squito guarantee.
                 </p>
+                {bundleIntent && (
+                  <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-green-700 mb-6">
+                    <Sparkles size={16} aria-hidden />
+                    Bundle selected — save {BUNDLE_DISCOUNT_PERCENT}% on mosquito &amp; tick at checkout
+                  </div>
+                )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -189,18 +208,18 @@ function PlansContentInner() {
       {/* ── 3-Step Booking Wizard ── */}
       <section className={wizardStep === 1 ? "pb-24" : "pb-24 pt-0"}>
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-          <BookingWizard onStepChange={handleStepChange} />
+          <BookingWizard onStepChange={handleStepChange} bundleIntent={bundleIntent} />
         </div>
       </section>
 
 
 
       {/* ── Best For + Pests Covered ── */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-24 border-t border-border">
         <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-display font-bold text-white mb-4">Plan Deep Dive</h2>
-            <p className="text-white/50 text-lg">
+            <h2 className="text-4xl font-display font-bold text-foreground mb-4">Plan Deep Dive</h2>
+            <p className="text-muted text-lg">
               See exactly who each plan is built for and what pests it covers.
             </p>
           </div>
@@ -217,19 +236,19 @@ function PlansContentInner() {
               const accentBg = isGreen ? "bg-green-500/10 border-green-500/20" : isAmber ? "bg-amber-500/10 border-amber-500/20" : "bg-tint-5 border-tint-10";
 
               return (
-                <div key={plan.id} className="rounded-3xl bg-card/30 border border-white/8 p-8 flex flex-col gap-8">
+                <div key={plan.id} className="rounded-3xl bg-card/30 border border-border p-8 flex flex-col gap-8">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accentBg} border`}>
                       <Icon size={20} className={accentText} />
                     </div>
-                    <h3 className="font-display font-bold text-white text-lg">{pricing.plan.shortName}</h3>
+                    <h3 className="font-display font-bold text-foreground text-lg">{pricing.plan.shortName}</h3>
                   </div>
 
                   <div>
                     <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${accentText}`}>Best For</p>
                     <ul className="flex flex-col gap-2">
                       {plan.bestFor.map((item) => (
-                        <li key={item} className="flex items-center gap-2 text-base text-white/75">
+                        <li key={item} className="flex items-center gap-2 text-base text-muted">
                           <Leaf size={14} className={accentText} />
                           {item}
                         </li>
@@ -255,11 +274,11 @@ function PlansContentInner() {
       </section>
 
       {/* ── Guarantees Strip ── */}
-      <section className="py-16 border-t border-white/5">
+      <section className="py-16 border-t border-border">
         <div className="container mx-auto px-4 lg:px-8 max-w-5xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: BadgeCheck, title: "100% Satisfaction Guarantee", desc: "If you're not happy after your first service, we'll refund your first month — no questions asked." },
+              { icon: BadgeCheck, title: "100% Satisfaction Guarantee", desc: "If you're not happy after your first service, we'll refund your first month, no questions asked." },
               { icon: AlertTriangle, title: "Free Re-Service Promise", desc: "If covered pests return between scheduled visits, we come back at no charge. Every single time." },
               { icon: Clock, title: "No Contracts. Ever.", desc: "Cancel anytime with zero fees. We earn your business every month through results, not fine print." },
             ].map(({ icon: Icon, title, desc }) => (
@@ -268,8 +287,8 @@ function PlansContentInner() {
                   <Icon size={20} className="text-green-400" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white mb-1">{title}</h3>
-                  <p className="text-sm text-white/55 leading-relaxed">{desc}</p>
+                  <h3 className="font-bold text-foreground mb-1">{title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -278,17 +297,17 @@ function PlansContentInner() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-24 border-t border-border">
         <div className="container mx-auto px-4 lg:px-8 max-w-3xl">
           <div className="text-center mb-14">
-            <h2 className="text-4xl font-display font-bold text-white mb-4">Common Questions</h2>
-            <p className="text-white/50">Everything you need to know before you book.</p>
+            <h2 className="text-4xl font-display font-bold text-foreground mb-4">Common Questions</h2>
+            <p className="text-muted">Everything you need to know before you book.</p>
           </div>
           <div className="flex flex-col gap-3">
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-white/8 bg-card/30 overflow-hidden transition-all duration-300"
+                className="rounded-2xl border border-border bg-card/30 overflow-hidden transition-all duration-300"
               >
                 <button
                   type="button"
@@ -296,14 +315,14 @@ function PlansContentInner() {
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left group"
                 >
-                  <span className="font-semibold text-white/90 group-hover:text-white transition-colors">{faq.q}</span>
+                  <span className="font-semibold text-foreground/90 group-hover:text-foreground transition-colors">{faq.q}</span>
                   <ChevronDown
                     size={18}
-                    className={`flex-shrink-0 text-white/40 transition-transform duration-300 ${openFaq === i ? "rotate-180 text-green-400" : ""}`}
+                    className={`flex-shrink-0 text-muted transition-transform duration-300 ${openFaq === i ? "rotate-180 text-green-400" : ""}`}
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5 text-white/65 text-base leading-relaxed border-t border-white/5 pt-4">
+                  <div className="px-6 pb-5 text-muted text-base leading-relaxed border-t border-border pt-4">
                     {faq.a}
                   </div>
                 )}
@@ -314,21 +333,21 @@ function PlansContentInner() {
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-24 border-t border-border">
         <div className="container mx-auto px-4 lg:px-8 max-w-3xl text-center">
-          <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-6">
+          <h2 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-6">
             Not sure which plan?<br />
             <span className="bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent">Just call us.</span>
           </h2>
-          <p className="text-white/55 text-lg mb-10">
-            Our team will assess your home and recommend the right plan — always free of charge, never high pressure.
+          <p className="text-muted text-lg mb-10">
+            Our team will assess your home and recommend the right plan. Always free of charge, never high pressure.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 w-full max-w-lg mx-auto">
             {!showContactForm ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
                 <a
                   href="tel:6312031000"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-green-500 hover:bg-green-400 text-white font-bold text-lg transition-all hover:shadow-[0_0_40px_rgba(34,197,94,0.5)] group"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-green-500 hover:bg-green-400 text-foreground font-bold text-lg transition-all hover:shadow-[0_0_40px_rgba(34,197,94,0.5)] group"
                 >
                   <Phone size={20} />
                   (631) 203-1000
@@ -336,7 +355,7 @@ function PlansContentInner() {
                 <button
                   type="button"
                   onClick={() => setShowContactForm(true)}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold transition-all group"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-border bg-muted/50 hover:bg-muted text-foreground font-semibold transition-all group"
                 >
                   Or send us a message <ChevronDown size={18} className="group-hover:translate-y-1 transition-transform" />
                 </button>
@@ -348,17 +367,17 @@ function PlansContentInner() {
                     <div className="w-16 h-16 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center">
                       <CheckCircle2 size={32} />
                     </div>
-                    <span className="font-bold text-white text-lg">Message Sent!</span>
-                    <span className="text-white/60 text-sm">We'll get back to you shortly.</span>
+                    <span className="font-bold text-foreground text-lg">Message Sent!</span>
+                    <span className="text-muted text-sm">We'll get back to you shortly.</span>
                   </div>
                 ) : (
                   <>
-                    <h4 className="text-xl font-bold text-white mb-2">How can we help?</h4>
+                    <h4 className="text-xl font-bold text-foreground mb-2">How can we help?</h4>
                     <input
                       type="text"
                       required
                       placeholder="Your Full Name"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50"
+                      className="funnel-input"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
@@ -366,7 +385,7 @@ function PlansContentInner() {
                       type="email"
                       required
                       placeholder="Your Email Address"
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50"
+                      className="funnel-input"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
@@ -374,7 +393,7 @@ function PlansContentInner() {
                       required
                       rows={3}
                       placeholder="Write your message here..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-green-500/50 resize-none"
+                      className="funnel-input resize-none"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     />
@@ -385,14 +404,14 @@ function PlansContentInner() {
                       <button 
                         type="button" 
                         onClick={() => setShowContactForm(false)} 
-                        className="flex-1 py-3 rounded-xl border border-white/10 text-white/70 hover:bg-white/5 transition-colors font-semibold"
+                        className="flex-1 py-3 rounded-xl border border-border text-muted hover:bg-muted/50 transition-colors font-semibold"
                       >
                         Cancel
                       </button>
                       <button 
                         type="submit" 
                         disabled={formStatus === "loading"}
-                        className="flex-[2] py-3 rounded-xl bg-green-500 text-white font-bold hover:bg-green-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="flex-[2] py-3 rounded-xl bg-green-500 text-foreground font-bold hover:bg-green-400 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         {formStatus === "loading" ? <Loader2 size={18} className="animate-spin" /> : "Send Now"}
                       </button>
@@ -404,8 +423,6 @@ function PlansContentInner() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </main>
   );
 }
@@ -414,7 +431,7 @@ export default function PlansContent() {
   return (
     <Suspense fallback={
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-white/50">Loading Plans...</p>
+        <p className="text-muted">Loading Plans...</p>
       </main>
     }>
       <PlansContentInner />

@@ -1,6 +1,8 @@
+import Image from "next/image";
 import { Info, ArrowRight, Shield, Clock, Leaf, Award, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { createPageMetadata } from "@/lib/site";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
 
 export const metadata = createPageMetadata({
   title: "About Us | Squito Pest Control",
@@ -22,17 +24,17 @@ const values = [
   {
     icon: Leaf,
     title: "Pet & Family Safe",
-    description: "We use organic, pet-friendly compounds that target pests where they live — not your living room. Safe for kids and pets within 30 minutes of treatment.",
+    description: "We use organic, pet-friendly compounds that target pests where they live, not your living room. Safe for kids and pets within 30 minutes of treatment.",
   },
   {
     icon: Clock,
     title: "Same-Day Response",
-    description: "Call before noon and we'll be there today. No automated phone trees — you reach a real local technician who knows your neighborhood.",
+    description: "Call before noon and we'll be there today. No automated phone trees. You reach a real local technician who knows your neighborhood.",
   },
   {
     icon: Shield,
     title: "Guaranteed Results",
-    description: "If pests return between treatments, so do we — at no extra charge. We stand behind every job until the problem is fully resolved.",
+    description: "If pests return between treatments, so do we, at no extra charge. We stand behind every job until the problem is fully resolved.",
   },
   {
     icon: MapPin,
@@ -68,13 +70,13 @@ export default function AboutPage() {
             </h1>
             <div className="space-y-5 text-lg text-white/70 leading-relaxed">
               <p>
-                Squito was started by someone who grew up on Long Island, works on Long Island, and knows exactly what pests show up — and when. With over 6 years of hands-on field experience, I started Squito because I believed homeowners deserved better than long wait times, vague pricing, and technicians who've never seen your neighborhood.
+                Squito was started by someone who grew up on Long Island, works on Long Island, and knows exactly what pests show up and when. With over 6 years of hands-on field experience, I started Squito because I believed homeowners deserved better than long wait times, vague pricing, and technicians who've never seen your neighborhood.
               </p>
               <p>
                 We're not a franchise. We don't send a different person every visit. When you call Squito, you get a local expert who knows how ant pressure spikes in Nassau every April, how termite season hits Suffolk hard in the spring, and where mosquitoes breed in your specific zip code.
               </p>
               <p>
-                Every treatment is tailored to your property and the season you're in. We use products that are safe for your family and pets — and we don't leave until the job is done right.
+                Every treatment is tailored to your property and the season you're in. We use products that are safe for your family and pets, and we don't leave until the job is done right.
               </p>
             </div>
 
@@ -105,10 +107,12 @@ export default function AboutPage() {
                 switched to the token-aware `border-border` so the image sits
                 clean without a washed-out bottom. */}
             <div className="relative w-full aspect-[4/5] md:aspect-square lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-border">
-              <img
-                src="/about-us-action.jpg"
-                alt="Squito Pest Control Technician"
-                className="w-full h-full object-cover object-center"
+              <Image
+                src={COMPANY_PHOTOS.about}
+                alt="Squito technician treating home eaves on Long Island"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
               />
             </div>
           </div>
@@ -133,6 +137,43 @@ export default function AboutPage() {
                 {cert}
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Team */}
+        <div className="grid grid-cols-3 gap-4 animate-fade-in-up">
+          {["team-portrait-1.png", "team-portrait-2.png", "team-portrait-3.png"].map((file) => (
+            <div key={file} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-border">
+              <Image
+                src={`/team/${file}`}
+                alt="Squito Pest Control team member"
+                fill
+                sizes="(max-width: 768px) 33vw, 240px"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Fleet */}
+        <div className="grid md:grid-cols-2 gap-6 animate-fade-in-up">
+          <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-border">
+            <Image
+              src={COMPANY_PHOTOS.commercialCrossSell}
+              alt="Squito branded service truck on Long Island"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-border">
+            <Image
+              src="/team/technician-thumbs-up.png"
+              alt="Squito technician ready to serve your property"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover object-top"
+            />
           </div>
         </div>
 
@@ -174,7 +215,7 @@ export default function AboutPage() {
               Proudly Serving <span className="gradient-text">All of Long Island</span>
             </h2>
             <p className="text-white/60 text-lg mb-8 leading-relaxed">
-              From the North Shore to the South Shore, Nassau to the Hamptons — if you&apos;re on Long Island, we&apos;ve got you covered. Same-day service available across Nassau and Suffolk County.
+              From the North Shore to the South Shore, Nassau to the Hamptons. If you&apos;re on Long Island, we&apos;ve got you covered. Same-day service available across Nassau and Suffolk County.
             </p>
             <Link href="/#service-area" className="btn-primary inline-flex items-center gap-2">
               Check Your Area <ArrowRight size={18} />

@@ -5,7 +5,7 @@ import { createPageMetadata } from "@/lib/site";
 export const metadata: Metadata = createPageMetadata({
   title: "Pest Control Plans & Pricing on Long Island | Squito Pest Control",
   description:
-    "Transparent monthly and yearly pest control plans for Long Island homes — Essential Defense, Premium Shield, and Ultimate Fortress. 100% satisfaction guarantee, no long-term contracts.",
+    "Transparent monthly and yearly pest control plans for Long Island homes: Essential Defense, Premium Shield, and Ultimate Fortress. 100% satisfaction guarantee, no long-term contracts.",
   path: "/plans",
 });
 

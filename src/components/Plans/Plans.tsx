@@ -35,7 +35,7 @@ const plans = [
   },
   {
     id: "premium-shield",
-    desc: "Most popular — full protection, inside and out.",
+    desc: "Most popular. Full protection, inside and out.",
     icon: Star,
     features: [
       "Quarterly interior & exterior treatments",
@@ -53,7 +53,7 @@ const plans = [
   },
   {
     id: "ultimate-fortress",
-    desc: "Total coverage — yard, interior, and everything in between.",
+    desc: "Total coverage: yard, interior, and everything in between.",
     icon: Zap,
     features: [
       "Everything in Premium Shield",

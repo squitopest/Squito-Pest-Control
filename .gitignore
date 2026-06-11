@@ -57,3 +57,10 @@ scripts/audit*.mjs
 scripts/peek-csv.mjs
 scripts/check-properties.mjs
 scripts/fix-mt.mjs
+
+# Local design scratch (Stitch prompts, HTML exports)
+docs/design/
+
+# Python bytecode from local skill scripts
+**/__pycache__/
+*.pyc

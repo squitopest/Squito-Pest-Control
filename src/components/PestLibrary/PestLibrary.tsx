@@ -6,6 +6,7 @@ import NextImage from "next/image";
 import Link from "next/link";
 import { PESTS, CATEGORIES, RISK_META, type Pest, type PestCategory } from "@/data/pests";
 import PestIdentifyCapture, { type PestIdentifyCaptureHandle } from "./PestIdentifyCapture";
+import { getPestModalSigns, getPestModalSummary } from "@/lib/pestModalContent";
 import { useModalDismiss } from "@/lib/useModalDismiss";
 
 export default function PestLibrary() {
@@ -52,7 +53,7 @@ export default function PestLibrary() {
               <span className="gradient-text">Pest Library</span>
             </h1>
             <p className="text-white/60 max-w-xl text-sm md:text-base mb-6">
-              The 28 most common species found on Long Island — we treat hundreds more. Tap any pest for our expert treatment profile.
+              The 28 most common species found on Long Island. We treat hundreds more. Tap any pest for our expert treatment profile.
             </p>
 
             {/* Snap & Identify */}
@@ -163,74 +164,48 @@ export default function PestLibrary() {
           className="fixed inset-0 z-[9999] bg-background/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in-up overflow-y-auto"
           onClick={e => e.target === e.currentTarget && closeModal()}
         >
-          <div className="bg-surface border border-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[95vh] my-auto">
-            <div className="w-full md:w-2/5 h-56 md:h-auto shrink-0 border-b md:border-b-0 md:border-r border-border relative overflow-hidden">
-              <NextImage src={selected.image} alt={selected.name} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 md:from-background/40 to-transparent" />
+          <div className="bg-surface border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
+            <div className="relative flex items-center justify-center bg-muted/30 border-b border-border px-6 py-5 min-h-[9rem]">
+              <NextImage
+                src={selected.image}
+                alt={selected.name}
+                width={280}
+                height={200}
+                className="max-h-28 sm:max-h-32 w-auto object-contain"
+                sizes="280px"
+              />
               <span className={`absolute top-4 left-4 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded border backdrop-blur-md ${RISK_META[selected.risk].badge}`}>
                 <span className={`w-2 h-2 rounded-full shrink-0 ${RISK_META[selected.risk].dot}`} />
                 {selected.risk}
               </span>
+              <button ref={modalCloseRef} type="button" onClick={closeModal} aria-label="Close pest details" className="absolute top-4 right-4 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-all">
+                <X size={20} />
+              </button>
             </div>
-            <div className="p-6 md:p-8 flex-1 overflow-y-auto">
-              <div className="flex justify-between items-start mb-1">
-                <div>
-                  <h3 id="pest-modal-title" className="text-2xl md:text-3xl font-display font-bold text-white">{selected.name}</h3>
-                  <p className="text-white/40 text-sm italic mt-0.5">{selected.scientificName}</p>
-                </div>
-                <button ref={modalCloseRef} type="button" onClick={closeModal} aria-label="Close pest details" className="text-white/40 hover:text-white bg-white/5 hover:bg-white/10 p-3 md:p-2 rounded-full transition-all shrink-0 ml-4">
-                  <X size={20} />
-                </button>
+            <div className="p-6 flex-1 overflow-y-auto">
+              <h3 id="pest-modal-title" className="text-2xl font-display font-bold text-white">{selected.name}</h3>
+              <p className="text-white/40 text-sm italic mt-0.5">{selected.scientificName}</p>
+              <p className="text-white/50 text-xs mt-3">
+                <span className="font-semibold uppercase tracking-wider text-green-400">Active season · </span>
+                {selected.season}
+              </p>
+              <p className="text-white/75 leading-relaxed text-sm mt-4">{getPestModalSummary(selected)}</p>
+              <div className="mt-5">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">What to watch for</h4>
+                <ul className="space-y-1.5">
+                  {getPestModalSigns(selected).map((sign, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-white/70">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 mt-1.5" />
+                      {sign}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="space-y-5 mt-5">
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1.5">Active Season</h4>
-                  <p className="text-white/80 font-medium text-sm">{selected.season}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1.5">Overview</h4>
-                  <p className="text-white/70 leading-relaxed text-sm">{selected.overview}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1.5">Danger to Your Family</h4>
-                  <p className="text-white/70 leading-relaxed text-sm">{selected.dangerToFamily}</p>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">Warning Signs</h4>
-                  <ul className="space-y-1.5">
-                    {selected.signs.map((sign, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-white/70">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 mt-1.5" />
-                        {sign}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">Prevention Tips</h4>
-                  <ul className="space-y-1.5">
-                    {selected.preventionTips.map((tip, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-white/70">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 mt-1.5" />
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1.5">Life Cycle</h4>
-                  <p className="text-white/70 leading-relaxed text-sm">{selected.lifeCycle}</p>
-                </div>
-                <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-1.5">⚡ Did You Know?</h4>
-                  <p className="text-white/70 text-sm leading-relaxed">{selected.funFact}</p>
-                </div>
-              </div>
-              <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
-                <Link href="/plans" className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] text-sm w-full">
+              <div className="mt-6 flex flex-col sm:flex-row items-stretch gap-3">
+                <Link href="/plans" className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl transition-all hover:shadow-[0_0_25px_rgba(34,197,94,0.3)] text-sm">
                   View Plans <ArrowRight size={16} />
                 </Link>
-                <Link href="/#contact" onClick={() => setSelected(null)} className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 text-white font-semibold rounded-xl transition-all text-sm w-full">
+                <Link href="/#contact" onClick={() => setSelected(null)} className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 border border-white/10 hover:border-green-500/50 hover:bg-green-500/10 text-white font-semibold rounded-xl transition-all text-sm">
                   Get Free Inspection
                 </Link>
               </div>

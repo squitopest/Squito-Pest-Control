@@ -9,6 +9,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { createPageMetadata } from "@/lib/site";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
 import MosquitoTickPackageSelector from "@/components/MosquitoTick/MosquitoTickPackageSelector";
 
 export const revalidate = 86400;
@@ -16,7 +17,7 @@ export const revalidate = 86400;
 export const metadata = createPageMetadata({
   title: "Mosquito & Tick Packages on Long Island | Squito Pest Control",
   description:
-    "Season-long mosquito and tick protection for Long Island homes. Monthly billing April through October only — no initial fees and cancel anytime.",
+    "Season-long mosquito and tick protection for Long Island homes. Monthly billing April through October only. No initial fees and cancel anytime.",
   path: "/services/mosquito-tick",
 });
 
@@ -37,7 +38,7 @@ function getCurrentSeasonLabel(date = new Date()): string {
 const whatsIncluded = [
   "Monthly barrier treatment across your yard's active zones",
   "Focused treatment of known tick harborage: woodline, tall grass, leaf litter, stone walls",
-  "Pollinator-conscious timing — we avoid flowering plants during active bee hours",
+  "Pollinator-conscious timing: we avoid flowering plants during active bee hours",
   "Pet-friendly and family-safe once treated areas are dry",
   "Free re-treatment between visits if activity returns",
   "Digital service report delivered after every visit",
@@ -46,7 +47,7 @@ const whatsIncluded = [
 const whyItMatters = [
   {
     title: "Long Island is tick country",
-    body: "Suffolk and Nassau counties sit inside one of the highest Lyme-disease pressure zones in the Northeast. Ticks thrive in wooded edges, tall grass, and leaf piles — exactly the places kids and pets spend their summer.",
+    body: "Suffolk and Nassau counties sit inside one of the highest Lyme-disease pressure zones in the Northeast. Ticks thrive in wooded edges, tall grass, and leaf piles, exactly the places kids and pets spend their summer.",
   },
   {
     title: "Mosquitoes aren't just annoying",
@@ -99,13 +100,19 @@ export default function MosquitoTickPage() {
         <section className="on-photo relative overflow-hidden rounded-[2rem] border border-white/10 mb-10 min-h-[560px] md:min-h-[620px]">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url(/services/mosquito-tick-hero-backyard.webp)" }}
+            style={{ backgroundImage: `url(${COMPANY_PHOTOS.mosquitoTickHero})` }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
           <div className="relative z-10 p-8 md:p-12 lg:p-16">
             <div className="max-w-3xl">
+              <Link
+                href="/get-started"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 hover:text-white transition-colors mb-6 on-photo"
+              >
+                ← Change service type
+              </Link>
               <div className="flex flex-wrap items-center gap-3 mb-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-green-500/30 bg-green-500/10 px-4 py-1.5 text-sm font-semibold uppercase tracking-wider text-green-400">
                   <ShieldCheck size={14} />
@@ -128,18 +135,10 @@ export default function MosquitoTickPage() {
                 <br />
                 <span className="gradient-text">Built for Long Island</span>
               </h1>
-              <p className="text-xl text-white/70 leading-relaxed mb-8 max-w-2xl">
+              <p className="text-xl text-white/70 leading-relaxed max-w-2xl">
                 Monthly barrier treatments across your yard from April through October. Clear pricing,
                 no initial fees, and you&apos;re only billed during active months.
               </p>
-
-              <Link
-                href="#packages"
-                className="inline-flex items-center gap-2 rounded-2xl bg-green-500 px-6 py-4 text-base font-display font-bold text-white transition-colors hover:bg-green-400"
-              >
-                Get Started
-                <ArrowRight size={18} />
-              </Link>
             </div>
           </div>
         </section>
@@ -280,7 +279,7 @@ export default function MosquitoTickPage() {
               </h2>
               <p className="text-lg text-white/75 leading-relaxed mb-8">
                 {inSeason
-                  ? "Pick your yard size and the first treatment is just a few steps away — get your yard back in time for dinner outside."
+                  ? "Pick your yard size and the first treatment is just a few steps away. Get your yard back in time for dinner outside."
                   : "Reserve your spot now so service begins the moment the April window opens. Come spring, your yard is already protected."}
               </p>
               <div className="flex flex-wrap justify-center gap-3">

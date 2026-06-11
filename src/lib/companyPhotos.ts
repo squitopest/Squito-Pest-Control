@@ -1,0 +1,22 @@
+/** Real Squito team & field photos (public/team, public/company) */
+export const COMPANY_PHOTOS = {
+  heroDesktop: "/team/technician-branded.jpg",
+  heroMobilePoster: "/team/yard-treatment-wide.jpg",
+  brandStory: "/team/community-event.png",
+  contact: "/team/technician-thumbs-up.png",
+  guarantee: "/company/squito-guarantee-badge.png",
+  about: "/team/eave-treatment.jpg",
+  residential: "/team/perimeter-door-treatment.jpg",
+  mosquitoTickHero: "/team/backyard-bush-treatment.png",
+  commercial: "/company/truck-driveway-equipment.png",
+  commercialCrossSell: "/company/truck-street.png",
+  commercialWarehouseTeam: "/services/service_commercial_bg_v2.webp",
+  serviceCobweb: "/team/cobweb-eave-brush.jpg",
+  serviceLawn: "/team/lawn-perimeter-spray.jpg",
+  serviceStoneWall: "/team/stone-wall-treatment.png",
+  serviceBackyardFogging: "/team/backyard-tree-fogging.png",
+  serviceEaveReach: "/team/eave-reach-treatment.png",
+  getStartedGeneralPest: "/team/perimeter-door-treatment.jpg",
+  getStartedMosquitoTick: "/team/backyard-tree-fogging.png",
+  getStartedBundle: "/team/yard-treatment-wide.jpg",
+} as const;

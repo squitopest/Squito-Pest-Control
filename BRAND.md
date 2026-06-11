@@ -49,20 +49,23 @@ Three words that describe Squito as a person:
 
 ## Colors
 
-| Token | Hex | Use |
-|---|---|---|
-| Background | `#0a0a0a` | Page background — pure near-black, no green tint |
-| Surface / Card | `#121212` | Cards, panels, sidebars |
-| Border | `#212121` | All dividers and card borders |
-| **Green 500** | `#22c55e` | Primary brand accent — buttons, icons, highlights |
-| **Green 400** | `#4ade80` | Gradient text, hover states |
-| Green 600 | `#16a34a` | Active/pressed states |
-| Off-white | `#f5f5f0` | Premium text accent, not used heavily |
+**Production default:** Light theme (`data-theme="light"` in `src/app/layout.tsx`) — warm sand page (`#ece3d2`), white cards, near-black text. Dark theme tokens remain in `globals.css` for hero/video overlays (`.on-photo`) and future use.
+
+| Token | Light (default) | Dark (alternate) | Use |
+|---|---|---|---|
+| Background | `#ece3d2` | `#0a0a0a` | Page background — neutral, no green tint |
+| Surface / Card | `#ffffff` | `#121212` | Cards, panels, sidebars |
+| Border | warm gray | `#212121` | All dividers and card borders |
+| **Green 500** | `#22c55e` | `#22c55e` | Primary brand accent — buttons, icons, highlights |
+| **Green 400** | `#4ade80` | `#4ade80` | Gradient text, hover states |
+| Green 600 | `#16a34a` | `#16a34a` | Active/pressed states |
+| Off-white | `#f5f5f0` | `#f5f5f0` | Premium text accent on dark overlays |
 
 **Rules:**
 - Green is reserved for **accent only** — CTAs, icons, labels. Don't use it as a background fill.
-- Background surfaces stay neutral (black/dark gray). The green pops because everything else doesn't compete.
+- Background surfaces stay neutral (cream/white on light, near-black on dark). The green pops because everything else doesn't compete.
 - Never use a green-tinted background. That's what made the site look "tech AI."
+- On photo/video hero sections, use the `.on-photo` wrapper so white text stays legible regardless of theme.
 
 ---
 
@@ -136,16 +139,31 @@ Avoid excessive `backdrop-blur` — it looks AI-generated.
 
 Real photos are the #1 brand asset. Always prefer a real photo over a gradient or illustration.
 
-**Available real photos:**
-- `/public/team-action.jpg` — technician on the job (hero, about)
-- `/public/about-us-action.jpg` — technician close-up (about page right panel)
-- `/public/reviews_bg.jpg` — background for reviews section
+**Canonical registry:** `src/lib/companyPhotos.ts` — import `COMPANY_PHOTOS` instead of hardcoding paths.
+
+| Key | Path | Typical use |
+|---|---|---|
+| `heroDesktop` | `/team/technician-branded.jpg` | Hero video poster (desktop) |
+| `heroMobilePoster` | `/team/yard-treatment-wide.jpg` | Hero video poster (mobile) |
+| `about` | `/team/eave-treatment.jpg` | About, reviews bleed image |
+| `contact` | `/team/technician-thumbs-up.png` | Contact form, promo popup |
+| `brandStory` | `/team/community-event.png` | Brand story / parallax |
+| `guarantee` | `/company/squito-guarantee-badge.png` | Guarantee panel |
+| `commercial` | `/company/truck-driveway-equipment.png` | Commercial pages |
+| `commercialCrossSell` | `/company/truck-street.png` | Parallax collage |
+| `residential` | `/team/perimeter-door-treatment.jpg` | Residential |
+| `mosquitoTickHero` | `/team/backyard-bush-treatment.png` | Mosquito & tick |
+| `serviceCobweb` … `serviceEaveReach` | `/team/*` | Pest intent, services |
+| `getStartedGeneralPest` / `getStartedMosquitoTick` / `getStartedBundle` | `/team/*` | `/get-started` cards |
+
+**Legacy paths still in use:** `/team-action.jpg` (privacy/terms), `/about-us-action.jpg` (about panel).
 
 **Rules:**
 - Hero section must show a real person or real job site
 - Never use stock photos of generic exterminators
-- Real photos go with a dark gradient overlay so text stays readable
-- Alt text should always describe what's actually happening: "Squito technician treating a Long Island backyard" not "pest control worker"
+- On photo/video overlays, use `.on-photo` or a dark gradient so text stays readable
+- Alt text should describe what's actually happening: "Squito technician treating a Long Island backyard" not "pest control worker"
+- Reproduce assets from source files via `scripts/copy-team-photos.mjs` when adding new team shots
 
 ---
 
@@ -160,6 +178,35 @@ For section depth, use the glow orb utility classes:
 ```
 
 Keep glow orbs subtle — `opacity-60` or less. They add depth without drama.
+
+---
+
+## Homepage Layout (live)
+
+**Primary CTA path:** `Get Protected` → `/get-started` → user picks General Pest or Mosquito & Tick → existing booking flows (`src/lib/pestRouting.ts`).
+
+**Section order** (`src/app/page.tsx`):
+1. Hero — full-bleed video, centered white copy, dual CTAs, trust band, town/zip lookup, Pest Identifier hook
+2. Pest Intent — "What's bugging you?" feature grid + lawn photo
+3. CTA band — free inspection
+4. Reviews — sticky card stack (desktop + mobile), platform links, bleed photo (desktop)
+5. Plans teaser — carousel (mobile) / grid (desktop)
+6. CTA band — get started
+7. Service Area — town/zip lookup
+8. Home parallax — zoom collage + Commercial / Guarantee / Brand story panels (`#guarantee`)
+9. Contact form
+
+**Footer:** global in `src/app/layout.tsx` (not duplicated on homepage).
+
+**Removed from homepage (anti-template):**
+- PestTicker marquee
+- Standalone Stats section
+- Pest Library teaser (full library remains at `/pest-library`)
+- Hero glow orbs
+
+**Promo popup:** scroll-triggered; uses real team portrait photos from `/team/team-portrait-*.png`.
+
+**Local design scratch:** `docs/design/` (gitignored) — Stitch prompts only, not shipped.
 
 ---
 
@@ -184,4 +231,4 @@ Keep glow orbs subtle — `opacity-60` or less. They add depth without drama.
 
 ---
 
-*Last updated: April 2026*
+*Last updated: June 2026 — light theme is the live production default.*

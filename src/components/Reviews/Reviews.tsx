@@ -1,223 +1,253 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Star, Quote } from "lucide-react";
+import Image from "next/image";
+import { Star, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/useMediaQuery";
+import {
+  homepageReviews,
+  REVIEW_PLATFORMS,
+  type Review,
+  type ReviewPlatform,
+  type ReviewPlatformId,
+} from "@/data/reviews";
+import SectionBleedImage from "@/components/Home/SectionBleedImage";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
 
-const reviews = [
-  {
-    name: "Aleksis Knel",
-    location: "Google Review",
-    stars: 5,
-    text: "We called Squito yesterday after spotting a pest in our bathroom, and they were amazing! They came within just a few hours no nonsense, no trying to upsell things we didn't need. Straightforward, professional, and efficient. They took care of everything quickly and cleaned up after. Honestly such a relief and a great experience. Highly recommend! 👏",
-    date: "6 months ago",
-  },
-  {
-    name: "james turzer",
-    location: "Google Review",
-    stars: 5,
-    text: "My highest recommendation for Squito. He was fast, reasonably priced, and very professional. A perfect job well done.",
-    date: "6 months ago",
-  },
-  {
-    name: "Chris Sweeney",
-    location: "Google Review",
-    stars: 5,
-    text: "We had a hornets nest in a kitchen exhaust vent about 15 ft off the ground. Marc responded promptly and arrived as promised. He treated the exterior and the interior to insure he eliminated the hazard. He did a thorough job at a very reasonable price. Marc also gave us some pointers to keep them out. We would highly recommend him and wouldn't hesitate to use his company again.",
-    date: "6 months ago",
-  },
-  {
-    name: "Colleen Mckeever",
-    location: "Google Review",
-    stars: 5,
-    text: "I recently used Squito for a pest issue in my home, and I couldn't be happier with the service. From the first call, the customer service was professional and responsive. The technician, Mark was punctual, knowledgeable, and took the time to explain everything he was doing. What stood out most was that he used pet-safe products, which was a huge relief since I have two dogs at home.",
-    date: "10 months ago",
-  },
-  {
-    name: "ChelbyV D",
-    location: "Google Review",
-    stars: 5,
-    text: "We've been using Squito Pest Control for a while now, and we can't recommend Marc enough! Marc is incredibly reliable and always texts me a few minutes before arriving so I can get our two little yappers inside. With our dogs and chickens free-roaming, it's essential that only pet-safe treatments are used. Marc uses organic compounds in our yard, and it's clear he truly cares about the safety of our animals.",
-    date: "8 months ago",
-  },
-  {
-    name: "Tesha Dale",
-    location: "Google Review",
-    stars: 5,
-    text: "I had a great experience with Squito. The team was professional, punctual, and very thorough. They communicated clearly, explained what needed to be done, and followed through exactly as promised. What stood out most was the attention to detail and the friendly attitude. Everything was handled quickly and efficiently, and the results were even better than I expected. Pricing was fair and transparent.",
-    date: "7 months ago",
-  },
-];
+const STATS = [
+  { value: "5.0", label: "Google rating" },
+  { value: "100+", label: "Reviews" },
+  { value: "5+", label: "Years local" },
+] as const;
 
-export default function Reviews() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const posRef = useRef(0);
-  const frameRef = useRef<number>(0);
-  const sectionRef = useRef<HTMLElement>(null);
-  // Respect OS-level motion preference. Driven by useSyncExternalStore so we
-  // don't need to setState from inside the effect below.
-  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-
-  useEffect(() => {
-    const track = trackRef.current;
-    const section = sectionRef.current;
-    if (!track || !section) return;
-
-    if (reducedMotion) {
-      // Stop the rAF-driven translate and let the user scroll the row manually.
-      track.style.transform = "";
-      return;
-    }
-
-    // We assume items are triplicated: [1, 2, 3] -> [1,2,3, 1,2,3, 1,2,3]
-    const oneSetWidth = track.scrollWidth / 3;
-    posRef.current = oneSetWidth;
-
-    let isPaused = false;
-    let isVisible = false;
-    let isPageVisible = true;
-    const SPEED = 0.5;
-
-    const animate = () => {
-      if (!isVisible || !isPageVisible) return; // Don't schedule if off-screen or tab hidden
-
-      if (!isPaused) {
-        posRef.current -= SPEED;
-        if (posRef.current <= 0) {
-          posRef.current = oneSetWidth;
-        }
-        track.style.transform = `translateX(-${posRef.current}px)`;
-      }
-      frameRef.current = requestAnimationFrame(animate);
-    };
-
-    // Only animate when visible in viewport
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isVisible = entry.isIntersecting;
-        if (isVisible && isPageVisible) {
-          cancelAnimationFrame(frameRef.current);
-          frameRef.current = requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0 }
-    );
-    observer.observe(section);
-
-    // Pause when tab is hidden
-    const onVisibilityChange = () => {
-      isPageVisible = !document.hidden;
-      if (isPageVisible && isVisible) {
-        frameRef.current = requestAnimationFrame(animate);
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    const handleEnter = () => { isPaused = true; };
-    const handleLeave = () => { isPaused = false; };
-
-    track.addEventListener("mouseenter", handleEnter);
-    track.addEventListener("mouseleave", handleLeave);
-
-    return () => {
-      cancelAnimationFrame(frameRef.current);
-      observer.disconnect();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      track.removeEventListener("mouseenter", handleEnter);
-      track.removeEventListener("mouseleave", handleLeave);
-    };
-  }, [reducedMotion]);
-
-  const items = reducedMotion ? reviews : [...reviews, ...reviews, ...reviews];
-
+function GoogleIcon({ className }: { className?: string }) {
   return (
-    <section ref={sectionRef} className="py-24 overflow-hidden relative" id="reviews">
-      {/* Subtle gradient surface so the band reads distinct from the cream
-          page bg and white cards float instead of melting in. Dark-theme
-          reviews_bg photo is dimmed way down on light since it was tuned
-          for a black backdrop. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgb(var(--surface-tint)/0.035)] to-transparent pointer-events-none" />
-      <div className="absolute inset-0 bg-[url('/reviews_bg.jpg')] bg-contain md:bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none mix-blend-multiply" />
-      <div className="container mx-auto px-4 lg:px-8 max-w-7xl relative z-10">
-        <div className="flex flex-col items-center justify-center text-center mb-16 px-4 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
-            <Star size={14} fill="currentColor" />
-            Customer Reviews
-          </div>
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
 
-          <div className="flex items-center gap-4 bg-tint-5 border border-tint-10 px-6 py-3 rounded-full flex-wrap justify-center">
-            <div className="flex gap-1 text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={20} fill="currentColor" />
-              ))}
-            </div>
-            <span className="font-bold text-lg text-foreground">5 out of 5</span>
-            <span className="text-muted">· 100+ reviews</span>
-          </div>
-        </div>
+function YelpIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        fill="#FF1A1A"
+        d="M12.271 18.715c-.307.665-1.011.96-1.678.707l-2.004-.812a1.087 1.087 0 0 1-.632-1.004V6.394a1.087 1.087 0 0 1 1.632-.942l2.004 1.188c.52.308.787.92.667 1.53l-1.658 10.545zM5.84 5.643c-.48-.48-1.257-.48-1.737 0L2.29 7.456a1.23 1.23 0 0 0 0 1.737l2.813 2.813a1.23 1.23 0 0 0 1.737 0l1.813-1.813a1.23 1.23 0 0 0 0-1.737L5.84 5.643zm12.32 0a1.23 1.23 0 0 0-1.737 0l-1.813 1.813a1.23 1.23 0 0 0 0 1.737l1.813 1.813a1.23 1.23 0 0 0 1.737 0l2.813-2.813a1.23 1.23 0 0 0 0-1.737l-2.813-1.813z"
+      />
+    </svg>
+  );
+}
+
+function ThumbtackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        fill="#009FD9"
+        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"
+      />
+    </svg>
+  );
+}
+
+function PlatformIcon({ id, className }: { id: ReviewPlatformId; className?: string }) {
+  switch (id) {
+    case "google":
+      return <GoogleIcon className={className} />;
+    case "yelp":
+      return <YelpIcon className={className} />;
+    case "thumbtack":
+      return <ThumbtackIcon className={className} />;
+  }
+}
+
+function PlatformLink({ platform }: { platform: ReviewPlatform }) {
+  return (
+    <a
+      href={platform.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full border border-border bg-card text-foreground font-bold text-sm hover:border-green-500/40 transition-colors"
+    >
+      <PlatformIcon id={platform.id} className="w-4 h-4 shrink-0" />
+      See on {platform.label}
+      <ExternalLink size={14} className="text-muted shrink-0" />
+    </a>
+  );
+}
+
+function StatCard({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="bg-muted/50 border border-border rounded-xl text-center p-4">
+      <p className="text-2xl md:text-3xl font-display font-bold text-foreground">{value}</p>
+      <p className="text-xs md:text-sm text-muted mt-1">{label}</p>
+    </div>
+  );
+}
+
+function TestimonialCard({
+  review,
+  sticky = false,
+  index = 0,
+  stackTopBase = 80,
+  stackGap = 28,
+}: {
+  review: Review;
+  sticky?: boolean;
+  index?: number;
+  stackTopBase?: number;
+  stackGap?: number;
+}) {
+  const quote = review.featured ? review.text : review.excerpt;
+
+  const card = (
+    <article className="p-6 rounded-2xl shadow-card flex flex-col w-full bg-card border border-border">
+      <div className="mb-3">
+        <p className="font-display font-bold text-lg text-foreground">{review.name}</p>
+        <p className="text-sm text-muted flex items-center gap-1.5 mt-0.5">
+          <GoogleIcon className="w-3 h-3 shrink-0" />
+          {review.town}
+        </p>
       </div>
 
-      {/* Full-bleed scroll track — lives outside the container so it touches
-          both screen edges. Edge fades were removed: cream gradients over
-          white review cards read as a white glow, and the overflow-hidden
-          already gives a clean clip at the viewport edge. */}
-      <div className={`relative w-full mb-16 ${reducedMotion ? "overflow-x-auto" : "overflow-hidden"}`}>
-        <div
-          className="flex gap-6 md:gap-8 w-max px-4 will-change-transform"
-          ref={trackRef}
-        >
-          {items.map((r, i) => (
-            <a
-              href="https://www.google.com/search?sca_esv=38eb6c1b91691d26&sxsrf=ANbL-n5S1kr7QiC9t3VBb1BhoeFbza73Nw:1775109861924&kgmid=/g/11l_8krl_c&q=Squito+-+Smart.+Safe.+Pest+Control&shndl=30&source=sh/x/loc/uni/m1/1&kgs=0a1cd8a9da134b2f&utm_source=sh/x/loc/uni/m1/1#lrd=0x8920f6ac750cdccf:0xf5c5b4451a660a15,1,,,,"
-              target="_blank"
-              rel="noopener noreferrer"
+      <div className="flex items-center gap-2 my-3">
+        <span className="font-bold text-base text-foreground">{review.stars.toFixed(1)}</span>
+        <div className="flex" aria-hidden="true">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star
               key={i}
-              className="w-[260px] md:w-[320px] shrink-0 bg-card backdrop-blur-sm border border-border p-5 md:p-6 rounded-2xl flex flex-col hover:border-green-500/30 hover:shadow-lg transition-all group"
-            >
-              <Quote size={24} className="text-green-500/20 mb-3 group-hover:text-green-500/40 transition-colors" />
-              <p className="text-body text-sm mb-5 flex-grow leading-relaxed italic">
-                &ldquo;{r.text}&rdquo;
-              </p>
-              <div className="mt-auto border-t border-border pt-4 flex flex-col">
-                <div className="flex gap-1 text-yellow-400 mb-3">
-                  {[...Array(r.stars)].map((_, j) => (
-                    <Star key={j} size={14} fill="currentColor" />
-                  ))}
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-foreground">{r.name}</span>
-                    <span className="text-xs text-subtle flex items-center gap-1.5 mt-0.5">
-                      <svg viewBox="0 0 24 24" className="w-3 h-3 shrink-0">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                      </svg>
-                      {r.location}
-                    </span>
-                  </div>
-                  <span className="text-xs text-subtle">{r.date}</span>
-                </div>
-              </div>
-            </a>
+              className={cn(
+                "h-4 w-4",
+                i < review.stars ? "text-amber-400 fill-amber-400" : "text-muted/30"
+              )}
+            />
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col items-center text-center mt-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-        <p className="text-foreground text-xl md:text-2xl mb-8 font-display font-bold tracking-wide animate-pulse">
-          Join hundreds of happy customers.
-        </p>
-        <a
-          href="#contact"
-          className="relative overflow-hidden inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-green-500 to-emerald-400 rounded-full hover:scale-105 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)] group"
-        >
-          <span className="relative z-10 flex items-center gap-2 shadow-sm">
-            Get Your Free Inspection <span className="group-hover:translate-x-1 transition-transform">→</span>
-          </span>
-          <div className="absolute inset-0 h-full w-[200%] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
-        </a>
+      <p className="text-base text-body leading-relaxed">&ldquo;{quote}&rdquo;</p>
+    </article>
+  );
+
+  if (!sticky) {
+    return card;
+  }
+
+  return (
+    <div
+      className="sticky w-full self-start"
+      style={{
+        top: `${stackTopBase + index * stackGap}px`,
+        zIndex: index + 1,
+      }}
+    >
+      {card}
+    </div>
+  );
+}
+
+export default function Reviews() {
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const useStickyStack = !reducedMotion;
+  const reviewCount = homepageReviews.length;
+  const stackStep = isDesktop ? 72 : 56;
+  const stackTopBase = isDesktop ? 96 : 80;
+  const stackGap = isDesktop ? 28 : 18;
+  const estimatedCardHeight = isDesktop ? 200 : 240;
+  const stackScrollDistance = Math.max(0, reviewCount - 1) * stackStep;
+  const scrollContainerHeight = useStickyStack
+    ? reviewCount * estimatedCardHeight +
+      (reviewCount - 1) * 16 +
+      stackScrollDistance
+    : undefined;
+
+  return (
+    <section className="w-full bg-background section-py" id="reviews">
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start min-w-0">
+          <div className="min-w-0 w-full">
+            <div className="flex flex-col gap-6 mb-10 lg:mb-12">
+              <h2 className="font-display font-bold text-4xl md:text-5xl text-foreground tracking-tight leading-tight">
+                Families love us, pests hate us.
+              </h2>
+              <p className="text-lg text-muted leading-relaxed">
+                Real reviews from Nassau &amp; Suffolk homeowners. The kind of thing your neighbor
+                would actually tell you over the fence.
+              </p>
+
+              <div className="grid grid-cols-3 gap-3 md:gap-4">
+                {STATS.map((stat) => (
+                  <StatCard key={stat.label} value={stat.value} label={stat.label} />
+                ))}
+              </div>
+
+              <div className="flex flex-wrap gap-2.5">
+                {REVIEW_PLATFORMS.map((platform) => (
+                  <PlatformLink key={platform.id} platform={platform} />
+                ))}
+              </div>
+            </div>
+
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden card-border shadow-card lg:hidden my-8">
+              <Image
+                src={COMPANY_PHOTOS.about}
+                alt="Squito technician treating a Long Island home"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+            </div>
+
+            <div
+              className={cn("relative flex flex-col gap-4 min-w-0 w-full", useStickyStack && "pb-4")}
+              style={
+                scrollContainerHeight
+                  ? { minHeight: `${scrollContainerHeight}px` }
+                  : undefined
+              }
+            >
+              {homepageReviews.map((review, index) => (
+                <TestimonialCard
+                  key={review.name}
+                  review={review}
+                  sticky={useStickyStack}
+                  index={index}
+                  stackTopBase={stackTopBase}
+                  stackGap={stackGap}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden lg:block lg:sticky lg:top-24 self-start w-full min-w-0">
+            <div className="overflow-x-clip rounded-2xl lg:rounded-r-none lg:rounded-l-3xl">
+              <SectionBleedImage
+              src={COMPANY_PHOTOS.about}
+              alt="Squito technician treating a Long Island home"
+              side="right"
+              sizes="52vw"
+              className="min-h-[min(72vh,720px)] w-full"
+              imageClassName="object-cover object-[center_35%]"
+            />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

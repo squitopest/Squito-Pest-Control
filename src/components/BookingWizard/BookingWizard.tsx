@@ -9,6 +9,10 @@ import CrossSellModal from "./CrossSellModal";
 import CheckoutStep from "./CheckoutStep";
 import type { PropertySize } from "@/data/plans";
 import { useEffect } from "react";
+import {
+  buildMosquitoTickBundleAddOn,
+  canAutoApplyMosquitoTickBundle,
+} from "@/lib/bundleOffers";
 
 type AddOn = {
   type: "mosquito-tick" | "general-pest";
@@ -28,9 +32,10 @@ type AddressData = {
 
 type BookingWizardProps = {
   onStepChange?: (step: number) => void;
+  bundleIntent?: boolean;
 };
 
-export default function BookingWizard({ onStepChange }: BookingWizardProps) {
+export default function BookingWizard({ onStepChange, bundleIntent = false }: BookingWizardProps) {
   const [step, setStep] = useState(1);
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -58,17 +63,23 @@ export default function BookingWizard({ onStepChange }: BookingWizardProps) {
       setSelectedPlan(planId);
       setSelectedBilling(billing);
 
-      // For "ultimate-fortress", it already includes M&T, so skip cross-sell
+      // Ultimate Fortress already includes seasonal mosquito & tick coverage.
       if (planId === "ultimate-fortress") {
         setAddOn(null);
         setStep(3);
         return;
       }
 
-      // Show cross-sell modal for mosquito & tick add-on
+      if (bundleIntent && addressData && canAutoApplyMosquitoTickBundle(addressData.sqft)) {
+        setAddOn(buildMosquitoTickBundleAddOn(addressData.sqft));
+        setStep(3);
+        return;
+      }
+
+      // Show cross-sell for optional bundle or large-yard quotes.
       setShowCrossSell(true);
     },
-    []
+    [addressData, bundleIntent]
   );
 
   const handleCrossSellAccept = useCallback(

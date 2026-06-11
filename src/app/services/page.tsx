@@ -29,7 +29,7 @@ const services = [
     icon: Rat,
     name: "Rodent Removal",
     tagline: "Mice and rats, gone for good",
-    description: "We locate entry points, set targeted traps, and seal the gaps. Not just removal — prevention. We block every route so they can't come back.",
+    description: "We locate entry points, set targeted traps, and seal the gaps. Not just removal. Prevention. We block every route so they can't come back.",
     href: "/residential",
     badge: null,
   },
@@ -186,7 +186,7 @@ export default function ServicesPage() {
             Not sure what you need? <span className="gradient-text">We'll figure it out.</span>
           </h2>
           <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
-            Book a free inspection and a local technician will assess your property and recommend the right plan — no pressure, no obligation.
+            Book a free inspection and a local technician will assess your property and recommend the right plan. No pressure, no obligation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact" className="btn-primary inline-flex items-center gap-2 text-lg px-8 py-4">

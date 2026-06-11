@@ -24,6 +24,8 @@ export default function CustomCursor() {
   useEffect(() => {
     if (isTouchDevice) return; // No cursor on touch devices — do not attach any listeners
 
+    document.body.classList.add("custom-cursor-active");
+
     let mouseX = -100;
     let mouseY = -100;
     let ringX = -100;
@@ -109,6 +111,7 @@ export default function CustomCursor() {
     animFrameId = requestAnimationFrame(animate);
 
     return () => {
+      document.body.classList.remove("custom-cursor-active");
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);

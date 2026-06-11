@@ -1,33 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { X, Shield, Sparkles, ArrowRight, ChevronDown } from "lucide-react";
+import { X, ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/bodyScrollLock";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
+import { BUNDLE_DISCOUNT_PERCENT } from "@/lib/bundleOffers";
+import { useModalDismiss } from "@/lib/useModalDismiss";
 
-/* ─── Scroll-triggered Promo Popup ────────────────────────────────────────────
-   Shows once per session after the visitor scrolls ~20% of the homepage.
-   Light-theme glassmorphic design for readability.
-
-   Rules:
-   • Only fires on the homepage ("/")
-   • Only once per browser session (sessionStorage)
-   • 2-second delay after crossing the scroll threshold
-   • Dismissible via X, CTA click, or backdrop click
-   • Locks body scroll while open
-   • On mobile the card is compact; body copy & value props are collapsed
-     behind a "Read More" toggle so the hero background stays visible.
-────────────────────────────────────────────────────────────────────────────── */
 const STORAGE_KEY = "squito_promo_seen";
+const EMAIL_KEY = "squito_promo_email";
+const EXIT_MS = 300;
+
+const TRUST_AVATARS = [
+  { src: "/team/team-portrait-1.png", alt: "Squito customer" },
+  { src: "/team/team-portrait-2.png", alt: "Squito customer" },
+  { src: "/team/team-portrait-3.png", alt: "Squito customer" },
+] as const;
 
 export default function PromoPopup() {
   const [visible, setVisible] = useState(false);
   const [animatingOut, setAnimatingOut] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const firedRef = useRef(false);
+  const scrollLockedRef = useRef(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   const isHome = pathname === "/";
+  const isOpen = visible || animatingOut;
 
   useEffect(() => {
     if (!isHome) return;
@@ -38,10 +42,10 @@ export default function PromoPopup() {
       if (firedRef.current) return;
       const scrollPct =
         window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-      if (scrollPct >= 0.20) {
+      if (scrollPct >= 0.3) {
         firedRef.current = true;
         window.removeEventListener("scroll", onScroll);
-        setTimeout(() => setVisible(true), 2000);
+        setTimeout(() => setVisible(true), 4000);
       }
     };
 
@@ -49,192 +53,208 @@ export default function PromoPopup() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
-  // Lock body scroll while popup is open
   useEffect(() => {
-    if (!visible) return;
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    return () => {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      window.scrollTo(0, scrollY);
-    };
-  }, [visible]);
+    if (isOpen && !scrollLockedRef.current) {
+      lockBodyScroll();
+      scrollLockedRef.current = true;
+      return;
+    }
 
-  const dismiss = () => {
+    if (!isOpen && scrollLockedRef.current) {
+      unlockBodyScroll();
+      scrollLockedRef.current = false;
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollLockedRef.current) {
+        unlockBodyScroll();
+        scrollLockedRef.current = false;
+      }
+    };
+  }, []);
+
+  const finishClose = useCallback(() => {
+    setVisible(false);
+    setAnimatingOut(false);
+    setEmailError("");
+  }, []);
+
+  const dismiss = useCallback(() => {
+    if (animatingOut) return;
     setAnimatingOut(true);
     sessionStorage.setItem(STORAGE_KEY, "1");
-    setTimeout(() => {
-      setVisible(false);
-      setAnimatingOut(false);
-    }, 300);
+    window.setTimeout(finishClose, EXIT_MS);
+  }, [animatingOut, finishClose]);
+
+  useModalDismiss(isOpen && !animatingOut, dismiss, closeRef);
+
+  const goToOffer = useCallback(
+    (submittedEmail?: string) => {
+      if (submittedEmail) {
+        sessionStorage.setItem(EMAIL_KEY, submittedEmail);
+      }
+      sessionStorage.setItem(STORAGE_KEY, "1");
+      setAnimatingOut(true);
+      window.setTimeout(() => {
+        finishClose();
+        router.push("/get-started?from=promo&intent=bundle");
+      }, EXIT_MS);
+    },
+    [finishClose, router]
+  );
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setEmailError("Enter your email to continue.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailError("");
+    goToOffer(trimmed);
   };
 
-  const handleCTA = () => {
-    sessionStorage.setItem(STORAGE_KEY, "1");
-    setVisible(false);
-    router.push("/plans");
-  };
-
-  if (!visible) return null;
+  if (!isOpen) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center px-6 sm:px-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 transition-opacity duration-300 overscroll-none ${
         animatingOut ? "opacity-0" : "opacity-100"
       }`}
       onClick={dismiss}
       role="dialog"
       aria-modal="true"
-      aria-label="Limited time offer"
+      aria-labelledby="promo-popup-title"
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" />
 
-      {/* Card — compact on mobile (max-w-sm), standard on md+ (max-w-md) */}
       <div
-        className={`relative w-full max-w-sm md:max-w-md rounded-3xl overflow-hidden transition-all duration-300 ${
+        className={`relative bg-card w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-border flex flex-col md:flex-row transition-all duration-300 ${
           animatingOut
             ? "scale-95 translate-y-4 opacity-0"
             : "scale-100 translate-y-0 opacity-100 animate-fade-in-up"
         }`}
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: "rgba(255, 255, 255, 0.85)",
-          backdropFilter: "blur(24px) saturate(1.8)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.8)",
-          boxShadow:
-            "0 25px 60px rgba(0,0,0,0.15), 0 0 80px rgba(34,197,94,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
-          border: "1px solid rgba(255,255,255,0.5)",
-        }}
       >
-        {/* Green accent glow behind card */}
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-green-400/20 rounded-full blur-[60px] pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-emerald-400/15 rounded-full blur-[50px] pointer-events-none" />
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={dismiss}
+          aria-label="Close offer"
+          className="absolute top-3 right-3 md:top-4 md:right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-muted hover:bg-muted/80 transition-colors text-muted hover:text-foreground"
+        >
+          <X size={18} />
+        </button>
 
-        {/* Top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-green-600" />
-
-        <div className="relative p-6 md:p-10">
-          {/* Dismiss button */}
-          <button
-            onClick={dismiss}
-            className="absolute top-3 right-3 md:top-4 md:right-4 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close"
-          >
-            <X size={16} />
-          </button>
-
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 md:mb-5">
-            <Sparkles size={12} />
-            Limited Time Offer
-          </div>
-
-          {/* Headline */}
-          <h3 className="text-xl md:text-3xl font-display font-extrabold text-gray-900 leading-tight mb-2 md:mb-3">
-            Bundle &amp; Save{" "}
-            <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-              10% Today
-            </span>
-          </h3>
-
-          {/* ── Desktop: always show body copy + value props ── */}
-          <div className="hidden md:block">
-            <p className="text-gray-600 text-base font-medium leading-relaxed mb-6">
-              Protect your home from pests and mosquitoes with one plan.
-              Add Mosquito &amp; Tick Protection to any pest plan and
-              save <strong className="text-green-700">10% on your seasonal subscription</strong> —
-              automatically applied at checkout.
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 mb-8">
-              {[
-                { icon: Shield, text: "Full perimeter defense" },
-                { icon: Shield, text: "Seasonal M&T coverage" },
-                { icon: Shield, text: "One easy checkout" },
-                { icon: Shield, text: "Cancel anytime" },
-              ].map(({ icon: Icon, text }) => (
-                <div
-                  key={text}
-                  className="flex items-center gap-2 text-xs font-semibold text-gray-500"
-                >
-                  <Icon size={12} className="text-green-600 flex-shrink-0" />
-                  <span>{text}</span>
-                </div>
-              ))}
+        {/* Visual panel — desktop only */}
+        <div className="hidden md:block w-full md:w-5/12 relative bg-muted min-h-[420px] overflow-hidden">
+          <Image
+            src={COMPANY_PHOTOS.heroMobilePoster}
+            alt="Long Island neighborhood protected by Squito"
+            fill
+            sizes="320px"
+            className="object-cover grayscale-[15%]"
+            priority
+          />
+          <div className="absolute inset-0 bg-primary/10 mix-blend-multiply" />
+          <div className="absolute inset-0 flex flex-col items-center justify-end p-8 text-center bg-gradient-to-t from-black/65 via-black/20 to-transparent">
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg border-4 border-card">
+              <ShieldCheck size={32} className="text-primary-foreground" strokeWidth={2.25} />
             </div>
+            <p className="font-display font-bold text-lg text-white">100% Local Protection</p>
+            <p className="text-white/75 text-sm mt-1">Nassau &amp; Suffolk County</p>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="w-full md:w-7/12 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+          <div className="inline-flex items-center gap-2 mb-5 text-green-700">
+            <Sparkles size={16} className="text-primary" aria-hidden />
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Exclusive Local Offer
+            </span>
           </div>
 
-          {/* ── Mobile: short teaser + collapsible "Read More" ── */}
-          <div className="md:hidden">
-            <p className="text-gray-600 text-sm font-medium leading-relaxed mb-3">
-              Add Mosquito &amp; Tick Protection to any pest plan and save{" "}
-              <strong className="text-green-700">10%</strong> — applied at checkout.
-            </p>
+          <h2
+            id="promo-popup-title"
+            className="font-display font-bold text-2xl sm:text-3xl md:text-4xl text-foreground leading-tight tracking-tight mb-3"
+          >
+            Save {BUNDLE_DISCOUNT_PERCENT}% When You Bundle
+          </h2>
+
+          <p className="text-muted text-sm sm:text-base leading-relaxed mb-6">
+            Join Long Island homeowners who trust Squito for year-round protection. Add
+            Mosquito &amp; Tick to any pest plan and save{" "}
+            <strong className="text-green-700">{BUNDLE_DISCOUNT_PERCENT}%</strong> automatically
+            at checkout — no code needed.
+          </p>
+
+          <form className="space-y-3" onSubmit={handleSubmit} noValidate>
+            <div>
+              <label htmlFor="promo-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="promo-email"
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError("");
+                }}
+                placeholder="Enter your email address"
+                autoComplete="email"
+                className="w-full px-5 py-3.5 rounded-xl bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all outline-none text-foreground placeholder:text-muted text-sm"
+              />
+              {emailError ? (
+                <p className="mt-1.5 text-xs text-red-600 font-medium">{emailError}</p>
+              ) : null}
+            </div>
 
             <button
-              type="button"
-              onClick={() => setDetailsOpen((o) => !o)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-green-600 mb-4 hover:text-green-700 transition-colors"
+              type="submit"
+              className="w-full gradient-cta flex items-center justify-center gap-2 py-4 rounded-full text-sm sm:text-base font-bold shadow-lg shadow-green-500/20 hover:shadow-green-500/35 active:scale-[0.98] transition-all"
             >
-              {detailsOpen ? "Show Less" : "Read More"}
-              <ChevronDown
-                size={14}
-                className={`transition-transform duration-200 ${detailsOpen ? "rotate-180" : ""}`}
-              />
+              Get Protected &amp; Save
+              <ArrowRight size={18} />
             </button>
+          </form>
 
-            <div
-              className={`grid transition-all duration-300 ease-in-out ${
-                detailsOpen ? "grid-rows-[1fr] opacity-100 mb-4" : "grid-rows-[0fr] opacity-0 mb-0"
-              }`}
+          <div className="mt-6 text-center md:text-left">
+            <button
+              type="button"
+              onClick={dismiss}
+              className="text-xs font-semibold uppercase tracking-widest text-muted hover:text-green-700 transition-colors hover:underline underline-offset-2"
             >
-              <div className="overflow-hidden">
-                <div className="grid grid-cols-2 gap-2 pb-1">
-                  {[
-                    { icon: Shield, text: "Full perimeter defense" },
-                    { icon: Shield, text: "Seasonal M&T coverage" },
-                    { icon: Shield, text: "One easy checkout" },
-                    { icon: Shield, text: "Cancel anytime" },
-                  ].map(({ icon: Icon, text }) => (
-                    <div
-                      key={text}
-                      className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500"
-                    >
-                      <Icon size={11} className="text-green-600 flex-shrink-0" />
-                      <span>{text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+              No thanks, I&apos;ll pass on the bundle discount
+            </button>
           </div>
 
-          {/* CTA */}
-          <button
-            onClick={handleCTA}
-            className="group w-full flex items-center justify-center gap-2 py-3.5 md:py-4 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold text-sm md:text-base shadow-lg shadow-green-500/25 hover:shadow-green-500/40 transition-all duration-300 hover:scale-[1.02]"
-          >
-            View Plans &amp; Save
-            <ArrowRight
-              size={16}
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </button>
-
-          <p className="text-center text-[11px] font-medium text-gray-400 mt-3 md:mt-4">
-            No commitment required. See all plans first.
-          </p>
+          <div className="mt-6 pt-5 border-t border-border flex items-center gap-3">
+            <div className="flex -space-x-2 shrink-0">
+              {TRUST_AVATARS.map((avatar) => (
+                <Image
+                  key={avatar.src}
+                  src={avatar.src}
+                  alt={avatar.alt}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full border-2 border-card object-cover"
+                />
+              ))}
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted">
+              Trusted by Long Island homeowners
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-

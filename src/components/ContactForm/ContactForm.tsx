@@ -1,26 +1,29 @@
 "use client";
 
 import { useId, useState, useRef, useEffect, useCallback } from "react";
-import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2, ChevronDown, X, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Phone, Mail, MapPin, Send, CheckCircle, Map, Home, Building2, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { trackMetaEvent } from "@/lib/meta-pixel";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
 
-export default function ContactForm() {
+type ContactFormProps = {
+  teamPhoto?: string;
+};
+
+export default function ContactForm({
+  teamPhoto = COMPANY_PHOTOS.contact,
+}: ContactFormProps) {
   const searchParams = useSearchParams();
   const prefilledType = searchParams.get("type");
   const prefilledService = searchParams.get("service");
   const prefilledMessage = searchParams.get("message");
-  const isQuoteFlow = (prefilledService || "").toLowerCase().includes("quote");
   const [submitted, setSubmitted] = useState(false);
   const [type, setType] = useState<"residential" | "commercial">("residential");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [autocompleteLoading, setAutocompleteLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
-  // The full form is long — collapsing it behind a drop-down keeps the home
-  // page dense and makes the "Free Inspection" CTA the actual call-to-action
-  // rather than something you scroll past.
-  const [formOpen, setFormOpen] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const firstNameRef = useRef<HTMLInputElement>(null);
   const autocompleteAbortRef = useRef<AbortController | null>(null);
@@ -28,15 +31,6 @@ export default function ContactForm() {
   const formPanelId = `contact-form-panel-${reactId}`;
   const suggestionListId = `contact-address-suggestions-${reactId}`;
   const suggestionOptionId = (i: number) => `contact-address-option-${reactId}-${i}`;
-
-  // When the drop-down form opens, move focus into it so keyboard users don't
-  // have to tab back up through the page to start filling it out.
-  useEffect(() => {
-    if (formOpen) {
-      const t = setTimeout(() => firstNameRef.current?.focus(), 50);
-      return () => clearTimeout(t);
-    }
-  }, [formOpen]);
 
   // Handle clicking outside suggestions
   useEffect(() => {
@@ -72,7 +66,6 @@ export default function ContactForm() {
     }
 
     if (prefilledService || prefilledMessage) {
-      setFormOpen(true);
       setForm((prev) => ({
         ...prev,
         service: prefilledService || prev.service,
@@ -80,6 +73,9 @@ export default function ContactForm() {
       }));
     }
   }, [prefilledMessage, prefilledService, prefilledType]);
+
+  const [isCurrentCustomer, setIsCurrentCustomer] = useState<"yes" | "no" | "">("");
+  const [agreeToContact, setAgreeToContact] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -90,7 +86,7 @@ export default function ContactForm() {
     city: "",
     zip: "",
     message: "",
-    service: "Mosquito & Tick Control",
+    service: "Free Inspection Request",
   });
 
   const [loading, setLoading] = useState(false);
@@ -191,16 +187,24 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
+    if (loading || !agreeToContact) return;
 
     setLoading(true);
     setError(null);
+
+    const customerNote =
+      isCurrentCustomer === "yes"
+        ? "Current customer: Yes"
+        : isCurrentCustomer === "no"
+          ? "Current customer: No"
+          : "";
+    const fullMessage = [customerNote, form.message].filter(Boolean).join("\n\n");
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, type }),
+        body: JSON.stringify({ ...form, message: fullMessage, type }),
       });
 
       if (!response.ok) {
@@ -221,25 +225,37 @@ export default function ContactForm() {
   };
 
   return (
-    <section className="py-24 relative overflow-hidden" id="contact">
-      <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
-          
-          <div className="flex-1 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-6">
-              <Mail size={14} />
-              Contact Us
-            </div>
+    <section className="py-24 relative overflow-hidden bg-[#0a0a0a]" id="contact">
+      {teamPhoto && (
+        <div className="hidden lg:block absolute right-0 top-0 bottom-0 z-0 w-[38vw] max-w-[520px] min-h-full">
+          <Image
+            src={teamPhoto}
+            alt=""
+            fill
+            sizes="38vw"
+            className="object-cover"
+            aria-hidden
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/85 to-transparent pointer-events-none"
+            aria-hidden
+          />
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 lg:px-8 max-w-7xl relative z-10">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 xl:gap-20 items-start">
+          <div className="on-photo flex-1 max-w-lg animate-fade-in-up space-y-8">
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-6 text-white tracking-tight">
               Get Your{" "}
               <span className="gradient-text">Free Inspection</span>
             </h2>
-            <p className="text-white/70 text-lg mb-10 max-w-md">
+            <p className="text-white/70 text-lg leading-relaxed">
               Fill out the form and a specialist will call you within the hour.
               Same-day service available.
             </p>
 
-            <div className="flex flex-col gap-6 mb-12">
+            <div className="flex flex-col gap-5">
               <a href="tel:6312031000" className="group relative inline-flex items-center gap-4 w-fit px-5 py-3.5 rounded-2xl bg-white/5 border border-white/10 overflow-hidden transition-all duration-300 hover:border-green-500/50 hover:bg-green-500/10">
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700" />
                 <div className="relative z-10 w-10 h-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center group-hover:bg-green-500/20 transition-colors shrink-0">
@@ -270,17 +286,18 @@ export default function ContactForm() {
              </div>
            </div>
 
-           <div className="space-y-3">
-             {["Free inspection — no obligation", "We call within the hour", "Same-day service available"].map((text, i) => (
-                <div key={i} className="flex items-center gap-3 text-sm font-medium text-white/80">
-                 <CheckCircle size={18} className="text-green-500 shrink-0" />
-                 {text}
-               </div>
-               ))}
-           </div>
-         </div>
+            <div className="space-y-3">
+              {["Free inspection, no obligation", "We call within the hour", "Same-day service available"].map((text, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm font-medium text-white/80 leading-relaxed">
+                  <CheckCircle size={18} className="text-green-500 shrink-0" />
+                  {text}
+                </div>
+              ))}
+            </div>
+          </div>
 
-          <div className="flex-1 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex-1 w-full min-w-0 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          <div className="w-full min-w-0">
            {submitted ? (
             <div className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20">
                 <div id="success-message" className="text-center py-8 flex flex-col items-center">
@@ -304,69 +321,101 @@ export default function ContactForm() {
 
                </div>
             </div>
-            ) : !formOpen ? (
-              <button
-                type="button"
-                onClick={() => setFormOpen(true)}
-                aria-expanded={false}
-                aria-controls={formPanelId}
-                className="group relative w-full text-left glass-card rounded-3xl p-8 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20 overflow-hidden transition-all duration-300 hover:border-green-500/50 hover:shadow-[0_20px_60px_rgba(34,197,94,0.2)] cursor-pointer"
-              >
-                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-                <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-                  <div className="shrink-0 w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/30 flex items-center justify-center group-hover:bg-green-500/20 group-hover:border-green-500/60 transition-all">
-                    <Send size={24} className="text-green-400 group-hover:scale-110 transition-transform" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] uppercase tracking-widest text-green-400 font-semibold mb-2">Free · No Obligation</div>
-                    <div className="text-2xl md:text-3xl font-display font-bold text-white mb-1">
-                      {isQuoteFlow ? "Start My Free Quote" : "Start My Free Inspection"}
-                    </div>
-                    <div className="text-white/60 text-sm">
-                      {isQuoteFlow ? "Click to request a tailored quote for your property." : "Click to open the form — takes under a minute."}
-                    </div>
-                  </div>
-                  <div className="shrink-0 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 group-hover:text-green-400 group-hover:border-green-500/50 group-hover:bg-green-500/10 transition-all">
-                    <ChevronDown size={20} />
-                  </div>
-                </div>
-              </button>
             ) : (
               <div
                 id={formPanelId}
                 role="region"
                 aria-label="Free inspection form"
-                className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20 animate-fade-in-up"
+                className="glass-card rounded-3xl p-6 md:p-10 shadow-[0_20px_60px_rgba(34,197,94,0.1)] border-green-500/20"
               >
-                <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-white/5">
-                  <h3 className="text-lg md:text-xl font-display font-bold text-white">
-                    {isQuoteFlow ? "Tell us about your property" : "Tell us about your pest issue"}
+                <div className="mb-8 pb-6 border-b border-white/10">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold text-white mb-2 leading-tight">
+                    Let&apos;s talk about your pest problems.
                   </h3>
-                  <button
-                    type="button"
-                    onClick={() => setFormOpen(false)}
-                    aria-label="Close inspection form"
-                    className="shrink-0 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
-                  >
-                    <X size={16} />
-                  </button>
+                  <p className="text-white/70 text-sm md:text-base">
+                    Send us a message using the form below, or call us at{" "}
+                    <a href="tel:6312031000" className="font-semibold text-green-400 hover:text-green-300">
+                      (631) 203-1000
+                    </a>
+                    .
+                  </p>
                 </div>
+
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-left">
-                  <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl mb-2">
-                    <button
-                      type="button"
-                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold transition-all ${type === "residential" ? 'bg-green-500 text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
-                      onClick={() => setType("residential")}
-                    >
-                      <Home size={15} /> Residential
-                   </button>
-                    <button
-                     type="button"
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-semibold transition-all ${type === "commercial" ? 'bg-green-500 text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
-                     onClick={() => setType("commercial")}
-                   >
-                     <Building2 size={15} /> Commercial
-                    </button>
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-white/90 mb-3">
+                      What type of property do you need help with?
+                    </legend>
+                    <div className="flex flex-wrap gap-4">
+                      {(
+                        [
+                          { value: "residential" as const, label: "Residential", icon: Home },
+                          { value: "commercial" as const, label: "Commercial", icon: Building2 },
+                        ] as const
+                      ).map(({ value, label, icon: Icon }) => (
+                        <label
+                          key={value}
+                          className={`inline-flex items-center gap-2 cursor-pointer rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                            type === value
+                              ? "border-green-500 bg-green-500/15 text-white"
+                              : "border-white/20 text-white/70 hover:border-white/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="property-type"
+                            value={value}
+                            checked={type === value}
+                            onChange={() => setType(value)}
+                            className="sr-only"
+                          />
+                          <Icon size={15} aria-hidden />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <fieldset>
+                    <legend className="text-sm font-semibold text-white/90 mb-3">
+                      Are you a current customer?
+                    </legend>
+                    <div className="flex flex-wrap gap-4">
+                      {(["yes", "no"] as const).map((value) => (
+                        <label
+                          key={value}
+                          className={`inline-flex items-center gap-2 cursor-pointer rounded-full border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                            isCurrentCustomer === value
+                              ? "border-green-500 bg-green-500/15 text-white"
+                              : "border-white/20 text-white/70 hover:border-white/40"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="current-customer"
+                            value={value}
+                            checked={isCurrentCustomer === value}
+                            onChange={() => setIsCurrentCustomer(value)}
+                            className="sr-only"
+                          />
+                          {value === "yes" ? "Yes" : "No"}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+
+                  <div className="space-y-2">
+                    <label htmlFor="message" className="text-sm font-semibold text-white/90">
+                      How can we help you?
+                    </label>
+                    <textarea
+                      id="message"
+                      rows={4}
+                      placeholder="Tell us what you're seeing and where..."
+                      className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors resize-none"
+                      value={form.message}
+                      onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                    />
                   </div>
 
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -399,43 +448,58 @@ export default function ContactForm() {
                     </div>
                   </div>
 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-semibold text-white/80 ml-1">Email *</label>
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        autoComplete="email"
-                        placeholder="john@example.com"
-                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
-                        value={form.email}
-                       onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                     />
-                    </div>
-                   <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-semibold text-white/80 ml-1">Phone Number *</label>
-                     <input
-                       id="phone"
-                       type="tel"
-                        required
-                       autoComplete="tel"
-                       inputMode="tel"
-                       placeholder="(631) 555-0000"
-                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
-                        value={form.phone}
-                       onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-                     />
-                    </div>
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-semibold text-white/90">Email Address *</label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      placeholder="john@example.com"
+                      className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
+                      value={form.email}
+                      onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2 relative" ref={suggestionsRef}>
-                      <label htmlFor="street" className="text-sm font-semibold text-white/80 ml-1">Street Address *</label>
+                    <div className="space-y-2">
+                      <label htmlFor="phone" className="text-sm font-semibold text-white/90">Phone Number *</label>
+                      <input
+                        id="phone"
+                        type="tel"
+                        required
+                        autoComplete="tel"
+                        inputMode="tel"
+                        placeholder="(631) 555-0000"
+                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
+                        value={form.phone}
+                        onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="zip" className="text-sm font-semibold text-white/90">ZIP Code *</label>
+                      <input
+                        id="zip"
+                        type="text"
+                        required
+                        placeholder="11749"
+                        maxLength={5}
+                        autoComplete="postal-code"
+                        inputMode="numeric"
+                        pattern="[0-9]{5}"
+                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
+                        value={form.zip}
+                        onChange={(e) => setForm((f) => ({ ...f, zip: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 relative" ref={suggestionsRef}>
+                      <label htmlFor="street" className="text-sm font-semibold text-white/90">Street Address (optional)</label>
                       <input
                         id="street"
                         type="text"
-                        required
                         autoComplete="street-address"
                         placeholder="123 Main St"
                         className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
@@ -494,101 +558,30 @@ export default function ContactForm() {
                           })}
                         </ul>
                       )}
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="city" className="text-sm font-semibold text-white/80 ml-1">City *</label>
-                      <input
-                        id="city"
-                        type="text"
-                        required
-                        autoComplete="address-level2"
-                        placeholder="Islandia"
-                        className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
-                        value={form.city}
-                        onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                      />
-                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="zip" className="text-sm font-semibold text-white/80 ml-1">ZIP Code *</label>
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input
-                      id="zip"
-                      type="text"
+                      type="checkbox"
+                      checked={agreeToContact}
+                      onChange={(e) => setAgreeToContact(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-white/30 bg-background/50 text-green-500 focus:ring-green-500/50"
                       required
-                      placeholder="11749"
-                      maxLength={5}
-                      autoComplete="postal-code"
-                      inputMode="numeric"
-                      pattern="[0-9]{5}"
-                      className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors"
-                      value={form.zip}
-                      onChange={e => setForm(f => ({ ...f, zip: e.target.value }))}
                     />
-                  </div>
-
-                 <div className="space-y-2">
-                     <label htmlFor="service" className="text-sm font-semibold text-white/80 ml-1">Pest Problem</label>
-                     <select
-                        id="service"
-                       className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors appearance-none cursor-pointer"
-                        value={form.service}
-                        onChange={e => setForm(f => ({ ...f, service: e.target.value }))}
-                     >
-                        <option value="" disabled className="text-black">Select a service</option>
-                       <option className="text-black">Mosquito & Tick Control</option>
-                        <option className="text-black">Termite Defense</option>
-                       <option className="text-black">Rodent Removal</option>
-                       <option className="text-black">Bed Bug Treatment</option>
-                       <option className="text-black">General Pest Control</option>
-                        <option className="text-black">Commercial Services</option>
-                       <option className="text-black">Other</option>
-                      </select>
-                   </div>
-
-                 <div className="space-y-2">
-                    <label htmlFor="message" className="text-sm font-semibold text-white/80 ml-1">Tell Us More</label>
-                   <textarea
-                     id="message"
-                     rows={3}
-                     placeholder="Describe your pest issue..."
-                      className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition-colors resize-none"
-                     value={form.message}
-                      onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                    />
-                 </div>
+                    <span className="text-xs text-white/60 leading-relaxed">
+                      I agree to be contacted by Squito about my request. We never share your data.
+                    </span>
+                  </label>
 
                  <button
                    type="submit"
-                   disabled={loading}
-                   aria-disabled={loading}
+                   disabled={loading || !agreeToContact}
+                   aria-disabled={loading || !agreeToContact}
                    aria-busy={loading}
-                   className="group relative w-full mt-2 overflow-hidden rounded-2xl p-[1px] focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                   className="gradient-cta w-full mt-2 inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                  >
-                   {/* Animated rotating gradient border */}
-                   <span
-                     className="absolute inset-0 rounded-2xl opacity-70 group-hover:opacity-100 transition-opacity duration-500"
-                     style={{
-                       background: "conic-gradient(from var(--angle, 0deg), #22c55e, #16a34a, #15803d, #4ade80, #22c55e)",
-                       animation: "spin-border 3s linear infinite",
-                     }}
-                   />
-                   {/* Glass fill */}
-                   <span className="relative flex items-center justify-center gap-3 w-full px-8 py-4 rounded-2xl bg-background/80 backdrop-blur-xl font-display font-bold text-lg transition-all duration-500 group-hover:bg-green-500/10 disabled:opacity-70">
-                     {/* Inner shimmer sweep */}
-                     <span className="absolute inset-0 rounded-2xl -translate-x-full bg-gradient-to-r from-transparent via-green-400/20 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                     {/* Glow blob */}
-                     <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ boxShadow: "inset 0 0 30px rgba(34,197,94,0.15), 0 0 40px rgba(34,197,94,0.25)" }} />
-                     <span className="relative z-10 w-8 h-8 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center group-hover:bg-green-500 group-hover:border-green-400 transition-all duration-300 shrink-0">
-                       <Send size={15} className="text-green-400 group-hover:text-white transition-colors" />
-                     </span>
-                     <span className="relative z-10 flex flex-col items-start leading-none text-left">
-                       <span className="text-[9px] uppercase tracking-widest text-green-400/70 font-semibold mb-0.5">100% Free</span>
-                        <span className="text-lg font-display font-bold text-white tracking-wide">
-                         {loading ? "Sending..." : isQuoteFlow ? "Request Free Quote" : "Request Free Inspection"}
-                       </span>
-                     </span>
-                   </span>
+                   <Send size={18} aria-hidden />
+                   {loading ? "Sending..." : "Send Message"}
                  </button>
                  
                  {error && (
@@ -596,13 +589,11 @@ export default function ContactForm() {
                      {error}
                    </p>
                  )}
-
-                <p className="text-xs text-center text-white/40 max-w-sm mx-auto leading-relaxed">
-                  By submitting, you agree to be contacted by Squito. We never share your data.
-                </p>
               </form>
             </div>
              )}
+          </div>
+
           </div>
         </div>
       </div>

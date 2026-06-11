@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus, Minus, HelpCircle, ChevronDown, Loader2, CheckCircle2 } from "lucide-react";
-import Footer from "@/components/Footer/Footer";
 
 const faqs = [
   {
@@ -210,8 +209,6 @@ export default function FaqContent() {
         </div>
 
       </div>
-      
-      <Footer />
     </main>
   );
 }

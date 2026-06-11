@@ -252,10 +252,10 @@ async function handleCheckoutSessionCompleted(event: any) {
           const safePlanName = escapeHtml(planName);
           const safeFirstName = escapeHtml(booking.full_name?.split(' ')[0] || 'there');
           const confirmationSubject = isMosquitoTickReservation
-            ? `Reservation Held — ${planName}`
+            ? `Reservation Held: ${planName}`
             : booking.service_type === "mosquito_tick"
-              ? `You're In! — ${planName}`
-              : `Booking Confirmed — ${planName}`;
+              ? `You're In! ${planName}`
+              : `Booking Confirmed: ${planName}`;
           const confirmationHeadline = isMosquitoTickReservation
             ? "Spot Reserved!"
             : booking.service_type === "mosquito_tick"
@@ -319,7 +319,7 @@ async function handleCheckoutSessionCompleted(event: any) {
                 </div>
                 <!-- Footer -->
                 <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
-                  <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
+                  <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control. Smart. Safe. Pest Control.</p>
                   <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau &amp; Suffolk County, Long Island NY</p>
                 </div>
               </div>
@@ -425,7 +425,7 @@ async function handleSubscriptionDeleted(event: any) {
           await resend.emails.send({
             from: "Squito Pest Control <noreply@squitopestcontrol.com>",
             to: [booking.email],
-            subject: `Season complete — see you in April ${nextSeasonYear}`,
+            subject: `Season complete. See you in April ${nextSeasonYear}`,
             html: `
               <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; border-radius: 16px; overflow: hidden;">
                 <div style="background: #0a0a0a; padding: 24px 24px 0; text-align: center;">
@@ -455,7 +455,7 @@ async function handleSubscriptionDeleted(event: any) {
                   </div>
                 </div>
                 <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
-                  <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
+                  <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control. Smart. Safe. Pest Control.</p>
                   <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau &amp; Suffolk County, Long Island NY</p>
                 </div>
               </div>
@@ -470,7 +470,7 @@ async function handleSubscriptionDeleted(event: any) {
         await resend.emails.send({
           from: "Squito Pest Control <service@squitopestcontrol.com>",
           to: ["service@getsquito.com"],
-          subject: `Season ended: ${yardLabel} (${endedSeasonYear}) — ${booking.full_name ?? booking.email}`,
+          subject: `Season ended: ${yardLabel} (${endedSeasonYear}), ${booking.full_name ?? booking.email}`,
           html: `
             <div style="font-family: sans-serif; padding: 20px; color: #333;">
               <h2 style="color: #22c55e;">Mosquito &amp; Tick Season Ended</h2>

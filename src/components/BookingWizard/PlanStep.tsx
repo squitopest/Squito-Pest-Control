@@ -50,7 +50,7 @@ const plans = [
   },
   {
     id: "premium-shield",
-    tagline: "Full protection, inside and out — our most popular.",
+    tagline: "Full protection, inside and out. Our most popular.",
     icon: Star,
     accentColor: "green",
     borderClass: "border-green-500",
@@ -66,14 +66,14 @@ const plans = [
       { label: "Coverage for 30+ pest types", included: true },
       { label: "Rodent baiting & exterior exclusion", included: true },
       { label: "Free yearly termite inspection ($150 value)", included: true },
-      { label: "Priority scheduling — skip the queue", included: true },
+      { label: "Priority scheduling: skip the queue", included: true },
       { label: "Mosquito & tick yard spray", included: false },
       { label: "Same-day service guarantee", included: false },
     ],
   },
   {
     id: "ultimate-fortress",
-    tagline: "Total domination — yard, interior, and everything.",
+    tagline: "Total domination: yard, interior, and everything.",
     icon: Zap,
     accentColor: "amber",
     borderClass: "border-amber-500/70 hover:border-amber-400",
@@ -119,10 +119,10 @@ export default function PlanStep({
         <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-5">
           <Shield size={14} /> Step 2
         </div>
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
+        <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
           Pick your protection plan
         </h2>
-        <p className="text-white/55 text-lg max-w-2xl mx-auto">
+        <p className="text-foreground/55 text-lg max-w-2xl mx-auto">
           Every plan includes free re-service and no contracts.
         </p>
       </div>
@@ -135,8 +135,8 @@ export default function PlanStep({
             aria-pressed={billing === "monthly"}
             className={`px-6 py-2 rounded-full font-semibold text-sm transition-all flex items-center ${
               billing === "monthly"
-                ? "bg-white/10 text-white shadow"
-                : "text-white/60 hover:text-white"
+                ? "bg-muted text-foreground shadow"
+                : "text-muted hover:text-foreground"
             }`}
             onClick={() => setBilling("monthly")}
           >
@@ -147,13 +147,13 @@ export default function PlanStep({
             aria-pressed={billing === "yearly"}
             className={`px-6 py-2 rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${
               billing === "yearly"
-                ? "bg-white/10 text-white shadow"
-                : "text-white/60 hover:text-white"
+                ? "bg-muted text-foreground shadow"
+                : "text-muted hover:text-foreground"
             }`}
             onClick={() => setBilling("yearly")}
           >
             Yearly
-            <span className="bg-green-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">
+            <span className="bg-green-500 text-foreground text-[10px] uppercase font-bold px-2 py-0.5 rounded-md">
               Save 20%
             </span>
           </button>
@@ -185,8 +185,8 @@ export default function PlanStep({
               } ${plan.popular ? "lg:scale-[1.03] z-10 relative" : ""}`}
             >
               {plan.popular && (
-                <div className="bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-bold uppercase tracking-widest py-2.5 text-center">
-                  Most Popular — Recommended
+                <div className="bg-gradient-to-r from-green-400 to-emerald-500 text-foreground text-xs font-bold uppercase tracking-widest py-2.5 text-center">
+                  Most Popular · Recommended
                 </div>
               )}
 
@@ -198,21 +198,21 @@ export default function PlanStep({
                       ? "border-green-500/30 text-green-400"
                       : isAmber
                         ? "border-amber-500/30 text-amber-400"
-                        : "border-white/10 text-white"
+                        : "border-border text-foreground"
                   }`}
                 >
                   <Icon size={26} />
                 </div>
-                <h3 className="text-2xl font-display font-bold text-white mb-1">
+                <h3 className="text-2xl font-display font-bold text-foreground mb-1">
                   {pricing.plan.shortName}
                 </h3>
-                <p className="text-white/50 text-sm mb-6">{plan.tagline}</p>
+                <p className="text-muted text-sm mb-6">{plan.tagline}</p>
 
                 {/* Price */}
                 {pricing.quoteOnly ? (
                   <>
                     <div className="mb-2">
-                      <span className="text-4xl font-display font-bold text-white">
+                      <span className="text-4xl font-display font-bold text-foreground">
                         Custom quote
                       </span>
                     </div>
@@ -223,13 +223,13 @@ export default function PlanStep({
                 ) : (
                   <>
                     <div className="flex items-end gap-1 mb-1">
-                      <span className="text-5xl font-display font-bold text-white">
+                      <span className="text-5xl font-display font-bold text-foreground">
                         $
                         {billing === "yearly"
                           ? pricing.yearlyTotal.toFixed(2)
                           : pricing.monthlyPrice.toFixed(2)}
                       </span>
-                      <span className="text-white/40 mb-2">
+                      <span className="text-foreground/40 mb-2">
                         {billing === "yearly" ? "/yr" : "/mo"}
                       </span>
                     </div>
@@ -262,7 +262,7 @@ export default function PlanStep({
                 )}
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-2 gap-3 mb-8 p-4 rounded-2xl bg-white/3 border border-white/5">
+                <div className="grid grid-cols-2 gap-3 mb-8 p-4 rounded-2xl bg-white/3 border border-border">
                   {[
                     { label: "Treatments", val: plan.treatment },
                     { label: "Coverage", val: plan.coverage },
@@ -270,10 +270,10 @@ export default function PlanStep({
                     { label: "Response", val: plan.responseTime },
                   ].map(({ label, val }) => (
                     <div key={label} className="flex flex-col gap-0.5">
-                      <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">
+                      <span className="text-[10px] uppercase tracking-widest text-muted/60 font-semibold">
                         {label}
                       </span>
-                      <span className="text-xs font-semibold text-white/80">
+                      <span className="text-xs font-semibold text-muted">
                         {val}
                       </span>
                     </div>
@@ -286,10 +286,10 @@ export default function PlanStep({
                   onClick={() => onSelectPlan(plan.id, billing)}
                   className={`flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-display font-bold text-base mb-6 transition-all duration-300 group ${
                     isGreen
-                      ? "bg-green-500 hover:bg-green-400 text-white hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
+                      ? "bg-green-500 hover:bg-green-400 text-foreground hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
                       : isAmber
                         ? "bg-amber-500/10 border border-amber-500/50 hover:bg-amber-500/20 text-amber-400 hover:border-amber-400"
-                        : "bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                        : "bg-muted/50 border border-border hover:bg-muted text-foreground"
                   }`}
                 >
                   {pricing.quoteOnly ? "Request Custom Quote" : plan.cta}
@@ -301,7 +301,7 @@ export default function PlanStep({
 
                 {/* Feature list */}
                 <div className="border-t border-white/8 pt-6 flex flex-col gap-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/30 mb-1">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted/60 mb-1">
                     What's Included
                   </p>
                   {plan.features.map((f, i) => (
@@ -327,7 +327,7 @@ export default function PlanStep({
                         />
                       )}
                       <span
-                        className={`text-sm ${f.included ? "text-white/85" : "text-white/50 line-through"}`}
+                        className={`text-sm ${f.included ? "text-foreground/85" : "text-muted line-through"}`}
                       >
                         {f.label}
                       </span>
@@ -345,7 +345,7 @@ export default function PlanStep({
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-white/50 hover:text-white/80 font-semibold text-sm transition-colors group"
+          className="inline-flex items-center gap-2 text-muted hover:text-muted font-semibold text-sm transition-colors group"
         >
           <ArrowLeft
             size={16}

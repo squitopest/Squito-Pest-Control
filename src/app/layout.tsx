@@ -2,11 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import CustomCursor from "@/components/CustomCursor/CustomCursor";
 import Navbar from "@/components/Navbar/Navbar";
 import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
-import ChatWidgetLoader from "@/components/ChatWidget/ChatWidgetLoader";
 import MetaPixel from "@/components/MetaPixel/MetaPixel";
+import Footer from "@/components/Footer/Footer";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const inter = Inter({
@@ -99,12 +98,11 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
       <body>
-        <CustomCursor />
         <Navbar />
         <ErrorBoundary>
           {children}
         </ErrorBoundary>
-        <ChatWidgetLoader />
+        <Footer />
         <Analytics />
         <MetaPixel />
       </body>

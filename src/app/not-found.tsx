@@ -31,7 +31,7 @@ export default function NotFound() {
         </h1>
 
         <p className="text-lg text-white/60 leading-relaxed mb-10">
-          Looks like this page got exterminated. Don't worry — our team is still here to help.
+          Looks like this page got exterminated. Don&apos;t worry, our team is still here to help.
         </p>
 
         {/* CTAs */}

@@ -352,19 +352,19 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
         <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase mb-5">
           <Home size={14} /> Step 1
         </div>
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-3">
+        <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-3">
           Where's your home?
         </h2>
-        <p className="text-white/55 text-lg max-w-lg mx-auto">
+        <p className="text-foreground/55 text-lg max-w-lg mx-auto">
           We'll look up your property details to show you accurate pricing for
           your home size.
         </p>
       </div>
 
       {/* Address input card */}
-      <div className="rounded-3xl border border-white/10 bg-card/40 backdrop-blur-xl p-6 md:p-8 overflow-visible">
+      <div className="rounded-3xl border border-border bg-card/40 backdrop-blur-xl p-6 md:p-8 overflow-visible">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h3 className="text-xl font-bold text-white">Service Location</h3>
+          <h3 className="text-xl font-bold text-foreground">Service Location</h3>
           <button
             type="button"
             onClick={handleDetectLocation}
@@ -384,7 +384,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
           <div className="space-y-2 relative" ref={suggestionsRef}>
             <label
               htmlFor="wizard-street"
-              className="text-sm font-semibold text-white/80 flex items-center gap-2"
+              className="text-sm font-semibold text-muted flex items-center gap-2"
             >
               <MapPin size={16} className="text-green-400" /> Street Address
             </label>
@@ -394,7 +394,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
               type="text"
               autoComplete="street-address"
               placeholder="Start typing your address..."
-              className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-4 text-white text-lg placeholder:text-white/30 outline-none transition-colors"
+              className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-4 text-foreground text-lg placeholder:text-muted/60 outline-none transition-colors"
               value={street}
               onChange={(e) => handleAddressChange(e.target.value)}
               onKeyDown={handleAddressKeyDown}
@@ -406,7 +406,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
               aria-expanded={showSuggestions && suggestions.length > 0}
             />
             {autocompleteLoading && (
-              <p className="mt-2 text-xs text-white/40 flex items-center gap-2">
+              <p className="mt-2 text-xs text-foreground/40 flex items-center gap-2">
                 <Loader2 size={12} className="animate-spin" /> Looking up
                 addresses…
               </p>
@@ -426,20 +426,20 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                         e.preventDefault();
                         selectSuggestion(suggestion);
                       }}
-                      className={`px-4 py-3 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-center gap-3 ${
-                        highlighted ? "bg-white/10" : "hover:bg-white/5"
+                      className={`px-4 py-3 cursor-pointer border-b border-border last:border-0 transition-colors flex items-center gap-3 ${
+                        highlighted ? "bg-muted" : "hover:bg-muted/50"
                       }`}
                     >
                       <Map
                         size={16}
-                        className="text-white/40 flex-shrink-0"
+                        className="text-foreground/40 flex-shrink-0"
                       />
                       <div>
-                        <p className="text-sm font-semibold text-white/90">
+                        <p className="text-sm font-semibold text-foreground">
                           {suggestion.structured_formatting?.main_text ||
                             suggestion.description}
                         </p>
-                        <p className="text-xs text-white/50">
+                        <p className="text-xs text-muted">
                           {suggestion.structured_formatting?.secondary_text ||
                             ""}
                         </p>
@@ -456,7 +456,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
             <div className="space-y-2">
               <label
                 htmlFor="wizard-city"
-                className="text-sm font-semibold text-white/80"
+                className="text-sm font-semibold text-muted"
               >
                 City
               </label>
@@ -465,7 +465,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                 type="text"
                 autoComplete="address-level2"
                 placeholder="Islandia"
-                className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
               />
@@ -473,7 +473,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
             <div className="space-y-2">
               <label
                 htmlFor="wizard-zip"
-                className="text-sm font-semibold text-white/80"
+                className="text-sm font-semibold text-muted"
               >
                 ZIP Code
               </label>
@@ -485,7 +485,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                 pattern="\d{5}"
                 maxLength={5}
                 placeholder="11749"
-                className="w-full bg-background/50 border border-white/10 focus:border-green-500/50 rounded-xl px-4 py-3 text-white placeholder:text-white/30 outline-none transition-colors"
+                className="w-full bg-background/50 border border-border focus:border-green-500/50 rounded-xl px-4 py-3 text-foreground placeholder:text-muted/60 outline-none transition-colors"
                 value={zipCode}
                 onChange={(e) =>
                   setZipCode(e.target.value.replace(/\D/g, "").slice(0, 5))
@@ -508,8 +508,8 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                 <Loader2 size={20} className="animate-spin text-green-400" />
               </div>
               <div>
-                <p className="text-white font-medium text-sm">Matching your home...</p>
-                <p className="text-white/40 text-xs mt-0.5">Checking Long Island property records</p>
+                <p className="text-foreground font-medium text-sm">Matching your home...</p>
+                <p className="text-foreground/40 text-xs mt-0.5">Checking Long Island property records</p>
               </div>
             </motion.div>
           )}
@@ -540,7 +540,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-white font-bold text-lg"
+                  className="text-foreground font-bold text-lg"
                 >
                   We&apos;ve matched your home!
                 </motion.p>
@@ -548,13 +548,13 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.45 }}
-                  className="text-white/50 text-sm mt-1"
+                  className="text-muted text-sm mt-1"
                 >
                   Loading your personalized plans...
                 </motion.p>
 
                 {/* Progress bar */}
-                <div className="mt-4 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="mt-4 h-1.5 rounded-full bg-muted overflow-hidden">
                   <motion.div
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
@@ -570,7 +570,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                     e.preventDefault();
                     setShowManualSelector(!showManualSelector);
                   }}
-                  className="mt-4 inline-flex items-center gap-1 text-xs text-white/30 hover:text-white/50 transition-colors"
+                  className="mt-4 inline-flex items-center gap-1 text-xs text-muted/60 hover:text-muted transition-colors"
                 >
                   Not your home?{" "}
                   <ChevronDown
@@ -596,7 +596,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                 <p className="text-amber-300 text-sm font-medium mb-1">
                   We found your property{propertyData.lotSizeAcres ? ` (${propertyData.lotSizeAcres} acre lot)` : ""} but couldn't pull the home's square footage.
                 </p>
-                <p className="text-white/50 text-sm">
+                <p className="text-muted text-sm">
                   Please select your approximate home size below so we can show you accurate pricing.
                 </p>
               </div>
@@ -617,8 +617,8 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                 <p className="text-amber-300 text-sm font-medium mb-1">
                   We couldn't find property details for this address.
                 </p>
-                <p className="text-white/50 text-sm">
-                  No worries — just pick the option that best matches your home size below.
+                <p className="text-muted text-sm">
+                  No worries. Just pick the option that best matches your home size below.
                 </p>
               </div>
             </motion.div>
@@ -636,7 +636,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
               exit={{ opacity: 0, height: 0 }}
               className="mt-6"
             >
-              <p className="text-sm font-semibold text-white/70 mb-3">
+              <p className="text-sm font-semibold text-muted mb-3">
                 Select your home size:
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -650,16 +650,16 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
                       className={`rounded-xl border px-3 py-3 text-left transition-all ${
                         selected
                           ? "border-green-500 bg-green-500/10"
-                          : "border-white/10 bg-card/40 hover:border-white/20"
+                          : "border-border bg-card/40 hover:border-white/20"
                       }`}
                     >
                       <span
-                        className={`font-bold text-sm ${selected ? "text-white" : "text-white/70"}`}
+                        className={`font-bold text-sm ${selected ? "text-foreground" : "text-muted"}`}
                       >
                         {option.label}
                       </span>
                       <p
-                        className={`text-xs mt-0.5 ${selected ? "text-white/60" : "text-white/40"}`}
+                        className={`text-xs mt-0.5 ${selected ? "text-muted" : "text-foreground/40"}`}
                       >
                         {option.sqftRangeLabel}
                       </p>
@@ -684,7 +684,7 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
             type="button"
             onClick={handleContinue}
             disabled={!addressSelected && (!street || !city || !zipCode)}
-            className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-white font-display font-bold text-lg flex items-center justify-center gap-3 transition-all hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] disabled:opacity-40 disabled:cursor-not-allowed group"
+            className="w-full py-4 rounded-2xl bg-green-500 hover:bg-green-400 text-foreground font-display font-bold text-lg flex items-center justify-center gap-3 transition-all hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] disabled:opacity-40 disabled:cursor-not-allowed group"
           >
             See My Plans
             <ArrowRight
@@ -692,8 +692,8 @@ export default function AddressStep({ onComplete }: AddressStepProps) {
               className="group-hover:translate-x-1 transition-transform"
             />
           </button>
-          <p className="text-center text-white/30 text-xs mt-3">
-            We use this only to personalize pricing — never shared.
+          <p className="text-center text-muted/60 text-xs mt-3">
+            We use this only to personalize pricing. Never shared.
           </p>
         </div>
       </div>

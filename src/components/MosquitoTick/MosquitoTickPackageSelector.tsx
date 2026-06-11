@@ -291,7 +291,7 @@ export default function MosquitoTickPackageSelector() {
                 <div className="flex items-center justify-center mb-5">
                   <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/30 text-green-400 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase">
                     <MapPin size={14} />
-                    Step 1 — Enter Your Address
+                    Step 1: Enter Your Address
                   </div>
                 </div>
 
@@ -401,7 +401,7 @@ export default function MosquitoTickPackageSelector() {
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="mt-5">
                       <div className="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-5">
                         <p className="text-amber-300 text-sm font-medium mb-1">We couldn&apos;t find your property in our records.</p>
-                        <p className="text-white/50 text-sm">No worries — select your yard size below for a quote.</p>
+                        <p className="text-white/50 text-sm">No worries. Select your yard size below for a quote.</p>
                       </div>
                     </motion.div>
                   )}
@@ -462,7 +462,7 @@ export default function MosquitoTickPackageSelector() {
                   <>
                     <h3 className="font-display text-3xl font-bold text-white mb-2">Custom Quote Needed</h3>
                     <p className="text-white/55 text-sm leading-relaxed mb-6">
-                      Your property is larger than 1 acre. We treat up to 1 acre of active outdoor areas —
+                      Your property is larger than 1 acre. We treat up to 1 acre of active outdoor areas:
                       patio, perimeter, and frequented zones. We&apos;ll put together a custom quote based on
                       your specific treatment areas.
                     </p>
@@ -494,7 +494,7 @@ export default function MosquitoTickPackageSelector() {
                         <li className="flex items-start gap-2.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-400" />High-traffic zones your family frequents</li>
                         <li className="flex items-start gap-2.5"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-green-400" />Areas of concern flagged by you</li>
                       </ul>
-                      <p className="text-xs text-white/35 mt-3">We treat up to 1 acre of active areas. This is mosquito <em>reduction</em> — designed to make your yard enjoyable again.</p>
+                      <p className="text-xs text-white/35 mt-3">We treat up to 1 acre of active areas. This is mosquito <em>reduction</em>, designed to make your yard enjoyable again.</p>
                     </div>
 
                     <div className="flex flex-wrap gap-3 mb-6">
@@ -529,7 +529,7 @@ export default function MosquitoTickPackageSelector() {
                   Billed only during active months
                 </div>
                 <p className="text-xs text-white/55 leading-relaxed">
-                  You&apos;re billed monthly April through October — {MOSQUITO_TICK_ACTIVE_MONTHS} treatments
+                  You&apos;re billed monthly April through October ({MOSQUITO_TICK_ACTIVE_MONTHS} treatments
                   per season. No charges November through March. No initial fee to start.
                 </p>
               </div>

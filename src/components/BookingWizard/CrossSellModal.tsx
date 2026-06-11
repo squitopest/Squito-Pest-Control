@@ -6,31 +6,17 @@ import Image from "next/image";
 import { X, Shield, Check, ArrowRight, Sparkles, Clock, ChevronDown } from "lucide-react";
 import {
   getMosquitoTickPackage,
-  type MosquitoTickYardSizeId,
 } from "@/data/mosquitoTickPackages";
 import {
   getSubscriptionPricing,
   type PropertySize,
 } from "@/data/plans";
+import {
+  BUNDLE_DISCOUNT_PERCENT,
+  resolveYardSizeFromHomeSqft,
+} from "@/lib/bundleOffers";
 
 type CrossSellType = "mosquito-tick" | "general-pest";
-
-/** Discount percentage applied when bundling M&T with a GPC plan */
-const BUNDLE_DISCOUNT_PERCENT = 10;
-
-/**
- * Auto-assigns M&T treatment area based on home sqft.
- *   ≤ 2,000 sqft → 1/4 acre  (small)
- *   2,001–4,000 → 1/2 acre   (medium)
- *   4,001+       → quote      (xl)
- */
-function resolveYardSizeFromHomeSqft(
-  sqft: number | null
-): MosquitoTickYardSizeId {
-  if (!sqft || sqft <= 2000) return "small";
-  if (sqft <= 4000) return "medium";
-  return "xl";
-}
 
 type CrossSellModalProps = {
   isOpen: boolean;
@@ -64,7 +50,7 @@ function PestPreview() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 hover:text-white/90 transition-colors"
+        className="w-full flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 px-4 py-3 text-sm font-semibold text-muted hover:text-foreground transition-colors"
       >
         <span>What we protect against</span>
         <ChevronDown
@@ -85,7 +71,7 @@ function PestPreview() {
               {PREVIEW_PESTS.map((pest) => (
                 <div
                   key={pest.name}
-                  className="rounded-xl border border-white/10 bg-white/5 overflow-hidden text-center"
+                  className="rounded-xl border border-border bg-muted/50 overflow-hidden text-center"
                 >
                   <div className="relative w-full aspect-square">
                     <Image
@@ -96,11 +82,11 @@ function PestPreview() {
                       sizes="120px"
                     />
                   </div>
-                  <p className="text-xs font-semibold text-white/70 py-2">{pest.name}</p>
+                  <p className="text-xs font-semibold text-muted py-2">{pest.name}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-white/40 mt-2 text-center">
+            <p className="text-xs text-foreground/40 mt-2 text-center">
               Plus 12 more common Long Island pests
             </p>
           </motion.div>
@@ -117,7 +103,7 @@ function MtPestPreview() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/70 hover:text-white/90 transition-colors"
+        className="w-full flex items-center justify-between gap-2 rounded-xl border border-border bg-muted/50 px-4 py-3 text-sm font-semibold text-muted hover:text-foreground transition-colors"
       >
         <span>What we target</span>
         <ChevronDown
@@ -138,7 +124,7 @@ function MtPestPreview() {
               {MT_PREVIEW_PESTS.map((pest) => (
                 <div
                   key={pest.name}
-                  className="rounded-xl border border-white/10 bg-white/5 overflow-hidden text-center"
+                  className="rounded-xl border border-border bg-muted/50 overflow-hidden text-center"
                 >
                   <div className="relative w-full aspect-square">
                     <Image
@@ -149,11 +135,11 @@ function MtPestPreview() {
                       sizes="120px"
                     />
                   </div>
-                  <p className="text-xs font-semibold text-white/70 py-2">{pest.name}</p>
+                  <p className="text-xs font-semibold text-muted py-2">{pest.name}</p>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-white/40 mt-2 text-center">
+            <p className="text-xs text-foreground/40 mt-2 text-center">
               Seasonal barrier protection Apr–Oct
             </p>
           </motion.div>
@@ -427,7 +413,7 @@ export default function CrossSellModal({
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ delay: 0.4, duration: 0.4, ease: "easeOut" }}
                   >
-                    <Check size={48} className="text-white" strokeWidth={3} />
+                    <Check size={48} className="text-foreground" strokeWidth={3} />
                   </motion.div>
                 </motion.div>
 
@@ -436,7 +422,7 @@ export default function CrossSellModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.4 }}
-                  className="text-2xl md:text-3xl font-display font-bold text-white text-center mb-2"
+                  className="text-2xl md:text-3xl font-display font-bold text-foreground text-center mb-2"
                 >
                   Bundle Locked In!
                 </motion.p>
@@ -478,7 +464,7 @@ export default function CrossSellModal({
             <button
               type="button"
               onClick={onDecline}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors z-10"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-muted/50 hover:bg-muted flex items-center justify-center text-muted hover:text-foreground transition-colors z-10"
             >
               <X size={16} />
             </button>
@@ -526,7 +512,7 @@ export default function CrossSellModal({
               >
                 <Clock size={12} className="text-amber-400" />
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                  One-time offer — only available right now
+                  One-time offer. Only available right now
                 </span>
               </motion.div>
 
@@ -537,7 +523,7 @@ export default function CrossSellModal({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-2xl md:text-3xl font-display font-bold text-white mb-3"
+                    className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3"
                   >
                     Add Mosquito &amp; Tick Protection?
                   </motion.h3>
@@ -545,11 +531,11 @@ export default function CrossSellModal({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-white/60 text-sm leading-relaxed mb-5"
+                    className="text-muted text-sm leading-relaxed mb-5"
                   >
                     Since you&apos;re already getting pest protection, bundle in seasonal
-                    mosquito &amp; tick treatments and <strong className="text-white/90">save {BUNDLE_DISCOUNT_PERCENT}% on every monthly treatment</strong>.
-                    This discount is only available when you add it now — you won&apos;t see this price again.
+                    mosquito &amp; tick treatments and <strong className="text-foreground">save {BUNDLE_DISCOUNT_PERCENT}% on every monthly treatment</strong>.
+                    This discount is only available when you add it now. You won&apos;t see this price again.
                   </motion.p>
 
                   {/* Savings highlight */}
@@ -566,7 +552,7 @@ export default function CrossSellModal({
                       <p className="text-amber-300 font-bold text-sm">
                         You&apos;ll save ${annualSavings.toFixed(2)} this season
                       </p>
-                      <p className="text-white/45 text-xs mt-0.5">
+                      <p className="text-foreground/45 text-xs mt-0.5">
                         That&apos;s ${mtSavingsPerMonth.toFixed(2)} off each of your 7 active-month treatments
                       </p>
                     </div>
@@ -582,15 +568,15 @@ export default function CrossSellModal({
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-white font-bold">
+                          <p className="text-foreground font-bold">
                             Mosquito &amp; Tick Protection
                           </p>
-                          <p className="text-white/50 text-xs mt-0.5">
+                          <p className="text-muted text-xs mt-0.5">
                             Monthly during active season (Apr–Oct)
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-white/40 text-sm line-through">
+                          <p className="text-foreground/40 text-sm line-through">
                             ${mtPrice.toFixed(2)}/mo
                           </p>
                           <p className="text-emerald-400 font-display font-bold text-2xl">
@@ -613,14 +599,14 @@ export default function CrossSellModal({
                       "Targeted barrier spray on patio, perimeter & hot spots",
                       "Mosquito, tick & flea protection",
                       "No charge from November–March",
-                      "Cancel anytime — no contracts",
+                      "Cancel anytime, no contracts",
                     ].map((item) => (
                       <div key={item} className="flex items-center gap-2.5">
                         <Check
                           size={14}
                           className="text-emerald-400 flex-shrink-0"
                         />
-                        <span className="text-sm text-white/75">{item}</span>
+                        <span className="text-sm text-muted">{item}</span>
                       </div>
                     ))}
                   </motion.div>
@@ -634,7 +620,7 @@ export default function CrossSellModal({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="text-2xl md:text-3xl font-display font-bold text-white mb-3"
+                    className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3"
                   >
                     Add Year-Round Pest Protection?
                   </motion.h3>
@@ -642,10 +628,10 @@ export default function CrossSellModal({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-white/60 text-sm leading-relaxed mb-5"
+                    className="text-muted text-sm leading-relaxed mb-5"
                   >
-                    You&apos;re protecting your yard — why not protect the inside too?
-                    Add our Essential Defense plan for quarterly exterior treatments and <strong className="text-white/90">save {BUNDLE_DISCOUNT_PERCENT}% every month when you bundle now</strong>.
+                    You&apos;re protecting your yard. Why not protect the inside too?
+                    Add our Essential Defense plan for quarterly exterior treatments and <strong className="text-foreground">save {BUNDLE_DISCOUNT_PERCENT}% every month when you bundle now</strong>.
                     This discount is only available right now.
                   </motion.p>
 
@@ -663,8 +649,8 @@ export default function CrossSellModal({
                       <p className="text-amber-300 font-bold text-sm">
                         You&apos;ll save ${annualSavings.toFixed(2)} per year
                       </p>
-                      <p className="text-white/45 text-xs mt-0.5">
-                        That&apos;s ${gpcSavingsPerMonth.toFixed(2)} off every single month — locked in forever
+                      <p className="text-foreground/45 text-xs mt-0.5">
+                        That&apos;s ${gpcSavingsPerMonth.toFixed(2)} off every single month, locked in forever
                       </p>
                     </div>
                   </motion.div>
@@ -679,13 +665,13 @@ export default function CrossSellModal({
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-white font-bold">Essential Defense</p>
-                          <p className="text-white/50 text-xs mt-0.5">
+                          <p className="text-foreground font-bold">Essential Defense</p>
+                          <p className="text-muted text-xs mt-0.5">
                             Quarterly exterior perimeter protection
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-white/40 text-sm line-through">
+                          <p className="text-foreground/40 text-sm line-through">
                             ${gpcPrice.toFixed(2)}/mo
                           </p>
                           <p className="text-green-400 font-display font-bold text-2xl">
@@ -714,7 +700,7 @@ export default function CrossSellModal({
                           size={14}
                           className="text-green-400 flex-shrink-0"
                         />
-                        <span className="text-sm text-white/75">{item}</span>
+                        <span className="text-sm text-muted">{item}</span>
                       </div>
                     ))}
                   </motion.div>
@@ -745,8 +731,8 @@ export default function CrossSellModal({
                   }
                   className={`w-full py-4.5 rounded-2xl font-display font-bold text-lg flex items-center justify-center gap-2.5 transition-all duration-300 group relative overflow-hidden disabled:opacity-70 ${
                     isMosquitoTickCrossSell
-                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)]"
-                      : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.5)]"
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-foreground shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)]"
+                      : "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-foreground shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_rgba(34,197,94,0.5)]"
                   }`}
                 >
                   {/* Subtle shimmer effect */}
@@ -763,7 +749,7 @@ export default function CrossSellModal({
                 <button
                   type="button"
                   onClick={onDecline}
-                  className="w-full py-3 rounded-2xl border border-white/8 text-white/40 font-medium text-sm hover:text-white/60 transition-all"
+                  className="w-full py-3 rounded-2xl border border-white/8 text-foreground/40 font-medium text-sm hover:text-muted transition-all"
                 >
                   No thanks, I&apos;ll pass on the savings
                 </button>

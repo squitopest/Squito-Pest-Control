@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Plus, Minus, Home, ArrowRight, ShieldCheck, Heart, Clock } from "lucide-react";
-import Footer from "@/components/Footer/Footer";
+import { COMPANY_PHOTOS } from "@/lib/companyPhotos";
 
 const faqs = [
   {
@@ -74,9 +75,15 @@ export default function ResidentialContent() {
         </div>
 
         {/* Action Image & Booking */}
-        <div className="relative rounded-3xl overflow-hidden glass-card mb-20">
-          <div className="absolute inset-0 bg-[url('/services/service_residential_bg_v5.webp')] bg-cover bg-center opacity-40 mix-blend-overlay" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+        <div className="relative rounded-3xl overflow-hidden glass-card mb-20 min-h-[280px]">
+          <Image
+            src={COMPANY_PHOTOS.residential}
+            alt="Squito technician treating a Long Island home exterior"
+            fill
+            sizes="(max-width: 1024px) 100vw, 896px"
+            className="object-cover object-center opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/30" />
           
           <div className="relative z-10 p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
             <div className="max-w-xl">
@@ -132,8 +139,6 @@ export default function ResidentialContent() {
           </div>
         </div>
       </div>
-      
-      <Footer />
     </main>
   );
 }

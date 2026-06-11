@@ -181,13 +181,13 @@ export async function POST(req: Request) {
     if (!isMock) {
       try {
         const mosquitoTickSummary = isMosquitoTickCheckout && mosquitoTickPackage && mosquitoTickBillingPlan
-          ? `${formatMosquitoTickPackageName(mosquitoTickPackage)} — ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
+          ? `${formatMosquitoTickPackageName(mosquitoTickPackage)}: ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
           : null;
 
         const bookingRow: Record<string, unknown> = {
           property_type: propertyType || "Residential",
           zip_code: zipCode,
-          service_date: date || (isReservationSignup ? "Reservation — schedule in late March" : ""),
+          service_date: date || (isReservationSignup ? "Reservation: schedule in late March" : ""),
           service_time: time || (isReservationSignup ? "We'll confirm by phone" : ""),
           street: street,
           city: city,
@@ -495,7 +495,7 @@ export async function POST(req: Request) {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `General Pest Protection — Essential Defense (${addOnDiscountPct}% bundle discount)`,
+              name: `General Pest Protection, Essential Defense (${addOnDiscountPct}% bundle discount)`,
               description: `Year-round quarterly exterior treatments. Address: ${street}, ${city} ${zipCode}`,
             },
             unit_amount: addOnMonthly + addOnTax,
@@ -635,7 +635,7 @@ export async function POST(req: Request) {
               ? specialtyService?.id ?? ""
               : planId,
           serviceSummary: isMosquitoTickCheckout && mosquitoTickPackage && mosquitoTickBillingPlan
-            ? `${formatMosquitoTickPackageName(mosquitoTickPackage)} — ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
+            ? `${formatMosquitoTickPackageName(mosquitoTickPackage)}: ${formatMosquitoTickBillingSummary(mosquitoTickBillingPlan)}`
             : isSpecialtyCheckout
               ? specialtyQuote?.serviceSummary ?? ""
               : planName,

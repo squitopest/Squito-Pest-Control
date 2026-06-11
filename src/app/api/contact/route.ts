@@ -185,7 +185,7 @@ export async function POST(req: Request) {
             </div>
             <!-- Footer -->
             <div style="padding: 20px 24px; background: #0f0f0f; border-top: 1px solid #1a1a1a; text-align: center;">
-              <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control — Smart. Safe. Pest Control.</p>
+              <p style="color: #666; font-size: 12px; margin: 0;">Squito Pest Control. Smart. Safe. Pest Control.</p>
               <p style="color: #444; font-size: 11px; margin: 4px 0 0;">Nassau & Suffolk County, Long Island NY</p>
             </div>
           </div>
